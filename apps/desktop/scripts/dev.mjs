@@ -5,7 +5,9 @@ const root = fileURLToPath(new URL('../../..', import.meta.url));
 const children = [];
 
 function run(command, args, options = {}) {
-  const child = spawn(command, args, { cwd: root, stdio: 'inherit', ...options });
+  // Windows: Node >= 20/22 refuses to spawn a .cmd/.bat without a shell (spawn EINVAL).
+  const shell = process.platform === 'win32' ? { shell: true } : {};
+  const child = spawn(command, args, { cwd: root, stdio: 'inherit', ...shell, ...options });
   children.push(child);
   return child;
 }
