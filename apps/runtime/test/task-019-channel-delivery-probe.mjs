@@ -22,7 +22,7 @@ async function waitForReady(child) {
   });
 }
 
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-019-api-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-019-api-'));
 let child;
 try {
   const home = join(root, 'home');
@@ -45,10 +45,10 @@ try {
     stdio: ['pipe', 'pipe', 'pipe'],
     env: {
       ...process.env,
-      YUANPU_HOME: home,
+      MINDLINK_HOME: home,
       TASK019_FIXTURE_KEY: 'fixture-only',
-      YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '',
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '',
     },
   });
   child.stdin.end(`${JSON.stringify({ token, approvalPublicKey, parentPid: process.pid })}\n`);

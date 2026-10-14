@@ -24,7 +24,7 @@ export function MermaidPreviewCard({ code, language, onAddToConversation }: {
           maxTextSize: 20_000, maxEdges: 300, suppressErrorRendering: true, theme: 'neutral' });
         initialized = true;
       }
-      const result = await mermaid.render(`yuanpuGraph${id}`, code);
+      const result = await mermaid.render(`mindlinkGraph${id}`, code);
       if (!cancelled) setSvg(result.svg);
     }).catch(() => { if (!cancelled) setError(true); });
     return () => { cancelled = true; };

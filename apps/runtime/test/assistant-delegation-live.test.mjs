@@ -6,11 +6,11 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { capabilityApprovalSigningPayload } from '@yuanpu-agent/protocol';
-import { createCapabilityId } from '@yuanpu-agent/runtime-kit';
+import { capabilityApprovalSigningPayload } from '@mindlink-agent/protocol';
+import { createCapabilityId } from '@mindlink-agent/runtime-kit';
 
 const entry = resolve(import.meta.dirname, '../dist/index.cjs');
-const capability = createCapabilityId('builtin.demo', 'yuanpu.echo');
+const capability = createCapabilityId('builtin.demo', 'mindlink.echo');
 
 async function eventually(read, label) {
   const until = Date.now() + 15_000;
@@ -75,8 +75,8 @@ test('real Runtime waits for a signed user grant before starting one professiona
   const keys = generateKeyPairSync('ed25519');
   const approvalPublicKey = keys.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
   const runtime = spawn(process.execPath, [entry, '--serve', '--port', '0'], {
-    stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, YUANPU_HOME: root,
-      YUANPU_PYTHON_MCP_EXECUTABLE: '', YUANPU_PYTHON_MCP_ROOT: '' },
+    stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, MINDLINK_HOME: root,
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '', MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   let stderr = '';
   runtime.stderr.on('data', (chunk) => { stderr += chunk; });

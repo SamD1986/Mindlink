@@ -12,10 +12,10 @@ const runtime = spawn(process.execPath, runtimeArgs, {
   stdio: ['pipe', 'pipe', mode === 'mcp' ? 'inherit' : 'ignore'],
   env: {
     ...process.env,
-    YUANPU_HOME: home,
+    MINDLINK_HOME: home,
     ...(mode === 'mcp' ? {} : {
-      YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '',
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '',
     }),
   },
 });

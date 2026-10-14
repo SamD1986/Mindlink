@@ -2,14 +2,14 @@
 
 ## 接入方式
 
-`createYuanpuChatSession` 默认注册 `subagent` 工具，随 Yuanpu Runtime 一起构建。
+`createMindlinkChatSession` 默认注册 `subagent` 工具，随 MindLink Runtime 一起构建。
 无需安装插件，也不写入用户的插件配置。实现位于
-`packages/yuanpu-runtime/src/pi/subagents/`，没有修改同步的 Pi 上游包。
-低层 `createYuanpuAgentSession` 仍可由调用方显式选择工具；不会自动引入子任务生命周期。
+`packages/mindlink-runtime/src/pi/subagents/`，没有修改同步的 Pi 上游包。
+低层 `createMindLinkSession` 仍可由调用方显式选择工具；不会自动引入子任务生命周期。
 
 参考来源：pi-subagents 0.71.0，commit
 `2e9c51bada2da6a9ba73b6973e1545a9afa0d057`。保留 MIT 许可和来源说明。
-这是适配到 Yuanpu 的原生实现，不是上游扩展的完整复制。
+这是适配到 MindLink 的原生实现，不是上游扩展的完整复制。
 
 ## 使用
 
@@ -57,7 +57,7 @@ scout/reviewer 等只读角色只能使用 read/grep/find/ls。角色声明不�
 - 每个父会话最多同时执行 3 个子任务，每次最多 8 个，累计最多 64 个。
 - 默认超时 5 分钟，`timeoutMs` 最大 30 分钟，包括排队时间。
 - 单次返回的每个子任务正文最多 16000 字符，完整结果保留在磁盘。
-- 输出位于 `<agentDir>/subagent-runs/<runId>/`，默认是 `~/.yuanpu/agent/subagent-runs/`。
+- 输出位于 `<agentDir>/subagent-runs/<runId>/`，默认是 `~/.mindlink/agent/subagent-runs/`。
   包含 request.json、result.json 和各子任务的会话记录。目录权限 0700，请求/结果文件 0600。
 - 父会话停止或释放时取消所有子任务；完成的普通消息不取消后台任务。
 - 进程退出后不会恢复后台任务。记录可能含工作资料，不应提交到仓库。
@@ -66,10 +66,10 @@ scout/reviewer 等只读角色只能使用 read/grep/find/ls。角色声明不�
 
 保留核心单任务、并行、串行、角色、进度、后台查询、取消和结果记录能力。
 没有引入上游的 TUI 面板、slash 命令、workflowScript 脚本执行器、独立后台进程、
-intercom、自定义角色文件发现或跨重启恢复。上游最新工具参数与这里的 Yuanpu 参数并不相同。
+intercom、自定义角色文件发现或跨重启恢复。上游最新工具参数与这里的 MindLink 参数并不相同。
 因此不能直接把上游 workflowScript 当作这里的输入。
 
 ## 验证
 
-`packages/yuanpu-runtime/test/subagents.test.mjs` 覆盖并发上限、工具交集、串行传递、
+`packages/mindlink-runtime/test/subagents.test.mjs` 覆盖并发上限、工具交集、串行传递、
 审批中断、取消、超时、错误和真实 SDK 父子模型调用。模型测试使用本地模拟服务，无外部 API 消耗。

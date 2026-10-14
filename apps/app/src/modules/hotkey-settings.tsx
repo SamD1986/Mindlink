@@ -6,11 +6,11 @@ import {
   effectiveHotkeyBinding,
   type HotkeyCommandId,
   type SaveHotkeyInput,
-} from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
 import { bindingFromKeyEvent, hotkeyLabel } from '../shared/hotkeys.js';
 
 export function HotkeySettingsPanel({ active }: { active: boolean }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const client = useQueryClient();
   const query = useQuery({
     queryKey: ['settings', 'hotkeys'],

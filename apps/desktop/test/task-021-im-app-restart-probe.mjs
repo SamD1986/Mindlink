@@ -13,7 +13,7 @@ const desktopRoot = resolve(import.meta.dirname, '..');
 const desktopMain = join(desktopRoot, 'dist/main.cjs');
 const rendererRoot = resolve(desktopRoot, '../app/dist');
 const fixtureRuntime = join(import.meta.dirname, 'task-021-im-runtime-fixture.mjs');
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-021-im-app-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-021-im-app-'));
 const home = join(root, 'home');
 const appRoot = join(root, 'apps', 'desktop');
 const workspace = join(home, 'workspace');
@@ -95,7 +95,7 @@ const staticServer = createServer(async (request, response) => {
 async function start(rendererPort) {
   const debugPort = await freePort();
   const child = spawn(electron, [`--remote-debugging-port=${debugPort}`, appRoot], {
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_RENDERER_URL: `http://127.0.0.1:${rendererPort}/`, YUANPU_NODE_BINARY: process.execPath, YUANPU_NOTIFICATIONS_ENABLED: '0' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_RENDERER_URL: `http://127.0.0.1:${rendererPort}/`, MINDLINK_NODE_BINARY: process.execPath, MINDLINK_NOTIFICATIONS_ENABLED: '0' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   const diagnostics = [];
@@ -107,7 +107,7 @@ async function start(rendererPort) {
   try {
     app.renderer = await bridge(debugPort);
     await eventually(async () => {
-      try { return (await app.renderer.evaluate('window.yuanpu.runtimeInfo()'))?.protocolVersion; }
+      try { return (await app.renderer.evaluate('window.mindlink.runtimeInfo()'))?.protocolVersion; }
       catch { return false; }
     }, 'Isolated Runtime bridge did not become ready.');
     app.runtimePid = await eventually(() => runtimePid(child.pid), 'Runtime fixture child was not found.');
@@ -191,20 +191,20 @@ try {
   const run = await (await fetch(`http://127.0.0.1:${secondPort}/fixture/run/${encodeURIComponent(initial.runId)}`)).json();
   assert.equal(run.status, 'succeeded');
   assert.equal(run.owner.entryPoint, 'im');
-  assert.equal(await second.renderer.evaluate(`window.yuanpu.getAgentRun(${JSON.stringify(initial.runId)}).then(() => false, () => true)`), true);
+  assert.equal(await second.renderer.evaluate(`window.mindlink.getAgentRun(${JSON.stringify(initial.runId)}).then(() => false, () => true)`), true);
   const senderDigest = new DatabaseSync(join(home, 'workflows', 'automation.sqlite'), { readOnly: true });
   const pairedDigest = senderDigest.prepare('SELECT sender_digest FROM yp_channel_inbound LIMIT 1').get().sender_digest;
   senderDigest.close();
   pairedDocument.connections[0].pairedSenderDigests = [pairedDigest];
   await writeFile(connectionDocument, JSON.stringify(pairedDocument));
-  const summary = await second.renderer.evaluate(`window.yuanpu.getPrivateImRunSummary(${JSON.stringify(initial.runId)})`);
+  const summary = await second.renderer.evaluate(`window.mindlink.getPrivateImRunSummary(${JSON.stringify(initial.runId)})`);
   assert.deepEqual({ ...summary }, { runId: initial.runId, runStatus: 'succeeded', replyDeliveryStatus: 'unknown' });
   assert.equal(JSON.stringify(summary).includes('synthetic-member'), false);
   assert.equal(JSON.stringify(summary).includes('synthetic reply'), false);
   assert.equal(JSON.stringify(summary).includes('http'), false);
   pairedDocument.connections[0].pairedSenderDigests = [];
   await writeFile(connectionDocument, JSON.stringify(pairedDocument));
-  assert.equal(await second.renderer.evaluate(`window.yuanpu.getPrivateImRunSummary(${JSON.stringify(initial.runId)}).then(() => false, () => true)`), true);
+  assert.equal(await second.renderer.evaluate(`window.mindlink.getPrivateImRunSummary(${JSON.stringify(initial.runId)}).then(() => false, () => true)`), true);
   pairedDocument.connections[0].pairedSenderDigests = [pairedDigest];
   await writeFile(connectionDocument, JSON.stringify(pairedDocument));
   const detail = await navigate(second, run);
@@ -215,7 +215,7 @@ try {
   const uiFacts = await second.renderer.evaluate(`({
     mounted: Boolean(document.querySelector('.app-shell')),
     imDeliveryLabel: document.body.innerText.includes('投递结果未知'),
-    summaryBridge: typeof window.yuanpu.getPrivateImRunSummary === 'function',
+    summaryBridge: typeof window.mindlink.getPrivateImRunSummary === 'function',
   })`);
   assert.equal(uiFacts.mounted, true);
   assert.equal(uiFacts.imDeliveryLabel, true);

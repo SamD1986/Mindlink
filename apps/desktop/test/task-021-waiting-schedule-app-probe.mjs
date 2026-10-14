@@ -86,7 +86,7 @@ function alive(pid) {
   try { process.kill(pid, 0); return true; } catch { return false; }
 }
 
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-021-waiting-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-021-waiting-'));
 const home = join(root, 'home');
 const appRoot = join(root, 'apps', 'desktop');
 const workspace = join(root, 'workspace');
@@ -115,8 +115,8 @@ async function start(rendererPort) {
   const debugPort = await freePort();
   const child = spawn(electron, [`--remote-debugging-port=${debugPort}`, appRoot], {
     env: {
-      ...process.env, YUANPU_HOME: home, YUANPU_RENDERER_URL: `http://127.0.0.1:${rendererPort}/`,
-      YUANPU_NODE_BINARY: process.execPath, YUANPU_NOTIFICATIONS_ENABLED: '0', TASK_021_PROVIDER_KEY: 'fixture-only',
+      ...process.env, MINDLINK_HOME: home, MINDLINK_RENDERER_URL: `http://127.0.0.1:${rendererPort}/`,
+      MINDLINK_NODE_BINARY: process.execPath, MINDLINK_NOTIFICATIONS_ENABLED: '0', TASK_021_PROVIDER_KEY: 'fixture-only',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -129,7 +129,7 @@ async function start(rendererPort) {
   try {
     app.renderer = await bridge(debugPort);
     await eventually(async () => {
-      try { return (await app.renderer.evaluate('window.yuanpu.runtimeInfo()'))?.protocolVersion; }
+      try { return (await app.renderer.evaluate('window.mindlink.runtimeInfo()'))?.protocolVersion; }
       catch { return false; }
     }, 'Isolated Runtime bridge did not become ready.');
     app.runtimePid = await eventually(() => childRuntimePid(child.pid), 'Runtime child was not found.');
@@ -177,7 +177,7 @@ try {
     workspaceId: workspace, timing: { kind: 'once', at: due }, timeZone: 'UTC',
     maximumLatenessMs: 30_000, delivery: { kind: 'desktop' },
   };
-  const created = await first.renderer.evaluate(`window.yuanpu.createSchedule(${JSON.stringify(input)})`);
+  const created = await first.renderer.evaluate(`window.mindlink.createSchedule(${JSON.stringify(input)})`);
   assert.equal(created.nextTriggerAt, due);
   await stop(first);
   assert.equal(modelRequests, 0, 'App quit before due time must not execute the schedule.');
@@ -187,13 +187,13 @@ try {
 
   const second = await start(rendererPort);
   const history = await eventually(async () => {
-    const rows = await second.renderer.evaluate(`window.yuanpu.getScheduleHistory(${JSON.stringify(created.scheduleId)})`);
+    const rows = await second.renderer.evaluate(`window.mindlink.getScheduleHistory(${JSON.stringify(created.scheduleId)})`);
     return rows?.[0]?.runStatus === 'succeeded' ? rows : undefined;
   }, 'Missed due schedule did not complete after App restart.');
   assert.equal(history.length, 1);
   assert.equal(history[0].triggerStatus, 'submitted');
   assert.equal(modelRequests, 1);
-  assert.equal((await second.renderer.evaluate('window.yuanpu.listSchedules()')).length, 1);
+  assert.equal((await second.renderer.evaluate('window.mindlink.listSchedules()')).length, 1);
   const database = new DatabaseSync(join(home, 'workflows', 'automation.sqlite'), { readOnly: true });
   const facts = database.prepare('SELECT COUNT(*) AS triggers, COUNT(DISTINCT run_id) AS runs FROM yp_schedule_triggers WHERE schedule_id = ?').get(created.scheduleId);
   database.close();

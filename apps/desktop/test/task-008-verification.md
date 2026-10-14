@@ -20,7 +20,7 @@ node apps/desktop/test/task-008-real-artifact-journey.mjs /absolute/new-fixtures
 
 Both explicit output directories must be absent before running; existing directories
 are rejected, not overwritten. Windows paths may be supplied instead. Every run uses
-a new isolated Yuanpu home and workspace. Child PATH excludes Python (but keeps
+a new isolated MindLink home and workspace. Child PATH excludes Python (but keeps
 System32 on Windows for lifecycle cleanup); the host can still have Python installed.
 Stopping the catalog is not a network-isolation test.
 
@@ -30,9 +30,9 @@ public trust metadata, the 0.1.0 bootstrap bundle and a sanitized result. They c
 **no standalone host runner or SEA**. To replay a downloaded fixture, use the exact
 source checkout and the first three build commands above; extract the artifact, then
 pass the directory containing `metadata/fixture.json` to the journey command. The
-journey needs `apps/runtime/dist-native/bin/YuanpuAgentRuntime-<target>[.exe]`,
+journey needs `apps/runtime/dist-native/bin/MindLinkRuntime-<target>[.exe]`,
 `apps/desktop/dist/runtime-manager.cjs`, `server/dist/index.mjs`, and
-`packages/yuanpu-runtime/dist/index.mjs` from those matching builds. Check the fixture
+`packages/mindlink-runtime/dist/index.mjs` from those matching builds. Check the fixture
 source commit/target against the CI run before reusing it. GitHub's ZIP upload may not
 preserve executable mode on POSIX; restore executable mode on the extracted 0.1.0
 bootstrap executable before replay. Do not treat this replay as no-system-Python
@@ -54,7 +54,7 @@ port, then run `apps/desktop/test/task-036-ui-app-probe.mjs` with
 This starts a real isolated Electron/Runtime/MCP stack and drives the actual
 one-time approval controls for allow and deny. Its OpenAI-compatible model
 responses are deterministic local fixtures, **not** evidence of a live model
-provider. It uses a temporary Yuanpu home and does not read the user's provider
+provider. It uses a temporary MindLink home and does not read the user's provider
 credentials. A previous live-provider TASK-036 run is historical supporting
 evidence only, not a substitute for this revision's desktop probe.
 
@@ -68,7 +68,7 @@ v0.1.0 remains active, retries and upgrades, rolls back, reloads the renderer,
 and compares page state to the isolated durable state after each transition.
 The resulting log reports `skillsUiJourney: true`; it also runs the allow/deny
 approval checks. Neither this mode nor the hosted artifact workflow touches the
-user's normal Yuanpu home.
+user's normal MindLink home.
 
 ## Existing Windows installation smoke
 
@@ -76,4 +76,4 @@ Run `task-008-installed-windows-probe.cmd` (or the adjacent PS1) from PowerShell
 It uses the normal PowerShell execution policy, the existing installed binaries, a
 fresh temp home and a minimal environment. It does not install or update capabilities.
 When the Mac user directory is mapped as `G:`, the task worktree scripts are under
-`G:\projects\yuanpu-agent\.worktrees\codex-yuanpu\apps\desktop\test`.
+`G:\projects\mindlink\.worktrees\codex-mindlink\apps\desktop\test`.

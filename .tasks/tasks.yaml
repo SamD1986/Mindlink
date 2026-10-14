@@ -1,6 +1,6 @@
 version: 1
 project:
-  name: "YuanpuAgent"
+  name: "MindLink"
 feature:
   title: "独立个人助理：工作评估、记忆与本地/企业微信协作"
   status: in_progress
@@ -16,7 +16,7 @@ tasks:
     forbidden: ["将构建成功当成业务验收通过","将两个元工具描述为完整沙箱"]
     acceptance:
       - type: assertion
-        expect: "合并后只保留现有两个 Yuanpu 包，旧包引用无遗漏；用户既有改动不被覆盖"
+        expect: "合并后只保留现有两个 MindLink 包，旧包引用无遗漏；用户既有改动不被覆盖"
       - type: assertion
         expect: "记录实际测试 revision 和工作区差异；未集成 main 不标 done"
       - type: command
@@ -28,7 +28,7 @@ tasks:
     dependencies: []
     risk_level: L2
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["入口 packages/yuanpu-runtime、apps/runtime/test/runtime.test.mjs、pnpm-lock.yaml；新包当前未提交","预检 git diff 与依赖引用；复用现有 test，不重做已完成合并"]
+    investigation_hints: ["入口 packages/mindlink-runtime、apps/runtime/test/runtime.test.mjs、pnpm-lock.yaml；新包当前未提交","预检 git diff 与依赖引用；复用现有 test，不重做已完成合并"]
     escalation_conditions: ["公共契约与设计不一致或需要修改 Pi 上游时停止该分支并报告","缺少平台环境或发布凭据时保留未验证项，不绕过安全检查"]
     result:
       owner: "codex-yuanpu"
@@ -49,7 +49,7 @@ tasks:
     status: done
     goal: "固定跨进程、授权和分发数据契约，消除消费者各自解释。"
     scope:
-      in: ["capabilities/contracts.ts 及 yuanpu-protocol 公共 DTO","source 路由、MCP 结果、授权状态、制品 schema 与兼容策略","对应旧消费者适配和契约测试"]
+      in: ["capabilities/contracts.ts 及 mindlink-protocol 公共 DTO","source 路由、MCP 结果、授权状态、制品 schema 与兼容策略","对应旧消费者适配和契约测试"]
       out: ["Python 子进程实现","下载器与 UI 实现"]
     constraints: ["保留用户工作区改动；Pi 上游与兄弟仓库不修改","完成需集成并在 main 验证；本轮不自动提交或推送"]
     forbidden: ["将构建成功当成业务验收通过","将两个元工具描述为完整沙箱"]
@@ -65,7 +65,7 @@ tasks:
     dependencies: ["TASK-001"]
     risk_level: L3
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["入口 packages/yuanpu-runtime/src/capabilities/contracts.ts、src/pi/index.ts、packages/yuanpu-protocol；现有结果只支持 JsonValue","契约卡为共享协议单一修改者；选 SDK/Schema 版本前核对官方文档；向下兼容必须测试"]
+    investigation_hints: ["入口 packages/mindlink-runtime/src/capabilities/contracts.ts、src/pi/index.ts、packages/mindlink-protocol；现有结果只支持 JsonValue","契约卡为共享协议单一修改者；选 SDK/Schema 版本前核对官方文档；向下兼容必须测试"]
     escalation_conditions: ["公共契约与设计不一致或需要修改 Pi 上游时停止该分支并报告","缺少平台环境或发布凭据时保留未验证项，不绕过安全检查"]
     result:
       owner: "codex-yuanpu"
@@ -365,7 +365,7 @@ tasks:
     dependencies: ["TASK-007"]
     risk_level: L3
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["入口 package.json presmoke:native、apps/runtime/scripts/native/smoke.mjs、apps/runtime/src/index.ts createConfiguredPythonSource/createYuanpuMcpServer","TASK-008 在 e51c64c 串行复现：冻结制品首次发现约 3 秒被 CapabilityRegistry 总超时截断，重跑受系统缓存影响可通过","沿用健康检查 20 秒上限；增加针对失败隔离与子进程清理的最小回归"]
+    investigation_hints: ["入口 package.json presmoke:native、apps/runtime/scripts/native/smoke.mjs、apps/runtime/src/index.ts createConfiguredPythonSource/createMindlinkMcpServer","TASK-008 在 e51c64c 串行复现：冻结制品首次发现约 3 秒被 CapabilityRegistry 总超时截断，重跑受系统缓存影响可通过","沿用健康检查 20 秒上限；增加针对失败隔离与子进程清理的最小回归"]
     escalation_conditions: ["若必须改变公共 MCP 契约或 Pi 上游实现则停止并报告","若 20 秒内仍无法稳定冷启动则保留失败证据，不提高为无界等待"]
     result:
       owner: "codex-yuanpu-61529-61529-88666-1628"
@@ -425,7 +425,7 @@ tasks:
     status: done
     goal: "建立桌面、IM、定时任务共用的执行、身份、事件与存储契约，并保持当前对话兼容。"
     scope:
-      in: ["AgentService 请求/响应、run 状态、会话标识与幂等规则","yuanpu-protocol 宿主事件、通知回执、取消及协议兼容范围","SQLite 表所有权、迁移与 SEA 驱动可行性验证"]
+      in: ["AgentService 请求/响应、run 状态、会话标识与幂等规则","mindlink-protocol 宿主事件、通知回执、取消及协议兼容范围","SQLite 表所有权、迁移与 SEA 驱动可行性验证"]
       out: ["平台 SDK 与管理页面","默认启用完全访问"]
     constraints: ["Pi 上游及兄弟仓库不修改；App 退出后不保留后台服务","完成须集成并验证于 main；本次建卡不授权实现、提交或推送","共享协议由本卡建立，后续更改须先同步消费者；实现默认不放宽现有权限"]
     forbidden: ["用构建成功代替真实业务验收","覆盖用户既有改动或伪造平台验证结果"]
@@ -443,7 +443,7 @@ tasks:
     dependencies: []
     risk_level: L3
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["packages/yuanpu-protocol/src/index.ts、packages/yuanpu-runtime/src/pi/index.ts、apps/runtime/src/index.ts；新增 agent/contracts 与 persistence 路径是计划入口","先检查全局 chatPromise、Pi SessionManager 公开接口和现有 approval 绑定；数据库只保存 Yuanpu 元数据","最小契约测试 → pnpm check → pnpm build:native && pnpm smoke:native；迁移需真实文件 fixture"]
+    investigation_hints: ["packages/mindlink-protocol/src/index.ts、packages/mindlink-runtime/src/pi/index.ts、apps/runtime/src/index.ts；新增 agent/contracts 与 persistence 路径是计划入口","先检查全局 chatPromise、Pi SessionManager 公开接口和现有 approval 绑定；数据库只保存 MindLink 元数据","最小契约测试 → pnpm check → pnpm build:native && pnpm smoke:native；迁移需真实文件 fixture"]
     escalation_conditions: ["需改变已确认 App 生命周期或修改 Pi 上游时报告具体冲突","缺平台选择、凭据或目标系统时保留对应未验证项；不扩大为公网或生产操作"]
     result:
       owner: "sol-owner-task-011-72012"
@@ -483,7 +483,7 @@ tasks:
     dependencies: ["TASK-011"]
     risk_level: L3
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["packages/yuanpu-runtime/src/agent、persistence、pi 和 capabilities/approval.ts；apps/runtime/src/index.ts getChat/resetChat/chat 路由","先落实 TASK-011 状态机；Pi 对话由公开 API 持久化，Yuanpu 不复制对话存储","新增行为测试归入 packages/yuanpu-runtime/test 与 apps/runtime/test；事务竞争、取消与崩溃恢复测试后运行 pnpm check"]
+    investigation_hints: ["packages/mindlink-runtime/src/agent、persistence、pi 和 capabilities/approval.ts；apps/runtime/src/index.ts getChat/resetChat/chat 路由","先落实 TASK-011 状态机；Pi 对话由公开 API 持久化，MindLink 不复制对话存储","新增行为测试归入 packages/mindlink-runtime/test 与 apps/runtime/test；事务竞争、取消与崩溃恢复测试后运行 pnpm check"]
     escalation_conditions: ["需改变已确认 App 生命周期或修改 Pi 上游时报告具体冲突","缺平台选择、凭据或目标系统时保留对应未验证项；不扩大为公网或生产操作"]
     result:
       owner: "sol-owner-task-012-92584-72012"
@@ -612,7 +612,7 @@ tasks:
     dependencies: ["TASK-014"]
     risk_level: L2
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["新增 packages/yuanpu-runtime/src/notifications；apps/desktop/src/main.ts、runtime-manager.ts、preload.ts；现有 main.tsx 对话页面最小导航适配","先核对 Electron 官方接口与各平台行为；复用 TASK-011 事件 DTO，Runtime 不导入 Electron","通知适配 fixture/事件断线测试 → pnpm check → 打包应用原生通知与点击实测；系统设置导致未展示需单独记录"]
+    investigation_hints: ["新增 packages/mindlink-runtime/src/notifications；apps/desktop/src/main.ts、runtime-manager.ts、preload.ts；现有 main.tsx 对话页面最小导航适配","先核对 Electron 官方接口与各平台行为；复用 TASK-011 事件 DTO，Runtime 不导入 Electron","通知适配 fixture/事件断线测试 → pnpm check → 打包应用原生通知与点击实测；系统设置导致未展示需单独记录"]
     escalation_conditions: ["需改变已确认 App 生命周期或修改 Pi 上游时报告具体冲突","缺平台选择、凭据或目标系统时保留对应未验证项；不扩大为公网或生产操作"]
     result:
       owner: "sol-task015-owner-20260922-72012"
@@ -692,7 +692,7 @@ tasks:
     dependencies: []
     risk_level: L2
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["docs/application-architecture.md 第 7 节及 packages/yuanpu-protocol；现阶段尚无平台适配器","平台/API 事实必须查询最新官方文档；信息和选择记录到现有架构文档的渠道决策小节","本卡以可执行接入契约与环境清单验收，不以空目录或 fixture 宣称接通"]
+    investigation_hints: ["docs/application-architecture.md 第 7 节及 packages/mindlink-protocol；现阶段尚无平台适配器","平台/API 事实必须查询最新官方文档；信息和选择记录到现有架构文档的渠道决策小节","本卡以可执行接入契约与环境清单验收，不以空目录或 fixture 宣称接通"]
     escalation_conditions: ["需改变已确认 App 生命周期或修改 Pi 上游时报告具体冲突","缺平台选择、凭据或目标系统时保留对应未验证项；不扩大为公网或生产操作"]
     result:
       owner: "sol-owner-task-017-72012"
@@ -733,7 +733,7 @@ tasks:
     dependencies: ["TASK-014","TASK-017"]
     risk_level: L3
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["packages/yuanpu-runtime/src/channels/adapters 为新增入口；复用 agent、persistence；apps/runtime 负责装配","收到消息须使用平台认证上下文，不能信任正文自报 sender；记忆/工作区按配对策略选择","协议 fixture/重放/错误身份测试 → pnpm check → 真实测试机器人双会话收发；依赖 SEA 打包检查"]
+    investigation_hints: ["packages/mindlink-runtime/src/channels/adapters 为新增入口；复用 agent、persistence；apps/runtime 负责装配","收到消息须使用平台认证上下文，不能信任正文自报 sender；记忆/工作区按配对策略选择","协议 fixture/重放/错误身份测试 → pnpm check → 真实测试机器人双会话收发；依赖 SEA 打包检查"]
     escalation_conditions: ["需改变已确认 App 生命周期或修改 Pi 上游时报告具体冲突","缺平台选择、凭据或目标系统时保留对应未验证项；不扩大为公网或生产操作"]
     result:
       owner: "sol-task018-owner-72012"
@@ -842,7 +842,7 @@ tasks:
     dependencies: ["TASK-019"]
     risk_level: L2
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["apps/app/src/main.tsx、styles.css、apps/desktop/src/preload.ts 与 yuanpu-protocol；未发现 .tasks/ui.yaml，沿用现有 UI 作为默认","UI 提案见 docs/application-architecture.md 第 13 节；通知部分按 docs/adr/0003-defer-native-notifications.md 暂缓；后续视觉证据保存在 .tasks/ui/TASK-020/","最小接口行为验证 → pnpm check → 真实 Electron 操作核心旅程；不能只截图或只用静态假数据"]
+    investigation_hints: ["apps/app/src/main.tsx、styles.css、apps/desktop/src/preload.ts 与 mindlink-protocol；未发现 .tasks/ui.yaml，沿用现有 UI 作为默认","UI 提案见 docs/application-architecture.md 第 13 节；通知部分按 docs/adr/0003-defer-native-notifications.md 暂缓；后续视觉证据保存在 .tasks/ui/TASK-020/","最小接口行为验证 → pnpm check → 真实 Electron 操作核心旅程；不能只截图或只用静态假数据"]
     escalation_conditions: ["需改变已确认 App 生命周期或修改 Pi 上游时报告具体冲突","缺平台选择、凭据或目标系统时保留对应未验证项；不扩大为公网或生产操作"]
     result:
       owner: "codex-t019sep23-12136"
@@ -994,7 +994,7 @@ tasks:
     dependencies: ["TASK-020"]
     risk_level: L3
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: [".tasks/verification/TASK-021/results.md 的 D21-02；apps/desktop/test/task-021-im-app-restart-probe.mjs", "packages/yuanpu-runtime/src/channels/store.ts 的 outboundByRun；apps/runtime/src/index.ts 的授权 run 查询；apps/desktop/src/{main,preload}.ts；apps/app/src/main.tsx 的 locatedRun 详情", "先明确现有本地 App 授权边界和状态契约，再做最小接口和现有页面行为；真实企微只在另行授权的 021 验收中复核"]
+    investigation_hints: [".tasks/verification/TASK-021/results.md 的 D21-02；apps/desktop/test/task-021-im-app-restart-probe.mjs", "packages/mindlink-runtime/src/channels/store.ts 的 outboundByRun；apps/runtime/src/index.ts 的授权 run 查询；apps/desktop/src/{main,preload}.ts；apps/app/src/main.tsx 的 locatedRun 详情", "先明确现有本地 App 授权边界和状态契约，再做最小接口和现有页面行为；真实企微只在另行授权的 021 验收中复核"]
     escalation_conditions: ["若必须放宽 IM 数据授权或更改恢复/重试语义，先说明契约变化"]
     result:
       owner: "codex-task021-followup-20260923-12136"
@@ -1048,15 +1048,15 @@ tasks:
   - id: TASK-031
     title: "隔离验证 Pi v0.87.1 内核同步"
     status: done
-    goal: "验证从当前 Pi 0.86.1 镜像升级到官方 v0.87.1 对 Yuanpu 构建、Runtime、SEA 与关键业务入口的兼容性，为是否正式升级提供证据。"
+    goal: "验证从当前 Pi 0.86.1 镜像升级到官方 v0.87.1 对 MindLink 构建、Runtime、SEA 与关键业务入口的兼容性，为是否正式升级提供证据。"
     scope:
-      in: ["以官方 v0.87.1 tag 和精确 commit 制作隔离同步候选", "对比 Pi 公共接口与 Yuanpu 适配边界", "在候选树执行构建、类型、单测、SEA 与受控入口烟测并记录差异"]
+      in: ["以官方 v0.87.1 tag 和精确 commit 制作隔离同步候选", "对比 Pi 公共接口与 MindLink 适配边界", "在候选树执行构建、类型、单测、SEA 与受控入口烟测并记录差异"]
       out: ["直接更新 main 的 Pi 镜像或用户运行中的 App", "调用真实模型或企业微信进行未经授权的外部测试", "用一次绿灯代替跨平台发布验收"]
     constraints: ["保留当前 docs/pi-upstream.json 的 0.86.1 基线；同步仅在一次性任务工作树进行", "不改写兄弟 ../pi checkout，来源必须是官方 v0.87.1 tag", "若需要适配代码，先记录具体冲突并另设实现边界，不在验证卡内混入修复"]
     forbidden: ["从可变 main HEAD 冒充 v0.87.1", "将上游生成文件或未锁定模型数据误记为版本差异", "覆盖用户现有工作树"]
     acceptance:
       - type: assertion
-        expect: "记录当前 0.86.1 与候选 v0.87.1 的准确 commit、变更范围、对 Yuanpu Pi 适配面的影响及可复现的隔离同步命令"
+        expect: "记录当前 0.86.1 与候选 v0.87.1 的准确 commit、变更范围、对 MindLink Pi 适配面的影响及可复现的隔离同步命令"
       - type: assertion
         expect: "候选树完成 pnpm check、pnpm build:native、pnpm smoke:native 与受控桌面/IM/计划核心入口回归；失败逐项归因，未运行平台如实标记"
       - type: assertion
@@ -1064,7 +1064,7 @@ tasks:
     dependencies: []
     risk_level: L3
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["docs/pi-integration.md、docs/pi-upstream.json、scripts/sync-pi-packages.mjs 为同步边界；候选 tag 为 https://github.com/earendil-works/pi/releases/tag/v0.87.1", "先隔离检出准确 tag，再从隔离工作树运行 pnpm sync:pi，检查镜像目录、共享 tsconfig 与 bundle helper 的差异", "按 closest Pi/Yuanpu 适配测试 → pnpm check → native 构建与烟测 → 隔离 App/Runtime 入口探针递进"]
+    investigation_hints: ["docs/pi-integration.md、docs/pi-upstream.json、scripts/sync-pi-packages.mjs 为同步边界；候选 tag 为 https://github.com/earendil-works/pi/releases/tag/v0.87.1", "先隔离检出准确 tag，再从隔离工作树运行 pnpm sync:pi，检查镜像目录、共享 tsconfig 与 bundle helper 的差异", "按 closest Pi/MindLink 适配测试 → pnpm check → native 构建与烟测 → 隔离 App/Runtime 入口探针递进"]
     escalation_conditions: ["若候选需要变更 Runtime/协议/数据迁移或用户凭据才可继续验证，记录边界并请求单独实施决定"]
     result:
       owner: "codex-d21sep23-12136-12136"
@@ -1102,7 +1102,7 @@ tasks:
     dependencies: ["TASK-016","TASK-018"]
     risk_level: L3
     recommended_model: "gpt-5.6 sol"
-    investigation_hints: ["D19-01 复现在 apps/runtime/test/task-019-channel-delivery-probe.mjs；apps/runtime/src/index.ts 的 schedulerCaller.authorizeDelivery 当前只接受 desktop/none，PersistentScheduler.open 未传 delivery；协议在 packages/yuanpu-protocol/src/agent.ts，调度口在 packages/yuanpu-runtime/src/scheduler/service.ts","预检 packages/yuanpu-runtime/src/channels/router.ts 与 store.ts：入站回复 routeId 是 inboundId，配对表只留 sender 摘要，不能直接当作跨重启的主动发送目标；从明确授权的稳定绑定定义开始，追踪受影响调用方","验证阶梯：先跑 scheduler/channel 邻近测试，再使 TASK-019 HTTP 探针由 400 变为受控成功并覆盖未绑定/解绑/错连接、失败/未知及 SQLite 重开；最后 pnpm check。真实企业微信单私聊显示由独立 TASK-019 复验，不在本实现卡冒称完成","对新增目标持久化和发送幂等语义做独立安全/数据边界复核，重点检查泄漏、误投递与回滚兼容"]
+    investigation_hints: ["D19-01 复现在 apps/runtime/test/task-019-channel-delivery-probe.mjs；apps/runtime/src/index.ts 的 schedulerCaller.authorizeDelivery 当前只接受 desktop/none，PersistentScheduler.open 未传 delivery；协议在 packages/mindlink-protocol/src/agent.ts，调度口在 packages/mindlink-runtime/src/scheduler/service.ts","预检 packages/mindlink-runtime/src/channels/router.ts 与 store.ts：入站回复 routeId 是 inboundId，配对表只留 sender 摘要，不能直接当作跨重启的主动发送目标；从明确授权的稳定绑定定义开始，追踪受影响调用方","验证阶梯：先跑 scheduler/channel 邻近测试，再使 TASK-019 HTTP 探针由 400 变为受控成功并覆盖未绑定/解绑/错连接、失败/未知及 SQLite 重开；最后 pnpm check。真实企业微信单私聊显示由独立 TASK-019 复验，不在本实现卡冒称完成","对新增目标持久化和发送幂等语义做独立安全/数据边界复核，重点检查泄漏、误投递与回滚兼容"]
     escalation_conditions: ["现有 SecretStore/数据边界无法安全持久化已授权目标时，先提出具体契约冲突，不用硬编码 userid 或扩大消息目标","若官方平台不支持该主动发送或需新增授权范围，记录限制并交由架构决策，不假定成功"]
     result:
       owner: "codex-t026sep23-12136"
@@ -1137,7 +1137,7 @@ tasks:
     dependencies: ["TASK-018"]
     risk_level: L2
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["apps/runtime/src/index.ts 在 server.listen 前直接 await startConfiguredWecomChannels；apps/runtime/src/wecom-channel.ts 的 readWecomConnectionDocument 对未知字段抛错；apps/runtime/test/wecom-channel.test.mjs 与真实 Runtime 启动测试可作最近回归入口","先用隔离 YUANPU_HOME 重现无效配置仍能健康启动，再测凭据失败、有效连接与清理；不使用用户真实凭据"]
+    investigation_hints: ["apps/runtime/src/index.ts 在 server.listen 前直接 await startConfiguredWecomChannels；apps/runtime/src/wecom-channel.ts 的 readWecomConnectionDocument 对未知字段抛错；apps/runtime/test/wecom-channel.test.mjs 与真实 Runtime 启动测试可作最近回归入口","先用隔离 MINDLINK_HOME 重现无效配置仍能健康启动，再测凭据失败、有效连接与清理；不使用用户真实凭据"]
     escalation_conditions: ["若现有健康/状态契约无法表达连接降级，记录最小接口缺口，不以静默吞错替代诊断"]
     result:
       owner: "codex-t027sep23-12136"
@@ -1190,11 +1190,11 @@ tasks:
       follow_up_candidates: []
 
   - id: TASK-036
-    title: "按 Muse 参考框架交付 Yuanpu 聊天 UI"
+    title: "按 Muse 参考框架交付 MindLink 聊天 UI"
     status: done
-    goal: "以用户已查看的浅色三栏预览为基线，完成可用于真实桌面对话的 Yuanpu UI，并保留技能、连接与定时任务的现有业务行为。"
+    goal: "以用户已查看的浅色三栏预览为基线，完成可用于真实桌面对话的 MindLink UI，并保留技能、连接与定时任务的现有业务行为。"
     scope:
-      in: ["左侧导航、中央聊天与固定输入栏、右侧会话动态及运行面板", "消息、授权、取消、错误恢复与响应式布局", "技能、连接、定时任务的浅色适配与导航回归", "Electron 标题栏适配、真实桥接验收与交付证据", "Yuanpu Pi 适配层传递模型错误，避免 UI 假成功"]
+      in: ["左侧导航、中央聊天与固定输入栏、右侧会话动态及运行面板", "消息、授权、取消、错误恢复与响应式布局", "技能、连接、定时任务的浅色适配与导航回归", "Electron 标题栏适配、真实桥接验收与交付证据", "MindLink Pi 适配层传递模型错误，避免 UI 假成功"]
       out: ["新增 Gmail/Notion 等连接能力", "新增 Runtime 协议、历史会话持久化或实时工具事件协议", "重做其他页面业务结构", "Pi 上游、打包分发及系统通知平台验收"]
     constraints: ["权威方案见 docs/frontend/tasks/muse-chat-redesign.md；复用已接受预览，不另起视觉方案", "先核对并保留当前未提交 UI 实现与用户改动，禁止以历史截图声称当前版本通过", "沿用 DesktopBridge 与宿主一次性授权边界；浏览器 fixture 和真实 Electron 证据分别记录", "同一实施者负责 main.tsx、styles.css/muse-theme.css 与桌面标题栏，避免共享文件并行冲突", "仅集成并在 main 验证后标 done；建卡不自动提交或推送"]
     forbidden: ["把示意的 Gmail 卡片、工具活动或连接状态作为真实功能", "绕过授权或在渲染进程直接访问 Runtime 凭据", "用截图、模拟数据或构建成功替代真实桌面对话验收"]
@@ -1210,15 +1210,15 @@ tasks:
       - type: assertion
         expect: "记录当前 revision、工作区差异、视口、操作、预期/实际结果和截图；浏览器 fixture、真实 Runtime/模型及未验证平台明确区分；macOS 原生标题栏可拖动且交通灯不遮挡导航，其他平台无依赖 macOS 控件才能使用的操作"
       - type: command
-        run: "pnpm --filter @yuanpu-agent/app typecheck"
+        run: "pnpm --filter @mindlink-agent/app typecheck"
       - type: command
-        run: "pnpm --filter @yuanpu-agent/desktop test"
+        run: "pnpm --filter @mindlink-agent/desktop test"
       - type: command
         run: "pnpm check"
     dependencies: ["TASK-020"]
     risk_level: L2
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 apps/app/src/main.tsx 的 App、ChatPanel 与 AppIcon，styles.css 和 muse-theme.css；桌面窗口 apps/desktop/src/main.ts；协议复用 packages/yuanpu-protocol/src/index.ts 的 DesktopBridge 和 src/agent.ts", "预检 git diff；已有 UI 草稿尚未提交。核对 submitDesktopMessage/getAgentRun/cancelAgentRun/decideCapabilityApproval 和通知 navigationTarget；当前右栏为本会话内存状态，不宣称持久历史或实时工具订阅", "设计及证据入口 docs/frontend/tasks/muse-chat-redesign.md、.tasks/ui/muse-chat-redesign/proposal.md；后者与 images 目前受 .gitignore 忽略，交付前须提供可持久审阅的已脱敏证据，不默默改变忽略规则", "验证阶梯：先 app typecheck 和受影响状态场景，再 desktop test，最后 pnpm check 与浏览器/Electron 操作验收；已有 apps/desktop/test/renderer-security.test.mjs、notification-host.test.mjs 和 packages/yuanpu-runtime/test/agent-service.test.mjs 可复用；只有修改原生或更新路径才增加 native smoke", "真实模型验证需要已配置可用模型；优先隔离 YUANPU_HOME，审批使用无外部副作用的受控能力。无环境时保留 unverified，不请求真实外部消息发送或扩大授权"]
+    investigation_hints: ["入口 apps/app/src/main.tsx 的 App、ChatPanel 与 AppIcon，styles.css 和 muse-theme.css；桌面窗口 apps/desktop/src/main.ts；协议复用 packages/mindlink-protocol/src/index.ts 的 DesktopBridge 和 src/agent.ts", "预检 git diff；已有 UI 草稿尚未提交。核对 submitDesktopMessage/getAgentRun/cancelAgentRun/decideCapabilityApproval 和通知 navigationTarget；当前右栏为本会话内存状态，不宣称持久历史或实时工具订阅", "设计及证据入口 docs/frontend/tasks/muse-chat-redesign.md、.tasks/ui/muse-chat-redesign/proposal.md；后者与 images 目前受 .gitignore 忽略，交付前须提供可持久审阅的已脱敏证据，不默默改变忽略规则", "验证阶梯：先 app typecheck 和受影响状态场景，再 desktop test，最后 pnpm check 与浏览器/Electron 操作验收；已有 apps/desktop/test/renderer-security.test.mjs、notification-host.test.mjs 和 packages/mindlink-runtime/test/agent-service.test.mjs 可复用；只有修改原生或更新路径才增加 native smoke", "真实模型验证需要已配置可用模型；优先隔离 MINDLINK_HOME，审批使用无外部副作用的受控能力。无环境时保留 unverified，不请求真实外部消息发送或扩大授权"]
     escalation_conditions: ["若既有桥接契约无法支持目标行为，先记录最小缺口并调整该边界，不借 UI 卡扩展 Runtime 架构", "若需要改变已接受三栏结构或新增业务入口，补充可见方案和决定后再做依赖修改"]
     result:
       owner: "codex-ui-sep24-30665"
@@ -1242,9 +1242,9 @@ tasks:
     status: done
     goal: "以运行证据确定独立助理、双入口及工作评估的服务边界，解除下游实现不确定性。"
     scope:
-      in: ["yuanpu-protocol 的 assistantId/身份/会话/来源/审阅/记忆/委派/回复契约及版本策略", "本地与企业微信归一化输入的 Pi client/server 垂直适配探针；状态订阅和重连", "选型结论、兼容迁移方案和相邻契约测试"]
+      in: ["mindlink-protocol 的 assistantId/身份/会话/来源/审阅/记忆/委派/回复契约及版本策略", "本地与企业微信归一化输入的 Pi client/server 垂直适配探针；状态订阅和重连", "选型结论、兼容迁移方案和相邻契约测试"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1260,7 +1260,7 @@ tasks:
     dependencies: []
     risk_level: "L4"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 packages/yuanpu-protocol/src/index.ts、packages/client/README.md、packages/server/README.md；参照 docs/agent-runtime-contracts.md", "预检当前 Pi 版本与工作区新增 API；packages/yuanpu-runtime/test/agent-contracts.test.mjs 是现有契约回归入口", "探针放 Yuanpu 自有 test/fixture，不改上游；先跑具体新增探针再 pnpm check；此卡统一拥有共享协议初始修改"]
+    investigation_hints: ["入口 packages/mindlink-protocol/src/index.ts、packages/client/README.md、packages/server/README.md；参照 docs/agent-runtime-contracts.md", "预检当前 Pi 版本与工作区新增 API；packages/mindlink-runtime/test/agent-contracts.test.mjs 是现有契约回归入口", "探针放 MindLink 自有 test/fixture，不改上游；先跑具体新增探针再 pnpm check；此卡统一拥有共享协议初始修改"]
     escalation_conditions: ["如现有公共契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "缺少真实账号、平台或模型环境时记为 unverified；不打印凭据或绕过审批"]
     result:
       owner: "assistant-architecture-sol1"
@@ -1282,13 +1282,13 @@ tasks:
     status: done
     goal: "助理可使用独立 Home、会话与专属技能执行一次真实 Agent 回合。"
     scope:
-      in: ["packages/yuanpu-assistant 构建、类型检查、test 与独立执行器", "Home 路径解析、SOUL/USER/MEMORY 初始化及冻结摘要", "仅助理技能的显式加载与窄 host 接口"]
+      in: ["packages/mindlink-assistant 构建、类型检查、test 与独立执行器", "Home 路径解析、SOUL/USER/MEMORY 初始化及冻结摘要", "仅助理技能的显式加载与窄 host 接口"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "来源、模型认证、委派和交付均由窄 host 接口注入；assistantHome 显式传入，核心不探测 Electron、固定用户目录或本机 Work 数据库；生命周期由宿主决定。见总体设计“本地先行与云端迁移边界”。"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "来源、模型认证、委派和交付均由窄 host 接口注入；assistantHome 显式传入，核心不探测 Electron、固定用户目录或本机 Work 数据库；生命周期由宿主决定。见总体设计“本地先行与云端迁移边界”。"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
-        expect: "包名 @yuanpu-agent/assistant；不直接或间接依赖 runtime-kit 或 apps 实现，根 build/check 覆盖新包"
+        expect: "包名 @mindlink-agent/assistant；不直接或间接依赖 runtime-kit 或 apps 实现，根 build/check 覆盖新包"
       - type: assertion
         expect: "相同机器安装 Work 技能、项目指令和扩展时助理技能清单不变；软链接不能绕过技能根"
       - type: assertion
@@ -1300,7 +1300,7 @@ tasks:
     dependencies: ["TASK-037"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["新增 packages/yuanpu-assistant/src 与 test；参照 packages/yuanpu-runtime/src/pi/index.ts 装配责任但不调用其工作工厂", "pnpm-workspace.yaml 已覆盖 packages/*；根 package.json 用 @yuanpu-agent/* 自动收集检查，核对新包脚本", "用 loopback 模型和测试 host 验证装配，先 pnpm --filter @yuanpu-agent/assistant test 再 pnpm check；该脚本由本卡创建"]
+    investigation_hints: ["新增 packages/mindlink-assistant/src 与 test；参照 packages/mindlink-runtime/src/pi/index.ts 装配责任但不调用其工作工厂", "pnpm-workspace.yaml 已覆盖 packages/*；根 package.json 用 @mindlink-agent/* 自动收集检查，核对新包脚本", "用 loopback 模型和测试 host 验证装配，先 pnpm --filter @mindlink-agent/assistant test 再 pnpm check；该脚本由本卡创建"]
     escalation_conditions: ["如现有公共契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "缺少真实账号、平台或模型环境时记为 unverified；不打印凭据或绕过审批"]
     result:
       owner: "assistant-architecture-sol1"
@@ -1322,7 +1322,7 @@ tasks:
     scope:
       in: ["Work conversation/session 创建、列表与后续回合路由", "取消全局长期记忆注入；旧 default 只读历史", "落盘后来源事件与重复补扫支持；现有 Work 页接入新建与历史"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "来源 ID 与版本独立于绝对路径和当前连接；内容引用由宿主解析，本卡继续本地持久化与补扫，不实现网络同步。"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "来源 ID 与版本独立于绝对路径和当前连接；内容引用由宿主解析，本卡继续本地持久化与补扫，不实现网络同步。"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1338,7 +1338,7 @@ tasks:
     dependencies: ["TASK-037"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 apps/runtime/src/index.ts 的 desktop submit/transcript、packages/yuanpu-runtime/src/pi/index.ts、src/persistence；UI apps/app/src/modules/chat.tsx", "预检不要误删工作区已新增 subagent/builtin 工具和 transcript-summary；保留原子授权边界", "最近测试 agent-service.test.mjs、persistence.test.mjs、pi.test.mjs、apps/runtime/test/runtime.test.mjs；先 focused，再 pnpm check", "共享宿主装配文件与后续进程/渠道卡由一个集成写入者顺序落地"]
+    investigation_hints: ["入口 apps/runtime/src/index.ts 的 desktop submit/transcript、packages/mindlink-runtime/src/pi/index.ts、src/persistence；UI apps/app/src/modules/chat.tsx", "预检不要误删工作区已新增 subagent/builtin 工具和 transcript-summary；保留原子授权边界", "最近测试 agent-service.test.mjs、persistence.test.mjs、pi.test.mjs、apps/runtime/test/runtime.test.mjs；先 focused，再 pnpm check", "共享宿主装配文件与后续进程/渠道卡由一个集成写入者顺序落地"]
     escalation_conditions: ["如现有公共契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "缺少真实账号、平台或模型环境时记为 unverified；不打印凭据或绕过审批"]
     result:
       owner: "work-conversations-sol1"
@@ -1360,7 +1360,7 @@ tasks:
     scope:
       in: ["apps/runtime 专用 Worker 启动与宿主装配", "IPC 就绪/取消/期限/异常恢复；Home 单写锁", "SEA Worker 分发、Desktop 启停和升级清理"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "本卡是 apps/runtime 装配与 SEA 构建集成所有者；不与渠道卡同时编辑共享入口", "App 退出停止助理是桌面宿主策略；助理服务装配不导入 Electron，无界面运行可测试。本轮不增加云端启动模式、常驻服务或公网监听。"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "本卡是 apps/runtime 装配与 SEA 构建集成所有者；不与渠道卡同时编辑共享入口", "App 退出停止助理是桌面宿主策略；助理服务装配不导入 Electron，无界面运行可测试。本轮不增加云端启动模式、常驻服务或公网监听。"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1399,7 +1399,7 @@ tasks:
     scope:
       in: ["按选定通信契约接入本地和已有企微长连接", "身份/会话/回复路由持久映射、幂等与重连", "旧 assistant/企微共享 session 绑定迁移、来源事件、宿主服务 API"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "渠道、认证与客户端传输适配置于宿主；业务身份、会话和请求 ID 不依赖 socket 地址或连接寿命。每个企微连接只有一个活动宿主所有者；本轮不开放远程访问。"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "渠道、认证与客户端传输适配置于宿主；业务身份、会话和请求 ID 不依赖 socket 地址或连接寿命。每个企微连接只有一个活动宿主所有者；本轮不开放远程访问。"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1419,7 +1419,7 @@ tasks:
     dependencies: ["TASK-040"]
     risk_level: "L4"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 apps/runtime/src/wecom-channel.ts、packages/yuanpu-runtime/src/channels、persistence/assistant-link-store.ts、apps/desktop/src/preload.ts 和 host-event-client.ts", "现有 assistant-link、channels、wecom-adapter、task-019-runtime-recovery 测试可复用；先回放事件再 pnpm check", "真实企业微信验收在阶段卡执行；适配器可引用 runtime-kit，助理核心不能反向依赖它"]
+    investigation_hints: ["入口 apps/runtime/src/wecom-channel.ts、packages/mindlink-runtime/src/channels、persistence/assistant-link-store.ts、apps/desktop/src/preload.ts 和 host-event-client.ts", "现有 assistant-link、channels、wecom-adapter、task-019-runtime-recovery 测试可复用；先回放事件再 pnpm check", "真实企业微信验收在阶段卡执行；适配器可引用 runtime-kit，助理核心不能反向依赖它"]
     escalation_conditions: ["如现有公共契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "缺少真实账号、平台或模型环境时记为 unverified；不打印凭据或绕过审批"]
     result:
       owner: "work-conversations-sol1-10414"
@@ -1442,7 +1442,7 @@ tasks:
     scope:
       in: ["独立 Worker 与双入口的 API/IPC/存储业务场景", "真实企业微信一位已授权用户私聊；本地服务调用", "迁移、重启、拒绝身份和 SEA 退出验证"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "由非本阶段主要实现者独立验证；只写验证 harness 和证据，不在验收卡隐藏产品功能", "实际外发测试消息前需明确测试目标与发送授权；可先完成全部离线验收", "按总体设计“本地先行与云端迁移边界”验证本地可替换接缝；这些测试不是云端部署或网络安全验收。"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "由非本阶段主要实现者独立验证；只写验证 harness 和证据，不在验收卡隐藏产品功能", "实际外发测试消息前需明确测试目标与发送授权；可先完成全部离线验收", "按总体设计“本地先行与云端迁移边界”验证本地可替换接缝；这些测试不是云端部署或网络安全验收。"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1481,7 +1481,7 @@ tasks:
     scope:
       in: ["来源登记、持久队列、游标、补扫、版本与受众范围", "memories/work/reviews 文档仓库、原子提交、索引与修订", "手工修改、删除来源、遗忘、旧 MEMORY 导入和中文检索"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "助理通过 host 来源接口读取正文和产物，不按 contentRef 直接打开本机绝对路径；来源不可用与已删除分别处理。单写入者维护持久状态，禁止把运行中的 SQLite/会话目录双向文件同步作为设计。", "本卡消费已通过本地进程和 fixture 验证的 Work/助理来源契约；TASK-042 的真实企业微信往返仍独立验收，本卡不得声称真实渠道已验证。"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "助理通过 host 来源接口读取正文和产物，不按 contentRef 直接打开本机绝对路径；来源不可用与已删除分别处理。单写入者维护持久状态，禁止把运行中的 SQLite/会话目录双向文件同步作为设计。", "本卡消费已通过本地进程和 fixture 验证的 Work/助理来源契约；TASK-042 的真实企业微信往返仍独立验收，本卡不得声称真实渠道已验证。"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1499,7 +1499,7 @@ tasks:
     dependencies: ["TASK-041", "TASK-054"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 packages/yuanpu-assistant/src 的新 source/memory 存储模块，复用宿主来源接口而非连接 automation.sqlite", "测试临时 Home、崩溃提交恢复、重复事件、编辑冲突及权限范围；先 assistant test 再 pnpm check", "旧 agent/memory/MEMORY.md 与 Pi 会话只读导入，不清空；大文件保留引用与有预算摘要"]
+    investigation_hints: ["入口 packages/mindlink-assistant/src 的新 source/memory 存储模块，复用宿主来源接口而非连接 automation.sqlite", "测试临时 Home、崩溃提交恢复、重复事件、编辑冲突及权限范围；先 assistant test 再 pnpm check", "旧 agent/memory/MEMORY.md 与 Pi 会话只读导入，不清空；大文件保留引用与有预算摘要"]
     escalation_conditions: ["如现有公共契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "缺少真实账号、平台或模型环境时记为 unverified；不打印凭据或绕过审批"]
     result:
       owner: "assistant-architecture-memory-10414"
@@ -1520,7 +1520,7 @@ tasks:
     status: done
     goal: "助理在 App 运行时根据来源事件和每日/每周检查持续评估与整理，并在重启后无重复副作用地恢复。"
     scope:
-      in: ["packages/yuanpu-assistant 内部 automation 模块与 state.sqlite 持久队列", "工作/助理/委派/来源变化事件触发及每日每周活跃检查", "幂等合并、前台优先、预算、暂停、失败恢复与 App 退出清理"]
+      in: ["packages/mindlink-assistant 内部 automation 模块与 state.sqlite 持久队列", "工作/助理/委派/来源变化事件触发及每日每周活跃检查", "幂等合并、前台优先、预算、暂停、失败恢复与 App 退出清理"]
       out: ["用户手动创建的 Runtime 计划迁移", "飞书、微信、钉钉、远程常驻及团队平台", "具体工作评估模型提示词、专业子代理执行、建议渠道 UI"]
     constraints: ["设计见 docs/assistant-skills-and-automation.md 与 docs/assistant-memory-proposal.md", "助理队列仅由 Assistant Worker 写；不复用 workflows/automation.sqlite 的用户任务表或工作执行器", "保留现有工作区改动；完成需集成并在 main 验证，不推送", "调度由 Assistant Worker 与宿主运行状态驱动，不以窗口可见性或 renderer 定时器触发；桌面退出仍停止。本轮不实现跨节点锁、主从切换或云端定时服务。"]
     forbidden: ["把定时检查伪装成用户消息或用户手动计划", "退出 App 后继续后台处理", "用内存 Map 代替跨重启去重记录"]
@@ -1540,7 +1540,7 @@ tasks:
     dependencies: ["TASK-043"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["新包 packages/yuanpu-assistant/src/automation 与相邻 test；来源游标和记忆写入见 TASK-043 交付", "现有 packages/yuanpu-runtime/src/scheduler 与 apps/runtime/src/index.ts 只可复用纯时间/调度思路，不能借用用户计划实例", "先用临时 Home 与可控时钟验证事件/重启/取消，再 pnpm check；影响 SEA 生命周期时补进程冒烟"]
+    investigation_hints: ["新包 packages/mindlink-assistant/src/automation 与相邻 test；来源游标和记忆写入见 TASK-043 交付", "现有 packages/mindlink-runtime/src/scheduler 与 apps/runtime/src/index.ts 只可复用纯时间/调度思路，不能借用用户计划实例", "先用临时 Home 与可控时钟验证事件/重启/取消，再 pnpm check；影响 SEA 生命周期时补进程冒烟"]
     escalation_conditions: ["如 TASK-043 存储无法原子表示完成和修订，先协调存储契约，不另建第二数据库权威", "如时区或渠道交付策略需要新增用户选择，记录最小决策与可验证默认值"]
     result:
       owner: "assistant-architecture-automation-10414-10414"
@@ -1562,7 +1562,7 @@ tasks:
     scope:
       in: ["工作审阅服务与 skills/review-work/SKILL.md，消费助理自动化触发", "增量触发、材料快照、证据校验、评估记录", "台账和记忆修订候选、模型预算与前台优先"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "评估对象是工作内容，不是评测助理本身；不启动 Docker/Vitest 跑每个用户任务", "评估不提供执行授权；不通过 bash 重跑未知副作用的任务来求证"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "评估对象是工作内容，不是评测助理本身；不启动 Docker/Vitest 跑每个用户任务", "评估不提供执行授权；不通过 bash 重跑未知副作用的任务来求证"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1580,7 +1580,7 @@ tasks:
     dependencies: ["TASK-043", "TASK-051", "TASK-061"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["packages/evals/README.md、src/harness.ts 仅作离线评分/证据方法参考，不修改上游或依赖其生产 runner", "新增 yuanpu-assistant review 模块与技能；输入来自已验证来源仓库，专业核验接口可先返回待委派状态", "临时文件与 loopback 模型验证真实写入；费用上限/取消/新版本重试/误报完成是最近行为测试，再 pnpm check"]
+    investigation_hints: ["packages/evals/README.md、src/harness.ts 仅作离线评分/证据方法参考，不修改上游或依赖其生产 runner", "新增 mindlink-assistant review 模块与技能；输入来自已验证来源仓库，专业核验接口可先返回待委派状态", "临时文件与 loopback 模型验证真实写入；费用上限/取消/新版本重试/误报完成是最近行为测试，再 pnpm check"]
     escalation_conditions: ["如现有公共契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "缺少真实账号、平台或模型环境时记为 unverified；不打印凭据或绕过审批"]
     result:
       owner: "root-assistant-review-044"
@@ -1605,7 +1605,7 @@ tasks:
     scope:
       in: ["skills/understand-user、maintain-memory、organize-work、follow-up 四项专属技能", "USER/MEMORY 有预算摘要与按需专题生长", "work context/focus/commitments/projects 更新及协作反馈", "将评估待核验事项接到宿主委派接口，回收结果后重新审阅并提交修订"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1623,7 +1623,7 @@ tasks:
     dependencies: ["TASK-044", "TASK-046"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 yuanpu-assistant skills 模板、整理由来源/评估队列消费；遵循 docs/assistant-skills-and-automation.md 和 Hermes 短摘要冻结策略", "为技能写清输入、触发、允许操作、完成条件；只用自身记忆/审阅/委派接口，不暗载系统技能", "先 assistant test：时间变化、矛盾、预算和索引引用，再 pnpm check；不以生成文本代替实际落盘"]
+    investigation_hints: ["入口 mindlink-assistant skills 模板、整理由来源/评估队列消费；遵循 docs/assistant-skills-and-automation.md 和 Hermes 短摘要冻结策略", "为技能写清输入、触发、允许操作、完成条件；只用自身记忆/审阅/委派接口，不暗载系统技能", "先 assistant test：时间变化、矛盾、预算和索引引用，再 pnpm check；不以生成文本代替实际落盘"]
     escalation_conditions: ["如现有公共契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "缺少真实账号、平台或模型环境时记为 unverified；不打印凭据或绕过审批"]
     result:
       owner: "root-assistant-organize-045-10414"
@@ -1648,7 +1648,7 @@ tasks:
     scope:
       in: ["skills/delegate-and-verify/SKILL.md 与宿主委派执行器、独立子任务会话和可续聊消息", "只读评估核验与用户授权的专业执行", "任务归档、完成通知、取消超时、审批和重启未知结果恢复"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "委派接口用逻辑任务 ID 和有范围的来源/结果引用，不假设与助理同机；节点选择、凭据及本地工具路径由宿主执行适配器解析，本轮只交付本地执行器。"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "委派接口用逻辑任务 ID 和有范围的来源/结果引用，不假设与助理同机；节点选择、凭据及本地工具路径由宿主执行适配器解析，本轮只交付本地执行器。"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1668,7 +1668,7 @@ tasks:
     dependencies: ["TASK-042"]
     risk_level: "L4"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["已有 packages/yuanpu-runtime/src/pi/subagents/{manager,runner,tools}.ts 与 test/subagents.test.mjs，当前无恢复和自动父会话唤醒，不能直接复制默认资源加载", "实现置于宿主 Yuanpu 模块，通过协议服务暴露；助理仅持有委派接口，低层共享代码如需抽取不得引入业务循环依赖", "先子任务 follow-up/工具访问/授权一次性/取消/恢复行为测试，后 pnpm check 和子进程 cleanup probe"]
+    investigation_hints: ["已有 packages/mindlink-runtime/src/pi/subagents/{manager,runner,tools}.ts 与 test/subagents.test.mjs，当前无恢复和自动父会话唤醒，不能直接复制默认资源加载", "实现置于宿主 MindLink 模块，通过协议服务暴露；助理仅持有委派接口，低层共享代码如需抽取不得引入业务循环依赖", "先子任务 follow-up/工具访问/授权一次性/取消/恢复行为测试，后 pnpm check 和子进程 cleanup probe"]
     escalation_conditions: ["如现有公共契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "缺少真实账号、平台或模型环境时记为 unverified；不打印凭据或绕过审批"]
     result:
       owner: "assistant-contract-review-20260927-046-10414"
@@ -1691,7 +1691,7 @@ tasks:
     scope:
       in: ["后端端到端业务验证与独立隔离审查", "纠正/遗忘、评估准确归类、预算抢占和失败恢复", "助理与专业子任务的工具/存储/身份边界"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "由非主要实现者验证；安全边界审查与业务记录需独立于开发自测", "此卡评估实现是否满足需求，产品功能仍是助理审阅用户工作；不新增 packages/evals 集成项目"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "由非主要实现者验证；安全边界审查与业务记录需独立于开发自测", "此卡评估实现是否满足需求，产品功能仍是助理审阅用户工作；不新增 packages/evals 集成项目"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1733,7 +1733,7 @@ tasks:
     scope:
       in: ["skills/reflect-and-suggest/SKILL.md 消费助理内部每日/每周检查，形成独立回顾会话、漏触发合并和预算", "建议收件箱、去重/冷却/反馈与暂停", "可选已绑定企业微信投递及宿主交付状态引用"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1774,7 +1774,7 @@ tasks:
     scope:
       in: ["复用今日/任务/记忆/连接页面，接入真实助理服务", "来源导航、工作评估详情、编辑纠正/遗忘、暂停整理与同步状态", "委派详情/取消/继续追问与可信投递状态；旧本地保存记忆迁移入口"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "同一实施者拥有 chat.tsx、assistant-home、共享样式和 preload 界面接入；保留工作区未提交布局", "若新增重大页面结构超出现有方案，按 UI Delivery 给出可审阅方案；普通数据接入继续复用已批准布局", "界面通过助理服务客户端获取记忆、来源与任务，不直接读取 assistant Home；地址、认证与传输留在适配层。本轮保留本地入口，不增加云端设置页。"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "同一实施者拥有 chat.tsx、assistant-home、共享样式和 preload 界面接入；保留工作区未提交布局", "若新增重大页面结构超出现有方案，按 UI Delivery 给出可审阅方案；普通数据接入继续复用已批准布局", "界面通过助理服务客户端获取记忆、来源与任务，不直接读取 assistant Home；地址、认证与传输留在适配层。本轮保留本地入口，不增加云端设置页。"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1815,7 +1815,7 @@ tasks:
     scope:
       in: ["真实桌面与企业微信单人私聊，记忆和工作评估生命周期", "子任务审批/取消/恢复、迁移和打包 App 生命周期", "本轮回归、未验证平台清单与最终交付证据"]
       out: ["飞书、微信、钉钉接入；远程常驻和团队平台", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/yuanpu-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "由非本轮主要实现者独立验收，产品缺陷另建修复卡，不在 Gate 内隐藏功能开发"]
+    constraints: ["设计权威 docs/assistant-memory-proposal.md；本地与企业微信，App 完整退出停止助理及子任务", "独立 packages/mindlink-assistant 与 assistant Home；助理不依赖工作 runtime-kit", "保留当前 main fbe7c05 及工作区增量；完成需集成并在 main 验证，本轮不自动提交或推送", "由非本轮主要实现者独立验收，产品缺陷另建修复卡，不在 Gate 内隐藏功能开发"]
     forbidden: ["将 fixture、编译成功或模型自述当作真实业务完成证据", "将原始工作记录或全量私人记忆自动注入新 Work 或执行子代理"]
     acceptance:
       - type: assertion
@@ -1873,7 +1873,7 @@ tasks:
     dependencies: []
     risk_level: "L3"
     recommended_model: "glm-5.3"
-    investigation_hints: ["协议入口 packages/yuanpu-protocol/src/index.ts（RUNTIME_ROUTES、WorkConversation、DesktopBridge）；runtime 路由参考 apps/runtime/src/index.ts 的 desktopTranscript 分支与 workConversations.row(workScope, id) 取 working_directory 的方式", "新模块 apps/runtime/src/workspace-files.ts 与 workspace-directory.ts 并列；containment 写法参考 packages/yuanpu-runtime/src/packages/index.ts:144 附近", "renderer 入口 apps/app/src/modules/chat.tsx activity-panel（activityTab/rightPanelWidth 最大化机制）；Markdown 复用 shared/message-content.tsx；宽度函数 shared/panel-resize.ts", "测试范式：node:test + tsx register 动态导入 TS（apps/app/test/panel-resize.test.mjs）；runtime 路由测试按 apps/runtime/test/runtime.test.mjs loopback 模式", "pdfjs-dist worker 用 Vite ?url 导入；如与构建冲突，记录最小替代（同步模式）并回归"]
+    investigation_hints: ["协议入口 packages/mindlink-protocol/src/index.ts（RUNTIME_ROUTES、WorkConversation、DesktopBridge）；runtime 路由参考 apps/runtime/src/index.ts 的 desktopTranscript 分支与 workConversations.row(workScope, id) 取 working_directory 的方式", "新模块 apps/runtime/src/workspace-files.ts 与 workspace-directory.ts 并列；containment 写法参考 packages/mindlink-runtime/src/packages/index.ts:144 附近", "renderer 入口 apps/app/src/modules/chat.tsx activity-panel（activityTab/rightPanelWidth 最大化机制）；Markdown 复用 shared/message-content.tsx；宽度函数 shared/panel-resize.ts", "测试范式：node:test + tsx register 动态导入 TS（apps/app/test/panel-resize.test.mjs）；runtime 路由测试按 apps/runtime/test/runtime.test.mjs loopback 模式", "pdfjs-dist worker 用 Vite ?url 导入；如与构建冲突，记录最小替代（同步模式）并回归"]
     escalation_conditions: ["如现有 DesktopBridge/协议契约无法表达需求，记录最小差异并回到契约所有者协调，不私增第二套含义", "pdfjs-dist 与 Vite/SEA 打包冲突或体积不可接受时，记录证据并将 PDF 降级为「下载/暂不支持」提示后完成其余验收"]
     result:
       owner: "zcode-80975"
@@ -1895,7 +1895,7 @@ tasks:
     scope:
       in: ["shared/font-preference 偏好模块：normalize 校验、localStorage 读写、documentElement 变量注入（主题同款模式，无 IPC）", "themes/tokens.css 新增字体 token；muse-theme/styles/management/assistant-home 字号 px→rem 转换与正文 token 化", "设置通用区新增界面字体大小、正文字体大小、界面字型三个设置块（复用 theme-setting/theme-options 控件样式）", "main.tsx 启动时应用字体偏好", "font-preference 单测；theme-contract 增加禁止硬编码 px font-size 的防回归断言"]
       out: ["代码字体（mono）单独配置", "连续 slider、多窗口差异化、界面整体缩放", "runtime config、protocol、DesktopBridge 或 IPC 链路改动", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["持久化仅用渲染端 localStorage 键 yuanpu:font:v1；字体 token 仅声明在 themes/tokens.css，dark.css 不修改，mindlink.css 仅允许 font-size px→rem 机械转换（默认渲染不变，2026-09-26 依 mindlink.css:85-124 取证修正）", "标准档（界面 100%、正文 14px、系统字型）渲染结果与改造前一致；档位只缩放文字不缩放布局尺寸", "界面字号与正文字号相互独立：界面档位不得缩放聊天正文，正文档位不得影响界面文字", "完成需集成并在 main 验证；本轮不自动提交推送"]
+    constraints: ["持久化仅用渲染端 localStorage 键 mindlink:font:v1；字体 token 仅声明在 themes/tokens.css，dark.css 不修改，mindlink.css 仅允许 font-size px→rem 机械转换（默认渲染不变，2026-09-26 依 mindlink.css:85-124 取证修正）", "标准档（界面 100%、正文 14px、系统字型）渲染结果与改造前一致；档位只缩放文字不缩放布局尺寸", "界面字号与正文字号相互独立：界面档位不得缩放聊天正文，正文档位不得影响界面文字", "完成需集成并在 main 验证；本轮不自动提交推送"]
     forbidden: ["把界面整体 zoom/缩放冒充界面字体大小", "在 muse-theme.css 之外新声明字体 token 或引入第二套字体持久化", "将构建成功当作视觉验收通过"]
     acceptance:
       - type: assertion
@@ -1907,7 +1907,7 @@ tasks:
       - type: assertion
         expect: "标准档下聊天、设置、管理页与改造前渲染一致；特大界面档 + 超大正文 + 自定义字型组合无明显溢出或文字挤压；assistant-home/shell-layout 等未提交增量文件在集成时按同一规则补齐转换"
       - type: command
-        run: "pnpm --filter @yuanpu-agent/app test"
+        run: "pnpm --filter @mindlink-agent/app test"
       - type: command
         run: "pnpm check"
     dependencies: []
@@ -1954,7 +1954,7 @@ tasks:
     dependencies: ["TASK-041"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["packages/yuanpu-runtime/src/persistence/index.ts 的迁移与 schema 常量、packages/yuanpu-runtime/test/persistence.test.mjs", "apps/runtime/scripts/native/smoke.mjs 的 schema 断言；TASK-042 的 .tasks/verification/TASK-042/results.md", "先以合成 v8 Work 目录库重现缺表，再实现带事务的修复；复测 v8 助理版、v9 缺表版及新库，最后全量与当前平台 SEA"]
+    investigation_hints: ["packages/mindlink-runtime/src/persistence/index.ts 的迁移与 schema 常量、packages/mindlink-runtime/test/persistence.test.mjs", "apps/runtime/scripts/native/smoke.mjs 的 schema 断言；TASK-042 的 .tasks/verification/TASK-042/results.md", "先以合成 v8 Work 目录库重现缺表，再实现带事务的修复；复测 v8 助理版、v9 缺表版及新库，最后全量与当前平台 SEA"]
     escalation_conditions: ["若出现同名表结构不兼容或真实库比 v9 更新，先停止写入并记录实际 schema，不自动猜测迁移", "修复不触碰或打印真实用户内容"]
     result:
       owner: "assistant-architecture-schema-repair-10414"
@@ -1975,9 +1975,9 @@ tasks:
     status: done
     goal: "用户可用稳定 ID 管理任意层级文件夹、会话名称与图标、标签及可恢复归档；新会话在选定文件夹下拥有独立工作目录。"
     scope:
-      in: ["Work 文件夹/会话/标签的 SQLite 元数据、兼容迁移与排序", "Runtime 管理路由、Yuanpu 协议 DTO、DesktopBridge/IPC 接线", "新建文件夹与会话、服务端重命名、图标、标签、归档/恢复、同级排序的服务行为"]
+      in: ["Work 文件夹/会话/标签的 SQLite 元数据、兼容迁移与排序", "Runtime 管理路由、MindLink 协议 DTO、DesktopBridge/IPC 接线", "新建文件夹与会话、服务端重命名、图标、标签、归档/恢复、同级排序的服务行为"]
       out: ["跨文件夹物理搬迁和 Pi header 更新", "消息正文搜索、树状 Renderer 界面与分支会话", "修改 Pi 上游包或覆盖现有未提交工作"]
-    constraints: ["设计权威 docs/work-conversation-tree.md 与 .tasks/ui/conversation-management/prototype-v003.md；无项目类型，文件夹可嵌套", "以修复助理与工作目录的 SQLite v8 迁移冲突（TASK-054）完成后的 main schema 为迁移基线；与工作对话右侧栏文件预览（TASK-052）的协议接线集成后再改共享文件", "稳定 Work/Pi ID、旧 default 只读历史和 ~/.yuanpu/agent/sessions 的 JSONL 权威不变"]
+    constraints: ["设计权威 docs/work-conversation-tree.md 与 .tasks/ui/conversation-management/prototype-v003.md；无项目类型，文件夹可嵌套", "以修复助理与工作目录的 SQLite v8 迁移冲突（TASK-054）完成后的 main schema 为迁移基线；与工作对话右侧栏文件预览（TASK-052）的协议接线集成后再改共享文件", "稳定 Work/Pi ID、旧 default 只读历史和 ~/.mindlink/agent/sessions 的 JSONL 权威不变"]
     forbidden: ["把旧 default 的 archived=true 当作可恢复普通归档", "让 Renderer 直接提交任意绝对目录路径或让图标字段变成文件执行入口"]
     acceptance:
       - type: assertion
@@ -1993,7 +1993,7 @@ tasks:
     dependencies: ["TASK-052", "TASK-054"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 packages/yuanpu-runtime/src/persistence/work-conversation-store.ts 与 persistence/index.ts，协议 packages/yuanpu-protocol/src/index.ts；Runtime apps/runtime/src/index.ts；Desktop apps/desktop/src/{runtime-manager,main,preload}.ts", "现有 work-conversation.test.mjs、persistence.test.mjs、apps/runtime/test/runtime.test.mjs 用合成旧库和临时 Home 做行为测试；先 focused 后 pnpm check", "预检 main 中修复助理与工作目录的 SQLite v8 迁移冲突（TASK-054）的最终 schema 版本与工作对话右侧栏文件预览（TASK-052）的新增协议接口，不从当前未提交迁移号推断可用版本；保留文件预览按 conversationId 解析 cwd 的契约"]
+    investigation_hints: ["入口 packages/mindlink-runtime/src/persistence/work-conversation-store.ts 与 persistence/index.ts，协议 packages/mindlink-protocol/src/index.ts；Runtime apps/runtime/src/index.ts；Desktop apps/desktop/src/{runtime-manager,main,preload}.ts", "现有 work-conversation.test.mjs、persistence.test.mjs、apps/runtime/test/runtime.test.mjs 用合成旧库和临时 Home 做行为测试；先 focused 后 pnpm check", "预检 main 中修复助理与工作目录的 SQLite v8 迁移冲突（TASK-054）的最终 schema 版本与工作对话右侧栏文件预览（TASK-052）的新增协议接口，不从当前未提交迁移号推断可用版本；保留文件预览按 conversationId 解析 cwd 的契约"]
     escalation_conditions: ["如迁移后 schema 与修复助理与工作目录的 SQLite v8 迁移冲突（TASK-054）或其他未集成分支冲突，先协调唯一集成 writer，不在并行分支重用版本号", "如文件夹目录名与展示名无法一一对应，以稳定 ID/安全磁盘名为准并记录 UI 表达差异"]
     result:
       owner: "conversation-tree-sol-055-10677"
@@ -2031,7 +2031,7 @@ tasks:
     dependencies: ["TASK-055"]
     risk_level: "L4"
     recommended_model: "gpt-6 astra"
-    investigation_hints: ["Runtime 工作目录与执行绑定 apps/runtime/src/index.ts、agent-runtime.ts；Pi 适配 packages/yuanpu-runtime/src/pi/index.ts；上游 SessionManager.findById/open 只读核对 header cwd 过滤", "先在临时 Home 下用真实 JSONL/SQLite 做单会话与子树失败注入，再做 Runtime 路由和重启验收；工作对话右侧栏文件预览（TASK-052）按 conversationId 取 cwd，移动后必须复测", "历史 run 的旧 cwd 是历史事实，来源 ID/版本不能因整理目录而重算；对当前路径引用给出可见提示"]
+    investigation_hints: ["Runtime 工作目录与执行绑定 apps/runtime/src/index.ts、agent-runtime.ts；Pi 适配 packages/mindlink-runtime/src/pi/index.ts；上游 SessionManager.findById/open 只读核对 header cwd 过滤", "先在临时 Home 下用真实 JSONL/SQLite 做单会话与子树失败注入，再做 Runtime 路由和重启验收；工作对话右侧栏文件预览（TASK-052）按 conversationId 取 cwd，移动后必须复测", "历史 run 的旧 cwd 是历史事实，来源 ID/版本不能因整理目录而重算；对当前路径引用给出可见提示"]
     escalation_conditions: ["若无法在不损坏 Pi JSONL 的前提下安全更新 cwd 关联，记录失败窗口并收窄为显式导入/复制流程，不以半迁移上线", "若发现跨卷或外部目录是必须支持的真实业务场景，另立导入契约，不把危险 fallback 塞入拖放"]
     result:
       owner: "conversation-move-astra-10677"
@@ -2071,7 +2071,7 @@ tasks:
     dependencies: ["TASK-055"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["读取入口 packages/yuanpu-runtime/src/pi/index.ts 的 readYuanpuChatTranscript 与 apps/runtime/src/index.ts 的 desktopTranscript；Work 元数据入口 work-conversation-store.ts", "检索 DTO 放 packages/yuanpu-protocol，DesktopBridge 通过 apps/desktop 转发；用临时 Pi JSONL 和真实 store 测试重建/隔离，先 focused 后 pnpm check", "与安全搬迁工作会话及文件夹的磁盘目录（TASK-056）共享稳定 ID/最新路径契约，消息索引不靠一次性的旧绝对 cwd 键定位"]
+    investigation_hints: ["读取入口 packages/mindlink-runtime/src/pi/index.ts 的 readMindlinkChatTranscript 与 apps/runtime/src/index.ts 的 desktopTranscript；Work 元数据入口 work-conversation-store.ts", "检索 DTO 放 packages/mindlink-protocol，DesktopBridge 通过 apps/desktop 转发；用临时 Pi JSONL 和真实 store 测试重建/隔离，先 focused 后 pnpm check", "与安全搬迁工作会话及文件夹的磁盘目录（TASK-056）共享稳定 ID/最新路径契约，消息索引不靠一次性的旧绝对 cwd 键定位"]
     escalation_conditions: ["若直接扫描 JSONL 无法满足可交互延迟，再引入可重建索引并注明磁盘占用与失效策略", "若现有摘要 API 不提供安全可见文本，先固定可索引字段，不扩大到原始工具/推理内容"]
     result:
       owner: "conversation-search-sol-10677"
@@ -2132,8 +2132,8 @@ tasks:
     scope:
       in: ["左侧工作树、紧凑工具栏、面包屑、折叠/缩进、选中态及三主题样式", "新建会话/文件夹、行内重命名、更换图标、添加标签、归档/恢复、排序与拖放/移动到菜单", "树搜索、消息结果定位、空态/失败恢复和键盘操作"]
       out: ["服务端目录迁移、Pi JSONL 改写与搜索索引实现", "助理企微会话树、分支会话及新的项目实体"]
-    constraints: ["视觉与行为依据 .tasks/ui/conversation-management/prototype-v003.md 和 docs/work-conversation-tree.md；只用 Yuanpu 现有 AppIcon、主题 token 与顶部工具栏", "保持左栏位于全宽顶栏下、与正文同层；不破坏工作对话右侧栏文件预览（TASK-052）和右栏缩放；Renderer 只按稳定 ID 调服务，不传任意绝对目标路径", "单一集成 writer 协调 chat.tsx、muse-theme.css、shared AppIcon 与工作对话右侧栏文件预览（TASK-052）/设置全局字体配置（TASK-053）可能重叠的现有工作区增量"]
-    forbidden: ["用仅在本地内存变化的假树冒充持久管理", "以视觉拖动代替可访问的移动到菜单或在搜索筛选时允许不明确落点", "把生成图里的第三方头像/动作栏当成 Yuanpu 正式组件"]
+    constraints: ["视觉与行为依据 .tasks/ui/conversation-management/prototype-v003.md 和 docs/work-conversation-tree.md；只用 MindLink 现有 AppIcon、主题 token 与顶部工具栏", "保持左栏位于全宽顶栏下、与正文同层；不破坏工作对话右侧栏文件预览（TASK-052）和右栏缩放；Renderer 只按稳定 ID 调服务，不传任意绝对目标路径", "单一集成 writer 协调 chat.tsx、muse-theme.css、shared AppIcon 与工作对话右侧栏文件预览（TASK-052）/设置全局字体配置（TASK-053）可能重叠的现有工作区增量"]
+    forbidden: ["用仅在本地内存变化的假树冒充持久管理", "以视觉拖动代替可访问的移动到菜单或在搜索筛选时允许不明确落点", "把生成图里的第三方头像/动作栏当成 MindLink 正式组件"]
     acceptance:
       - type: assertion
         expect: "用户从工作对话新建文件夹/会话、折叠和切换，使用行菜单或拖放移动后树与面包屑立即显示新路径，重启仍一致；移动失败显示原因并恢复原行位置"
@@ -2148,8 +2148,8 @@ tasks:
     dependencies: ["TASK-053", "TASK-058"]
     risk_level: "L2"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 apps/app/src/modules/chat.tsx 的 work-conversation-list、PageToolbar、muse-theme.css；复用 shared/app-icon.tsx、apps/app/themes token 与既有右栏响应式规则", "预检工作对话右侧栏文件预览（TASK-052）合入后的 activity-panel 文件 tab、设置全局字体配置（TASK-053）的字体 token 与当前未提交 shell-layout；先组件/状态测试，再按 UI Delivery 在浏览器完成新建→移动→搜索→归档任务旅程", "可评估 @pierre/trees 的 React 适配与 keyboard/DnD，但 stable ID/路径与迁移授权由 Yuanpu 服务端掌握；不用该库也须满足同等交互"]
-    escalation_conditions: ["若现有窄侧栏无法承载深层树，先用可调整宽度、截断提示和面包屑解决，勿引入全屏浮框替换已确认布局", "如果 v003 图与真实组件有冲突，以已确认的 Yuanpu 顶栏/主题与文字行为为准并记录可见差异"]
+    investigation_hints: ["入口 apps/app/src/modules/chat.tsx 的 work-conversation-list、PageToolbar、muse-theme.css；复用 shared/app-icon.tsx、apps/app/themes token 与既有右栏响应式规则", "预检工作对话右侧栏文件预览（TASK-052）合入后的 activity-panel 文件 tab、设置全局字体配置（TASK-053）的字体 token 与当前未提交 shell-layout；先组件/状态测试，再按 UI Delivery 在浏览器完成新建→移动→搜索→归档任务旅程", "可评估 @pierre/trees 的 React 适配与 keyboard/DnD，但 stable ID/路径与迁移授权由 MindLink 服务端掌握；不用该库也须满足同等交互"]
+    escalation_conditions: ["若现有窄侧栏无法承载深层树，先用可调整宽度、截断提示和面包屑解决，勿引入全屏浮框替换已确认布局", "如果 v003 图与真实组件有冲突，以已确认的 MindLink 顶栏/主题与文字行为为准并记录可见差异"]
     result:
       owner: "conversation-tree-ui-sol-10677-10677"
       attempts: 0
@@ -2287,7 +2287,7 @@ tasks:
     scope:
       in: ["Electron webview guest 挂载与 will-attach-webview 安全加固", "main BrowserGuestManager（CDP attach/命令执行/崩溃自愈/空闲释放）", "127.0.0.1 回环控制服务（Bearer + 体积上限）", "builtin.host.browser 能力源（10 命令、R 级审批）", "viewer/browser UI（标签页、工具栏、状态）与 FileWorkspace 集成"]
       out: ["响应式视口、元素拾取、DevTools、录制、residency 挂起恢复、Chrome 数据导入", "浏览器 MCP 独立包化", "修改 Pi 上游镜像；覆盖既有未提交改动"]
-    constraints: ["渲染采用 renderer 内 <webview> guest（zcode 方案），guest 强制 sandbox/contextIsolation、剥 nodeintegration/disablewebsecurity", "回环控制服务仅监听 127.0.0.1 + Bearer token（启动引导下发）+ 请求体上限", "CDP detach 先于 webview 节点移除（防 UAF）；空闲释放；render-process-gone 事件驱动 renderer 重建", "能力走既有 execute_capability 审批链：navigate/back/forward/reload/snapshot/scroll/screenshot R1，click/type R2，evaluate R3", "目标会话无浏览器 tab 时：当前活跃会话自动开 tab（session-request 事件），非活跃会话返回明确错误", "viewer 组件不触碰 window.yuanpu，经 ViewerBrowserHost 接缝；完成需集成并在 main 验证；本轮测试后停在分支等用户审批"]
+    constraints: ["渲染采用 renderer 内 <webview> guest（zcode 方案），guest 强制 sandbox/contextIsolation、剥 nodeintegration/disablewebsecurity", "回环控制服务仅监听 127.0.0.1 + Bearer token（启动引导下发）+ 请求体上限", "CDP detach 先于 webview 节点移除（防 UAF）；空闲释放；render-process-gone 事件驱动 renderer 重建", "能力走既有 execute_capability 审批链：navigate/back/forward/reload/snapshot/scroll/screenshot R1，click/type R2，evaluate R3", "目标会话无浏览器 tab 时：当前活跃会话自动开 tab（session-request 事件），非活跃会话返回明确错误", "viewer 组件不触碰 window.mindlink，经 ViewerBrowserHost 接缝；完成需集成并在 main 验证；本轮测试后停在分支等用户审批"]
     forbidden: ["guest 进程关闭 nodeintegration 或 websecurity", "回环服务监听非回环地址或无 Bearer 校验", "把 fixture、编译成功当作 UI/会话共享验收", "绕过审批直接执行 R2/R3 浏览器能力"]
     acceptance:
       - type: assertion
@@ -2305,7 +2305,7 @@ tasks:
     dependencies: ["TASK-052"]
     risk_level: "L4"
     recommended_model: "glm-5.3"
-    investigation_hints: ["zcode 蓝本：packages/desktop/src/main/browserGuestManager.ts（裁剪至 attach/execute/detach + CDP 空闲释放）、desktopWindowChrome.ts:586-695（will-attach 加固）、UnifiedBrowserView.tsx + EmbeddedBrowserPaneParts.tsx（UI）、browser-use/commands.ts（命令面参考）", "yuanpu 接入点：viewer/files/file-tabs.tsx FileTab union、viewer/host/、chat.tsx fileHost 组装模式、apps/runtime/src/index.ts capabilitySources 数组与 stdin 引导（runtime-manager.ts:301-305）、notifications/index.ts SSE+回执先例", "验收环境 pnpm dev；models.dev 拉取偶发失败可先单独跑 pnpm --dir packages/ai run build"]
+    investigation_hints: ["zcode 蓝本：packages/desktop/src/main/browserGuestManager.ts（裁剪至 attach/execute/detach + CDP 空闲释放）、desktopWindowChrome.ts:586-695（will-attach 加固）、UnifiedBrowserView.tsx + EmbeddedBrowserPaneParts.tsx（UI）、browser-use/commands.ts（命令面参考）", "mindlink 接入点：viewer/files/file-tabs.tsx FileTab union、viewer/host/、chat.tsx fileHost 组装模式、apps/runtime/src/index.ts capabilitySources 数组与 stdin 引导（runtime-manager.ts:301-305）、notifications/index.ts SSE+回执先例", "验收环境 pnpm dev；models.dev 拉取偶发失败可先单独跑 pnpm --dir packages/ai run build"]
     escalation_conditions: ["webview guest 在现有 CSP 下被拦截且 frame-src 放行无效时，记录证据回到架构决策（备选 WebContentsView）", "回执/命令载荷超过设计上限时回到通道决策，不私开第二通道"]
     result:
       owner: "zcode-63103"
@@ -2342,7 +2342,7 @@ tasks:
     dependencies: ["TASK-059", "TASK-061"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["TASK-060 隔离 Electron 重启复现：旧 default 只有 yp_conversation_bindings 行，没有 yp_work_conversations 行；启动 scanSavedWorkTurns 调用 WorkEvidenceStore.recordToolResults 抛 Work evidence is not bound to a local conversation", "从 packages/yuanpu-runtime/src/persistence/work-evidence-store.ts 与 apps/runtime/src/index.ts 的现有路径和 packages/yuanpu-runtime/test/work-conversation.test.mjs 的 legacy fixture 入手"]
+    investigation_hints: ["TASK-060 隔离 Electron 重启复现：旧 default 只有 yp_conversation_bindings 行，没有 yp_work_conversations 行；启动 scanSavedWorkTurns 调用 WorkEvidenceStore.recordToolResults 抛 Work evidence is not bound to a local conversation", "从 packages/mindlink-runtime/src/persistence/work-evidence-store.ts 与 apps/runtime/src/index.ts 的现有路径和 packages/mindlink-runtime/test/work-conversation.test.mjs 的 legacy fixture 入手"]
     escalation_conditions: ["若旧绑定无法可靠证明同一工作目录和身份，保持拒绝并记录迁移决策，不隐式授权"]
     result:
       owner: "legacy-work-repair-sol-10677"
@@ -2379,7 +2379,7 @@ tasks:
     dependencies: ["TASK-049", "TASK-062"]
     risk_level: "L3"
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["TASK-050 红测 apps/runtime/test/task-050-memory-refresh-probe.mjs：真实 Worker/Pi 同 session 的第二回合未看到纠正记忆，runner 1790469379939975000.log", "packages/yuanpu-assistant/src/executor.ts 从 sessions/system-prompts 读取冻结提示词；packages/agent 的 systemPrompt 回调可按 provider request 求值；apps/runtime/src/assistant-worker.ts 持有单写入记忆库", "先让红测变绿，再加遗忘/来源撤销与受众负向回归，最后 Node24 pnpm check 和独立阶段复测"]
+    investigation_hints: ["TASK-050 红测 apps/runtime/test/task-050-memory-refresh-probe.mjs：真实 Worker/Pi 同 session 的第二回合未看到纠正记忆，runner 1790469379939975000.log", "packages/mindlink-assistant/src/executor.ts 从 sessions/system-prompts 读取冻结提示词；packages/agent 的 systemPrompt 回调可按 provider request 求值；apps/runtime/src/assistant-worker.ts 持有单写入记忆库", "先让红测变绿，再加遗忘/来源撤销与受众负向回归，最后 Node24 pnpm check 和独立阶段复测"]
     escalation_conditions: ["若 Pi 请求级提示词无法保证当前版本与恢复语义，先固定最小差异并调整助理会话契约，不改 Pi 上游镜像", "若当前来源状态无法可靠核实，拒绝把该记忆用于新模型请求"]
     result:
       owner: "root-assistant-live-memory-10414-10414-10414"
@@ -2399,7 +2399,7 @@ tasks:
     status: ready
     goal: "本地已授权的 Work/助理来源能可靠送达另一台机器，并以版本和撤回语义供云端唯一助理读取。"
     scope:
-      in: ["Yuanpu 自有跨设备来源协议、设备身份与受众校验", "本地持久 outbox 和云端持久 inbox/ACK、内容快照读取、撤回与遗忘传播", "合成数据的断网、乱序、重复、重启、权限拒绝回归"]
+      in: ["MindLink 自有跨设备来源协议、设备身份与受众校验", "本地持久 outbox 和云端持久 inbox/ACK、内容快照读取、撤回与遗忘传播", "合成数据的断网、乱序、重复、重启、权限拒绝回归"]
       out: ["迁移正在写入的 SQLite/JSONL 文件", "生产云端部署、企微连接转移和多主同步", "把完整 Work 历史自动加入助理提示词"]
     constraints: ["以 docs/assistant-memory-proposal.md 的唯一写入者和来源版本/受众边界为准；远端必须能读取获授权的正文或受控产物快照，而不是本机绝对路径", "协议兼容旧本地 Home；设备认证、加密传输和请求限额在公网使用前必须落地；秘密不进事件、日志与测试制品", "单一 owner 修改共享协议，消费方经公开接口适配；集成 main 后才可标 done"]
     forbidden: ["用 rsync/网盘双向同步运行中的助理 Home", "ACK 早于远端持久提交", "撤回后离线旧事件把内容复活"]
@@ -2415,7 +2415,7 @@ tasks:
     dependencies: ["TASK-050", "TASK-062"]
     risk_level: L4
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["从 packages/yuanpu-protocol/src/assistant.ts、apps/runtime/src/assistant-source-host.ts、apps/runtime/src/assistant-worker.ts 与 packages/yuanpu-assistant 的来源存储接缝入手；先核对当前 IPC 与落盘来源状态，不把本地 source pump 当网络实现", "先做临时 Home 的协议/队列行为测试，再做双主机 loopback 故障测试与 pnpm check；云端真实网络与迁移留给后续卡；验收矩阵见 .tasks/verification/assistant-next-stage-acceptance.md"]
+    investigation_hints: ["从 packages/mindlink-protocol/src/assistant.ts、apps/runtime/src/assistant-source-host.ts、apps/runtime/src/assistant-worker.ts 与 packages/mindlink-assistant 的来源存储接缝入手；先核对当前 IPC 与落盘来源状态，不把本地 source pump 当网络实现", "先做临时 Home 的协议/队列行为测试，再做双主机 loopback 故障测试与 pnpm check；云端真实网络与迁移留给后续卡；验收矩阵见 .tasks/verification/assistant-next-stage-acceptance.md"]
     escalation_conditions: ["若来源不能形成可授权的独立快照，先收紧上传范围与内容契约，不复制整份 Work 数据库", "若撤回无法端到端收敛，阻断云端迁移而非容忍旧内容继续读取"]
     result:
       owner: null
@@ -2434,7 +2434,7 @@ tasks:
       in: ["无 Electron 的 Linux x64 Runtime/Assistant Worker 宿主和服务生命周期", "远程桌面认证、会话/状态订阅、来源同步接入及断线重连", "本地到云端的停写快照、备份/恢复、渠道配对与投递状态转移流程"]
       out: ["飞书、微信、钉钉接入", "企业多租户与公开部署服务", "自动抢主或双活写入"]
     constraints: ["同一时间只允许一个权威助理写入者；云端接管前本地停写并核对快照，失败时可回退且不能让企微两个连接同时消费", "凭据只在目标宿主单独配置；桌面与企微共享记忆但聊天 Session 独立；服务最小暴露且不占用 jump 现有 80/443 服务", "先以隔离合成数据部署；目标机 glibc 2.32、约 1.8 GiB RAM，需在实机验证 Linux x64 制品兼容与资源上限"]
-    forbidden: ["直接把真实 ~/.yuanpu 或企微密钥复制到云机当作部署方案", "本地与云端同时启动可写助理 Home", "界面断开就误判云端任务取消或盲目重放外部发送"]
+    forbidden: ["直接把真实 ~/.mindlink 或企微密钥复制到云机当作部署方案", "本地与云端同时启动可写助理 Home", "界面断开就误判云端任务取消或盲目重放外部发送"]
     acceptance:
       - type: assertion
         expect: "合成账号在 jump 上启动权威 Worker，关闭本地桌面后云端整理/调度仍受宿主策略运行；重开桌面后同一会话/记忆/队列状态可见，错误设备和会话访问被拒绝"
@@ -2541,7 +2541,7 @@ tasks:
     dependencies: ["TASK-050"]
     risk_level: L3
     recommended_model: "gpt-6 sol"
-    investigation_hints: ["入口 packages/yuanpu-assistant/src/executor.ts、来源/记忆/工作审阅/建议模块及 apps/runtime/test 的真实 Worker/Pi 探针；packages/evals/README.md 和 scripts/verification/jev-evidence-review.mjs 仅借鉴离线案例/证据方法", "先确定固定案例与盲测标签，再实现临时 Home/虚拟时钟回放；先跑最近行为测试、脚本自身检验及 pnpm check，真实模型不入普通 CI"]
+    investigation_hints: ["入口 packages/mindlink-assistant/src/executor.ts、来源/记忆/工作审阅/建议模块及 apps/runtime/test 的真实 Worker/Pi 探针；packages/evals/README.md 和 scripts/verification/jev-evidence-review.mjs 仅借鉴离线案例/证据方法", "先确定固定案例与盲测标签，再实现临时 Home/虚拟时钟回放；先跑最近行为测试、脚本自身检验及 pnpm check，真实模型不入普通 CI"]
     escalation_conditions: ["私有语料缺少使用授权则只用合成数据并标明外部效度限制", "如果评分受模型版本/上下文变化影响，保留原始分组结果，不用单个均值掩盖"]
     result:
       owner: null
@@ -2590,7 +2590,7 @@ tasks:
     scope:
       in: ["pi/index.ts 会话订阅捕获 edit/write 工具执行前后文件内容（提取可测纯函数），随 run 归档", "persistence 新迁移建 yp_work_file_changes 表与幂等读写（before/after ≤256KB 截断 + sha256）", "GET /v1/work/file-changes 路由：scope=last-run|conversation，同文件多编辑合并为首 before+末 after 重算 unified patch 与统计", "protocol 类型 + DesktopBridge + runtime-manager/main/preload 接线", "渲染端审查 tab：chat.tsx/file-tabs/review-panel（复用 @pierre/diffs PatchDiff 与 .file-diff-stats）/图标/CSS token 化，run 终态自动刷新", "store/捕获合并/路由 scope 的单测或 loopback 测试"]
       out: ["bash/shell 间接文件修改与子代理（subagent）会话的捕获（记录为已知边界）", "git 依赖、分支对比、逐 hunk 暂存/撤销", "SSE 推送（沿用 run 终态轮询拉取）", "assistant surface 的审查入口", "修改 Pi 上游镜像；覆盖已有未提交改动"]
-    constraints: ["捕获只经 yuanpu 侧 session.subscribe 与自读文件；before=after 或工具报错不记录；捕获/读取失败不中断会话执行", "路径含界校验：工作目录外的目标不捕获；下发仅工作区相对路径，renderer 不持绝对路径", "大文件（>256KB）截断加标记，前端显示占位而非 patch", "样式只用已声明 --yp-* token（theme-contract 保持通过）；审查 tab 仅 work surface 出现", "完成需集成并在 main 验证；本轮不推送"]
+    constraints: ["捕获只经 mindlink 侧 session.subscribe 与自读文件；before=after 或工具报错不记录；捕获/读取失败不中断会话执行", "路径含界校验：工作目录外的目标不捕获；下发仅工作区相对路径，renderer 不持绝对路径", "大文件（>256KB）截断加标记，前端显示占位而非 patch", "样式只用已声明 --yp-* token（theme-contract 保持通过）；审查 tab 仅 work surface 出现", "完成需集成并在 main 验证；本轮不推送"]
     forbidden: ["把 bash 或子代理修改冒充为已捕获范围", "在 renderer 或持久层暴露绝对路径", "新增第二套文件变更持久化或双写", "将构建成功当作 UI 验收通过"]
     acceptance:
       - type: assertion
@@ -2602,13 +2602,13 @@ tasks:
       - type: assertion
         expect: "单测覆盖 store 幂等/游标/截断、捕获合并纯函数、路由 scope 行为；捕获失败不影响会话运行"
       - type: command
-        run: "pnpm --filter @yuanpu-agent/app test"
+        run: "pnpm --filter @mindlink-agent/app test"
       - type: command
         run: "pnpm check"
     dependencies: []
     risk_level: "L3"
     recommended_model: "glm-5.3"
-    investigation_hints: ["捕获点 packages/yuanpu-runtime/src/pi/index.ts 的 session.subscribe（现约 462-496，闭包持 runId/conversationId/workspaceId/cwd）；edit 的 details.patch 仅作参考，主链为自读 before/after；write 后内容可用 args.content 兜底", "持久化范式 work-evidence-store.ts（BEGIN IMMEDIATE + INSERT OR IGNORE + sourcePage 游标）；迁移追加于 persistence/index.ts（当前 v15，TASK-054 已 done；若版本被占顺延并在 evidence 记录）", "diff 依赖：lockfile 已含 diff@8.0.4（coding-agent 在用），yuanpu-runtime 声明同版本即 store 命中零网络；备选内置 LCS unified-diff（参照渲染端 viewer/preview/text-diff.ts）", "渲染端现成件：viewer/preview/file-diff-view.tsx 的 PatchDiff、text-diff.ts countDiffChanges、.file-diff-stats 样式；tab 机制 viewer/files/file-tabs.tsx FileTab union + chat.tsx activityTab（约 L179）+ runContent 宿主 prop 模式；图标 app-icon.tsx 三处", "run 归属锚点：agent-runtime.ts registerWorkWriteArtifact 先例（约 88-100）；「上一轮」由渲染端传最近 run 的 runId（路由 runId 缺省即本会话聚合；实施时以此为准，替代先前的 runtime 解析设想）", "测试范式：node:test + tsx register（apps/app/test/panel-resize.test.mjs）；apps/runtime/test/runtime.test.mjs 被主工作区增量占用时新建独立测试文件；浏览器验收可 addInitScript 注入 window.yuanpu 桩 + fixture patch 截图", "主工作区未提交增量与 chat.tsx、runtime.test.mjs 等有交集：worktree 基于提交态实施，集成按 stash→merge→pop 融合并保持对方增量未提交；complete 前先 stash 他人 WIP 防横扫"]
+    investigation_hints: ["捕获点 packages/mindlink-runtime/src/pi/index.ts 的 session.subscribe（现约 462-496，闭包持 runId/conversationId/workspaceId/cwd）；edit 的 details.patch 仅作参考，主链为自读 before/after；write 后内容可用 args.content 兜底", "持久化范式 work-evidence-store.ts（BEGIN IMMEDIATE + INSERT OR IGNORE + sourcePage 游标）；迁移追加于 persistence/index.ts（当前 v15，TASK-054 已 done；若版本被占顺延并在 evidence 记录）", "diff 依赖：lockfile 已含 diff@8.0.4（coding-agent 在用），mindlink-runtime 声明同版本即 store 命中零网络；备选内置 LCS unified-diff（参照渲染端 viewer/preview/text-diff.ts）", "渲染端现成件：viewer/preview/file-diff-view.tsx 的 PatchDiff、text-diff.ts countDiffChanges、.file-diff-stats 样式；tab 机制 viewer/files/file-tabs.tsx FileTab union + chat.tsx activityTab（约 L179）+ runContent 宿主 prop 模式；图标 app-icon.tsx 三处", "run 归属锚点：agent-runtime.ts registerWorkWriteArtifact 先例（约 88-100）；「上一轮」由渲染端传最近 run 的 runId（路由 runId 缺省即本会话聚合；实施时以此为准，替代先前的 runtime 解析设想）", "测试范式：node:test + tsx register（apps/app/test/panel-resize.test.mjs）；apps/runtime/test/runtime.test.mjs 被主工作区增量占用时新建独立测试文件；浏览器验收可 addInitScript 注入 window.mindlink 桩 + fixture patch 截图", "主工作区未提交增量与 chat.tsx、runtime.test.mjs 等有交集：worktree 基于提交态实施，集成按 stash→merge→pop 融合并保持对方增量未提交；complete 前先 stash 他人 WIP 防横扫"]
     escalation_conditions: ["如迁移版本号与并行任务冲突且无法顺延解决，停止并报告，不重写既有迁移", "如 PatchDiff 在审查面板约束下不可用（性能/主题），记录证据并降级为自绘行式 diff 后完成其余验收", "如捕获必须修改 Pi 上游才能实现，停止报告，不修改镜像"]
     result:
       owner: "zcode-reviewtab-20260927-32374"

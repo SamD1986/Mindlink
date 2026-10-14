@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 
-import { PROTOCOL_VERSION } from '@yuanpu-agent/protocol';
+import { PROTOCOL_VERSION } from '@mindlink-agent/protocol';
 import { RuntimeUpdater } from '../dist/runtime-updater.cjs';
 
 const execFileAsync = promisify(execFile);
@@ -17,13 +17,13 @@ const suffix = process.platform === 'win32' ? '.exe' : '';
 const sourceExecutable = resolve(
   desktopRoot,
   '../runtime/dist-native/bin',
-  `YuanpuAgentRuntime-${target}${suffix}`,
+  `MindLinkRuntime-${target}${suffix}`,
 );
 const executable = await readFile(sourceExecutable);
 const { stdout } = await execFileAsync(sourceExecutable, ['--version'], { timeout: 10_000 });
 const version = stdout.trim().replace(/^v/, '');
 const sha256 = createHash('sha256').update(executable).digest('hex');
-const runtimeRoot = await mkdtemp(resolve(tmpdir(), 'yuanpu-sea-update-'));
+const runtimeRoot = await mkdtemp(resolve(tmpdir(), 'mindlink-sea-update-'));
 let server;
 
 try {
@@ -44,7 +44,7 @@ try {
         version,
         platforms: {
           [target]: {
-            filename: `YuanpuAgentRuntime-${target}${suffix}`,
+            filename: `MindLinkRuntime-${target}${suffix}`,
             url: `${baseUrl}/runtime`,
             size: executable.byteLength,
             sha256,

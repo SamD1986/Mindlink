@@ -16,11 +16,11 @@
 
 | 入口 | 现状与缺口 |
 | --- | --- |
-| `packages/yuanpu-runtime/src/capabilities/index.ts` | 有 CapabilitySource 与两个元工具；并行发现使用 Promise.all，单源失败会连带失败；审批只判断 token 非空 |
-| `packages/yuanpu-runtime/src/capabilities/contracts.ts` | Schema 与结果表达较窄；没有完整 MCP 内容块、取消和宿主授权契约 |
-| `packages/yuanpu-runtime/src/pi/index.ts` | Pi 保留 read/write/edit/bash，并加载可信扩展；工具结果转为 JSON 文本 |
+| `packages/mindlink-runtime/src/capabilities/index.ts` | 有 CapabilitySource 与两个元工具；并行发现使用 Promise.all，单源失败会连带失败；审批只判断 token 非空 |
+| `packages/mindlink-runtime/src/capabilities/contracts.ts` | Schema 与结果表达较窄；没有完整 MCP 内容块、取消和宿主授权契约 |
+| `packages/mindlink-runtime/src/pi/index.ts` | Pi 保留 read/write/edit/bash，并加载可信扩展；工具结果转为 JSON 文本 |
 | `apps/runtime/src/index.ts` | 已支持通过显式环境配置装配受管 Python MCP source；生产制品路径由分发任务接管 |
-| `packages/yuanpu-runtime/src/packages/index.ts` | npm/Git 安装与 Pi settings 同步；不能把 Python 包目录直接加入 Pi extensions |
+| `packages/mindlink-runtime/src/packages/index.ts` | npm/Git 安装与 Pi settings 同步；不能把 Python 包目录直接加入 Pi extensions |
 | `server/src/catalog.ts`、`server/src/index.ts` | 静态目录搜索/详情，不是完整二进制制品发布服务 |
 | `apps/desktop/src/runtime-manager.ts` | SEA 独立更新已有校验、暂存和版本切换路径；此次保留现有存储位置 |
 
@@ -28,27 +28,27 @@
 
 ```text
 Electron / React ──认证的 Runtime API── Node SEA
-                                         ├── Pi + Yuanpu 适配
+                                         ├── Pi + MindLink 适配
                                          │     └── search_capabilities / execute_capability
                                          └── 能力注册表（进程内）
                                                ├── 内置 TS source
                                                └── MCP client ──stdio── Python 能力包进程
 ```
 
-Yuanpu 的两个工具是代理接口，不要求再起一层网络 MCP Server。Python 标准接入采用 MCP stdio，避免为每个插件另设计 HTTP API；既有 HTTP 服务可由一个 source 适配，不能再套多个 MCP 转发层。首版不实现通用远程连接器。
+MindLink 的两个工具是代理接口，不要求再起一层网络 MCP Server。Python 标准接入采用 MCP stdio，避免为每个插件另设计 HTTP API；既有 HTTP 服务可由一个 source 适配，不能再套多个 MCP 转发层。首版不实现通用远程连接器。
 
 | 位置 | 职责 |
 | --- | --- |
 | `apps/app` | 技能安装/运行状态和宿主审批交互，不持有进程控制权 |
 | `apps/desktop` | 窄 IPC、可信窗口校验、装配预装制品；维持 SEA 更新机制 |
 | `apps/runtime` | 组合服务、API 生命周期，不承载具体插件实现 |
-| `packages/yuanpu-runtime/src/capabilities` | source、MCP client、进程管理、路由、授权与执行 |
-| `packages/yuanpu-runtime/src/packages` | 制品下载、验证、安装状态、切换/回滚与包类型分流 |
-| `packages/yuanpu-protocol` | 跨 renderer/desktop/runtime DTO；不向前端泄漏运行时实现 |
+| `packages/mindlink-runtime/src/capabilities` | source、MCP client、进程管理、路由、授权与执行 |
+| `packages/mindlink-runtime/src/packages` | 制品下载、验证、安装状态、切换/回滚与包类型分流 |
+| `packages/mindlink-protocol` | 跨 renderer/desktop/runtime DTO；不向前端泄漏运行时实现 |
 | `apps/python-capabilities` | 官方 Python echo MCP 示例的源码、`uv.lock` 与构建配置；它是独立能力进程，不是共享 Python 守护进程 |
 | `server` | 能力包目录、不可变版本元数据；文件由受控对象存储/CDN 提供 |
 
-不增加 yuanpu-* workspace 包，不改任何 Pi 上游包，不修改兄弟 kimi-code/openwork/pi 仓库。
+不增加 mindlink-* workspace 包，不改任何 Pi 上游包，不修改兄弟 kimi-code/openwork/pi 仓库。
 
 ## 能力契约与授权
 
@@ -62,7 +62,7 @@ Yuanpu 的两个工具是代理接口，不要求再起一层网络 MCP Server�
 
 模型只能收到 needs_approval/requestId，不能通过任意非空 approvalToken 获权。`approvalRequestId` 只是宿主待审批记录的引用，不携带权限。用户经可信 Electron 界面确认；Electron 用仅存在于主进程内的临时 Ed25519 私钥签署决定，Runtime 只持有公钥并校验请求、决定、时间和 nonce。普通 Runtime bearer 不具备批准权，也不通过 argv/env 传递。宿主授权记录一次消费，并在参数变化、版本切换、取消、会话结束或超时后失效。重复批准/重放不能重复执行。无界面/headless 时需审批操作默认拒绝。许可必须先持久/原子消费，再派发；崩溃后不自动重做可能产生副作用的操作。
 
-安全边界仅覆盖 Yuanpu 管理的能力调用。Pi 的 bash/文件工具和可信进程内扩展并未被沙箱限制；它们不能被描述为已受到统一网关强制约束。审批接口不暴露为 Pi 工具；认证 IPC 和防重放不等于对任意本机恶意代码的隔离。
+安全边界仅覆盖 MindLink 管理的能力调用。Pi 的 bash/文件工具和可信进程内扩展并未被沙箱限制；它们不能被描述为已受到统一网关强制约束。审批接口不暴露为 Pi 工具；认证 IPC 和防重放不等于对任意本机恶意代码的隔离。
 
 ## 进程与故障隔离
 
@@ -72,7 +72,7 @@ Python 包按需启动，复用一个受管进程；stdio stdout 仅承载协议
 
 MCP `ToolAnnotations` 只是未受信提示，不能降低风险等级。未知工具默认 R2；只有宿主随已验证能力包提供的风险策略才能把特定工具降为 R0/R1。执行前重新发现当前定义，避免永久使用陈旧 schema 或撤销前状态。SDK 会补入少量基础用户环境变量，因此宿主把 HOME、USERPROFILE、APPDATA 与 LOCALAPPDATA 覆盖到能力私有目录；这用于阻断对用户凭据目录的默认发现，不构成操作系统沙箱。
 
-开发与 CI 先执行 `uv sync --frozen --project apps/python-capabilities`，再设置 `YUANPU_PYTHON_MCP_EXECUTABLE`、`YUANPU_PYTHON_MCP_ROOT` 并运行 `YuanpuAgentRuntime --capability-smoke`。该入口实际依次调用唯一公开的 `search_capabilities`、`execute_capability`，验证 SEA、Node MCP client 和 Python FastMCP 的完整链路，同时断言结构化成功结果与 MCP `isError` 错误保真；它不绕过能力注册表，也不需要模型 API。
+开发与 CI 先执行 `uv sync --frozen --project apps/python-capabilities`，再设置 `MINDLINK_PYTHON_MCP_EXECUTABLE`、`MINDLINK_PYTHON_MCP_ROOT` 并运行 `MindLinkRuntime --capability-smoke`。该入口实际依次调用唯一公开的 `search_capabilities`、`execute_capability`，验证 SEA、Node MCP client 和 Python FastMCP 的完整链路，同时断言结构化成功结果与 MCP `isError` 错误保真；它不绕过能力注册表，也不需要模型 API。
 
 初始化、发现、调用均有独立超时与取消；发现采用逐源容错，返回可用结果和故障摘要，缓存有界且更新/停用会失效。工具重名不覆盖。进程崩溃只影响对应 source；重启有预算和退避，停用/卸载/Runtime 退出清理进程树。取消失败的操作标记结果未知，不自动重试可能有副作用的调用。
 
@@ -82,7 +82,7 @@ MCP `ToolAnnotations` 只是未受信提示，不能降低风险等级。未知�
 
 包元数据必须包含 kind、包 ID/版本、接口版本、Runtime 兼容范围、OS/架构/必要系统基线、归档格式、URL、字节数、SHA-256、入口相对路径、配置 schema、权限声明。制品自带所有首调必需依赖；模型/OCR 数据等若非随包携带，必须作为同版本锁定的受控资源显式展示和校验。
 
-在 `~/.yuanpu/packages/` 内为进程外制品增设 `artifacts/<safe-id>/<version>/<target>/`，复用 `.staging/`、`config/` 和 `state.json` 的边界；包 ID 转为安全目录标识并检查最终路径。旧 npm 安装布局保持。凭据不放入制品/市场元数据或日志，复用宿主受控配置传递。SEA 更新继续位于 Electron `userData/runtime`，不迁移到此目录。
+在 `~/.mindlink/packages/` 内为进程外制品增设 `artifacts/<safe-id>/<version>/<target>/`，复用 `.staging/`、`config/` 和 `state.json` 的边界；包 ID 转为安全目录标识并检查最终路径。旧 npm 安装布局保持。凭据不放入制品/市场元数据或日志，复用宿主受控配置传递。SEA 更新继续位于 Electron `userData/runtime`，不迁移到此目录。
 
 生命周期：下载 → 限额解包 → 完整性/真实性/兼容校验 → 隔离健康检查 → 安装为不可变目录 → 原子切换活动版本 → 下一次调用使用新版本。并发安装需跨进程协调；旧版本在调用排空或超时终止前不能删除，Windows 不原地覆盖运行中的文件。切换失败保留旧版本和配置，支持崩溃恢复。卸载默认保留用户配置，清理配置是独立显式动作。
 
@@ -92,7 +92,7 @@ SHA-256 只保证与元数据一致，不证明来源。生产安装使用可信
 
 ## 兼容与界面流程
 
-既有 Pi 包继续原加载路径；python-mcp 包只注册为 capability source，不写入 Pi extensions。旧 pi-mcp-adapter 保留为可信扩展，不自动卸载或修改其配置；若同一连接还要迁入 Yuanpu，展示冲突并由用户选择唯一托管方，确认前不重复注册。
+既有 Pi 包继续原加载路径；python-mcp 包只注册为 capability source，不写入 Pi extensions。旧 pi-mcp-adapter 保留为可信扩展，不自动卸载或修改其配置；若同一连接还要迁入 MindLink，展示冲突并由用户选择唯一托管方，确认前不重复注册。
 
 界面沿用“技能市场/本地技能”，详情展示来源、权限、平台和运行状态。新安装需要用户信任确认；更新可在详情中触发，失败显示仍在用的版本及重试动作。敏感调用在对话中进入“待确认”，显示能力、目标、参数摘要和允许一次/拒绝；拒绝回到对话，不陷入自动反复申请。
 

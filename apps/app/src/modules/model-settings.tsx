@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CustomModelSettings, CustomProviderSettings, ModelApi, ModelCatalog, ModelSettings, SaveModelSettingsInput } from '@yuanpu-agent/protocol';
+import type { CustomModelSettings, CustomProviderSettings, ModelApi, ModelCatalog, ModelSettings, SaveModelSettingsInput } from '@mindlink-agent/protocol';
 import deepseekIcon from '../assets/provider-icons/model-provider-deepseek.png';
 import kimiIcon from '../assets/provider-icons/model-provider-moonshot-kimi.png';
 import minimaxIcon from '../assets/provider-icons/model-provider-minimax.png';
@@ -19,10 +19,10 @@ function formatError(error: unknown): string {
 }
 
 function loadCatalog(provider?: string) {
-  if (typeof window.yuanpu?.getModelCatalog !== 'function') {
+  if (typeof window.mindlink?.getModelCatalog !== 'function') {
     throw new Error('桌面应用需要重新启动，才能加载模型列表。');
   }
-  return window.yuanpu.getModelCatalog(provider);
+  return window.mindlink.getModelCatalog(provider);
 }
 
 function ModelEditor({ editor, onClose, onSaved }: {
@@ -44,7 +44,7 @@ function ModelEditor({ editor, onClose, onSaved }: {
   const [reasoning, setReasoning] = useState(item?.reasoning ?? false);
   const [thinkingMap, setThinkingMap] = useState(item?.thinkingLevelMap ? JSON.stringify(item.thinkingLevelMap, null, 2) : '');
   const [validationError, setValidationError] = useState('');
-  const save = useMutation({ mutationFn: (input: SaveModelSettingsInput) => window.yuanpu!.saveModelSettings(input),
+  const save = useMutation({ mutationFn: (input: SaveModelSettingsInput) => window.mindlink!.saveModelSettings(input),
     onSuccess: (result, input) => onSaved(result, input.provider),
   });
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -209,17 +209,17 @@ function ProviderDetails({ provider, settings, onSettings, onEdit, onError, onNo
   const [removeApiKey, setRemoveApiKey] = useState(false);
   const [search, setSearch] = useState('');
   const [showKey, setShowKey] = useState(false);
-  const saveProvider = useMutation({ mutationFn: (input: SaveModelSettingsInput) => window.yuanpu!.saveModelSettings(input),
+  const saveProvider = useMutation({ mutationFn: (input: SaveModelSettingsInput) => window.mindlink!.saveModelSettings(input),
     onSuccess: (result) => { onSettings(result); setApiKey(''); setRemoveApiKey(false); onError(''); onNotice('供应商配置已保存'); },
     onError: (error) => onError(formatError(error)),
   });
-  const activate = useMutation({ mutationFn: (item: typeof models[number]) => window.yuanpu!.saveModelSettings({
+  const activate = useMutation({ mutationFn: (item: typeof models[number]) => window.mindlink!.saveModelSettings({
     provider, model: item.model, baseUrl: isCustom ? baseUrl : '', api: isCustom ? api : item.api as ModelApi,
     apiKeyEnv: isCustom ? customProvider?.apiKeyEnv ?? '' : '',
   }), onSuccess: (result) => { onSettings(result); onError(''); onNotice('已切换，下一条消息生效'); },
     onError: (error) => onError(formatError(error)),
   });
-  const remove = useMutation({ mutationFn: (item: CustomModelSettings) => window.yuanpu!.deleteModelSettings(provider, item.model),
+  const remove = useMutation({ mutationFn: (item: CustomModelSettings) => window.mindlink!.deleteModelSettings(provider, item.model),
     onSuccess: (result) => { onSettings(result); onError(''); onNotice('模型已删除'); },
     onError: (error) => onError(formatError(error)),
   });
@@ -275,7 +275,7 @@ function ProviderDetails({ provider, settings, onSettings, onEdit, onError, onNo
 }
 
 export function ModelSettingsPanel({ active }: { active: boolean }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const client = useQueryClient();
   const query = useQuery({ queryKey: ['settings', 'models'], queryFn: () => desktop!.getModelSettings(), enabled: active && Boolean(desktop) });
   const catalog = useQuery({ queryKey: ['settings', 'model-catalog', 'providers'], queryFn: () => loadCatalog(), enabled: active && Boolean(desktop) });

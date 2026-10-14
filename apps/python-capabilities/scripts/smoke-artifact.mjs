@@ -9,10 +9,10 @@ const executable = join(
   root,
   'dist-artifact',
   'bundle',
-  'YuanpuEchoMcp',
-  process.platform === 'win32' ? 'YuanpuEchoMcp.exe' : 'YuanpuEchoMcp',
+  'MindlinkEchoMcp',
+  process.platform === 'win32' ? 'MindlinkEchoMcp.exe' : 'MindlinkEchoMcp',
 );
-const isolatedPath = await mkdtemp(join(tmpdir(), 'yuanpu-no-python-'));
+const isolatedPath = await mkdtemp(join(tmpdir(), 'mindlink-no-python-'));
 try {
   const result = execFileSync(executable, ['--version'], {
     encoding: 'utf8',

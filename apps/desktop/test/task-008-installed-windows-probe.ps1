@@ -1,21 +1,21 @@
 param(
-  [string]$InstallRoot = (Join-Path $env:LOCALAPPDATA 'Programs\@yuanpu-agentdesktop'),
+  [string]$InstallRoot = (Join-Path $env:LOCALAPPDATA 'Programs\@mindlinkdesktop'),
   [int]$TimeoutSeconds = 120
 )
 
 $ErrorActionPreference = 'Stop'
 $resources = Join-Path $InstallRoot 'resources'
-$runtime = Join-Path $resources 'runtime\YuanpuAgentRuntime-win32-x64.exe'
-$capabilityRoot = Join-Path $resources 'capabilities\builtin.python.echo\YuanpuEchoMcp'
-$capability = Join-Path $capabilityRoot 'YuanpuEchoMcp.exe'
+$runtime = Join-Path $resources 'runtime\MindLinkRuntime-win32-x64.exe'
+$capabilityRoot = Join-Path $resources 'capabilities\builtin.python.echo\MindlinkEchoMcp'
+$capability = Join-Path $capabilityRoot 'MindlinkEchoMcp.exe'
 foreach ($file in @($runtime, $capability)) {
   if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
     throw "Required installed file is missing: $file"
   }
 }
 
-# Use a fresh process environment; do not read the user's Yuanpu configuration.
-$probeRoot = Join-Path ([IO.Path]::GetTempPath()) ('yuanpu-task008-' + [guid]::NewGuid().ToString('N'))
+# Use a fresh process environment; do not read the user's MindLink configuration.
+$probeRoot = Join-Path ([IO.Path]::GetTempPath()) ('mindlink-task008-' + [guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($probeRoot) | Out-Null
 $start = New-Object System.Diagnostics.ProcessStartInfo
 $start.FileName = $runtime
@@ -31,10 +31,10 @@ foreach ($name in @('SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP')) {
   if ($value) { $start.EnvironmentVariables[$name] = $value }
 }
 $start.EnvironmentVariables['PATH'] = Join-Path $env:SYSTEMROOT 'System32'
-$start.EnvironmentVariables['YUANPU_HOME'] = Join-Path $probeRoot 'home'
-$start.EnvironmentVariables['YUANPU_PYTHON_MCP_EXECUTABLE'] = $capability
-$start.EnvironmentVariables['YUANPU_PYTHON_MCP_ROOT'] = $capabilityRoot
-$start.EnvironmentVariables['YUANPU_PYTHON_MCP_ARGS'] = '[]'
+$start.EnvironmentVariables['MINDLINK_HOME'] = Join-Path $probeRoot 'home'
+$start.EnvironmentVariables['MINDLINK_PYTHON_MCP_EXECUTABLE'] = $capability
+$start.EnvironmentVariables['MINDLINK_PYTHON_MCP_ROOT'] = $capabilityRoot
+$start.EnvironmentVariables['MINDLINK_PYTHON_MCP_ARGS'] = '[]'
 $process = New-Object System.Diagnostics.Process
 $process.StartInfo = $start
 $watch = [Diagnostics.Stopwatch]::StartNew()
@@ -55,7 +55,7 @@ try {
   if (($result.tools -join ',') -ne 'search_capabilities,execute_capability') {
     throw 'Runtime did not expose the expected capability tools.'
   }
-  if ($result.result.structuredContent.text -ne 'YuanpuAgent SEA' -or $result.result.structuredContent.length -ne 15) {
+  if ($result.result.structuredContent.text -ne 'MindLink SEA' -or $result.result.structuredContent.length -ne 15) {
     throw 'Frozen Python capability returned an unexpected result.'
   }
   if ($result.errorResult.isError -ne $true -or $result.errorResult.content[0].text -notmatch 'diagnostic error') {

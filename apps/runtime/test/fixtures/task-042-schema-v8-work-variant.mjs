@@ -5,16 +5,16 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import test from 'node:test';
 
-import { openYuanpuMetadataDatabase } from '@yuanpu-agent/runtime-kit';
+import { openMindlinkMetadataDatabase } from '@mindlink-agent/runtime-kit';
 
 test('a historical schema-v8 Work database gains the dedicated assistant tables without losing Work',
   async (t) => {
-    const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-042-v8-variant-'));
+    const root = await mkdtemp(join(tmpdir(), 'mindlink-task-042-v8-variant-'));
     t.after(() => rm(root, { recursive: true, force: true }));
     const path = join(root, 'automation.sqlite');
     // Start with every other synthetic migration table intact, then model the
     // already-v8 Work lineage that predates dedicated AssistantHost tables.
-    const baseline = openYuanpuMetadataDatabase(path);
+    const baseline = openMindlinkMetadataDatabase(path);
     baseline.close();
     const seed = new DatabaseSync(path);
     seed.exec(`
@@ -45,7 +45,7 @@ test('a historical schema-v8 Work database gains the dedicated assistant tables 
     assert.equal(columns.includes('workspace_id') && columns.includes('working_directory'), true);
     seed.close();
 
-    const metadata = openYuanpuMetadataDatabase(path);
+    const metadata = openMindlinkMetadataDatabase(path);
     t.after(() => metadata.close());
     const inspection = new DatabaseSync(path, { readOnly: true });
     t.after(() => inspection.close());

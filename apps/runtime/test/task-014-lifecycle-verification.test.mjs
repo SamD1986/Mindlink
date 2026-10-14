@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import test from 'node:test';
 
-import { AGENT_CONTRACT_VERSION } from '@yuanpu-agent/protocol';
+import { AGENT_CONTRACT_VERSION } from '@mindlink-agent/protocol';
 
 async function listen(server) {
   await new Promise((resolve, reject) => {
@@ -97,9 +97,9 @@ async function waitForExit(child) {
 }
 
 test('TASK-014 real Runtime API isolates concurrent Pi sessions and persists one run per idempotent request', async (context) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-014-runtime-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-task-014-runtime-'));
   context.after(() => rm(root, { recursive: true, force: true }));
-  const home = join(root, 'yuanpu-home');
+  const home = join(root, 'mindlink-home');
   const workspace = join(root, 'workspace');
   await mkdir(join(home, 'app'), { recursive: true });
   await mkdir(workspace, { recursive: true });
@@ -148,10 +148,10 @@ test('TASK-014 real Runtime API isolates concurrent Pi sessions and persists one
     stdio: ['pipe', 'pipe', 'pipe'],
     env: {
       ...process.env,
-      YUANPU_HOME: home,
+      MINDLINK_HOME: home,
       TASK_014_PROVIDER_KEY: 'fixture-only-secret',
-      YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '',
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '',
     },
   });
   context.after(() => child.kill('SIGKILL'));

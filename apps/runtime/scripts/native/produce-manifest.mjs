@@ -1,7 +1,7 @@
 import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { PROTOCOL_VERSION } from '@yuanpu-agent/protocol';
+import { PROTOCOL_VERSION } from '@mindlink-agent/protocol';
 
 import { sha256File } from './lib.mjs';
 
@@ -24,17 +24,17 @@ if (packageJson.version !== version) {
 }
 
 const files = (await readdir(inputDir)).filter(
-  (file) => /^YuanpuAgentRuntime-(linux|darwin|win32)-(x64|arm64)(\.exe)?$/.test(file),
+  (file) => /^MindLinkRuntime-(linux|darwin|win32)-(x64|arm64)(\.exe)?$/.test(file),
 );
 if (files.length === 0) throw new Error(`No native binaries found in ${inputDir}`);
 
 const platforms = {};
 for (const filename of files.sort()) {
-  const target = filename.replace(/^YuanpuAgentRuntime-/, '').replace(/\.exe$/, '');
+  const target = filename.replace(/^MindLinkRuntime-/, '').replace(/\.exe$/, '');
   const artifact = resolve(inputDir, filename);
   platforms[target] = {
     filename,
-    url: `https://github.com/linxinhong/yuanpu-agent/releases/download/${tag}/${filename}`,
+    url: `https://github.com/linxinhong/mindlink-agent/releases/download/${tag}/${filename}`,
     size: (await stat(artifact)).size,
     sha256: await sha256File(artifact),
   };

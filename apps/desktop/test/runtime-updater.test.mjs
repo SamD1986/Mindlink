@@ -9,7 +9,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { promisify } from 'node:util';
 import test from 'node:test';
 
-import { PROTOCOL_VERSION } from '@yuanpu-agent/protocol';
+import { PROTOCOL_VERSION } from '@mindlink-agent/protocol';
 import { RuntimeUpdater } from '../dist/runtime-updater.cjs';
 
 const execFileAsync = promisify(execFile);
@@ -17,7 +17,7 @@ const executableVersion = process.version.replace(/^v/, '');
 const target = `${process.platform}-${process.arch}`;
 
 async function temporaryRuntimeRoot(context) {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-runtime-update-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-runtime-update-'));
   context.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(root, { recursive: true });
   await writeFile(
@@ -192,9 +192,9 @@ test('rolls back an unconfirmed activation on the next App start without touchin
   const stagedName = process.platform === 'win32' ? 'runtime.exe' : 'runtime';
   const executable = await readFile(process.execPath);
   const sha256 = createHash('sha256').update(executable).digest('hex');
-  const yuanpuHome = join(root, 'yuanpu-home');
-  const userDatabase = join(yuanpuHome, 'workflows', 'automation.sqlite');
-  await mkdir(join(yuanpuHome, 'workflows'), { recursive: true });
+  const mindlinkHome = join(root, 'mindlink-home');
+  const userDatabase = join(mindlinkHome, 'workflows', 'automation.sqlite');
+  await mkdir(join(mindlinkHome, 'workflows'), { recursive: true });
   const database = new DatabaseSync(userDatabase);
   database.exec(`
     CREATE TABLE yp_schema_migrations (

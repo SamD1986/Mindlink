@@ -1,15 +1,15 @@
-# YuanpuAgent 总体架构
+# MindLink 总体架构
 
 更新：2026-09-22。本文记录本轮讨论收敛的目标架构，不代表相关模块已经实现。实现状态和验收记录仍以代码及 `.tasks/tasks.yaml` 为准。
 
 ## 1. 产品定位与确定的边界
 
-YuanpuAgent 是运行在用户电脑上的 Pi 工作助手。桌面对话、IM 消息和定时任务是同一个本机 Agent 的不同入口；模型请求使用用户配置的服务，文件操作与本机工具在用户电脑执行。
+MindLink 是运行在用户电脑上的 Pi 工作助手。桌面对话、IM 消息和定时任务是同一个本机 Agent 的不同入口；模型请求使用用户配置的服务，文件操作与本机工具在用户电脑执行。
 
 - 全部运行能力跟随 Electron App 生命周期。启动 App 后工作，退出 App 后停止；不安装独立后台服务，不提供 App 退出后的执行保证。
-- IM 用于远程操作本机 YuanpuAgent，不建设云端 Agent 或多租户执行平台。
-- 复用 `packages/yuanpu-runtime` 和 `packages/yuanpu-protocol`，保持 Pi 上游包不变。
-- 外部能力继续通过两个 Yuanpu MCP 元工具发现和调用；Python 保持独立能力进程。
+- IM 用于远程操作本机 MindLink，不建设云端 Agent 或多租户执行平台。
+- 复用 `packages/mindlink-runtime` 和 `packages/mindlink-protocol`，保持 Pi 上游包不变。
+- 外部能力继续通过两个 MindLink MCP 元工具发现和调用；Python 保持独立能力进程。
 - 用户侧沿用“技能”作为能力分发概念，连接账号和定时任务是使用技能的产品功能。
 - 根目录 `server/` 保持技能市场职责，不承担机器人执行和本机调度。
 
@@ -27,7 +27,7 @@ YuanpuAgent 是运行在用户电脑上的 Pi 工作助手。桌面对话、IM �
 | SEA 更新器支持暂存和下次启动切换 | 沿用升级路径，补充执行记录恢复与协议兼容性检查 |
 | 尚未实现本轮描述的 IM、持久调度和通知路由 | 分阶段实现，不将目录或设计声明作为可用证据 |
 
-证据入口：`apps/desktop/src/{main,runtime-manager,runtime-updater}.ts`、`apps/runtime/src/index.ts`、`packages/yuanpu-runtime/src/{pi,capabilities,config}/`、`apps/python-capabilities/src/yuanpu_echo_mcp/server.py`。
+证据入口：`apps/desktop/src/{main,runtime-manager,runtime-updater}.ts`、`apps/runtime/src/index.ts`、`packages/mindlink-runtime/src/{pi,capabilities,config}/`、`apps/python-capabilities/src/mindlink_echo_mcp/server.py`。
 
 检索：沿用本轮 scoped rg 与上述源码阅读证据；会话未提供可用 ZG 入口，未创建或修改索引。
 
@@ -41,7 +41,7 @@ Electron App（唯一生命周期管理者）
     ├── Channels ──────────── IM 入站消息
     ├── Scheduler ─────────── 到期任务
     ├── AgentService ←─────── 桌面对话
-    │   └── Pi 会话 → Pi 内置工具 / Yuanpu MCP 元工具
+    │   └── Pi 会话 → Pi 内置工具 / MindLink MCP 元工具
     ├── CapabilityHost ────── MCP / Python / 外部工具
     ├── Notifications ─────── 请求 Electron 展示通知
     └── 本机持久化 ────────── 计划、运行记录、去重、投递状态
@@ -59,18 +59,18 @@ apps/
 └── python-capabilities/        # 内置 Python MCP 能力
 
 packages/
-├── yuanpu-runtime/src/
+├── mindlink-runtime/src/
 │   ├── agent/                 # AgentService、会话映射、排队与取消
 │   ├── channels/              # 连接管理、身份映射、消息与投递
 │   │   └── adapters/          # 首批内置 IM 平台适配器
 │   ├── scheduler/             # 计划、时区、触发与漏跑策略
 │   ├── notifications/         # 通知请求、偏好、合并与去重
-│   ├── persistence/           # Yuanpu 运行状态及迁移
+│   ├── persistence/           # MindLink 运行状态及迁移
 │   ├── capabilities/          # 现有 MCP 与授权
 │   ├── packages/              # 现有能力包安装与配置
 │   ├── config/                # 现有配置和用户目录
 │   └── pi/                    # 现有 Pi 公开接口适配
-├── yuanpu-protocol/            # 桌面与 Runtime DTO、事件和版本契约
+├── mindlink-protocol/            # 桌面与 Runtime DTO、事件和版本契约
 └── …                          # Pi 上游包，按上游同步规则维护
 ```
 
@@ -94,7 +94,7 @@ AgentService 提供提交任务、订阅执行事件、查询记录、取消任�
 - 桌面可查看和继续 IM 会话；共享已有会话必须显式绑定。
 - 同一会话串行执行；跨会话设置并发上限及有界队列。
 - 定时任务默认独立会话，可显式关联既有会话。
-- Pi 管理对话内容；Yuanpu 保存外部会话到 Pi 会话的映射及任务记录，避免复制一套对话存储。
+- Pi 管理对话内容；MindLink 保存外部会话到 Pi 会话的映射及任务记录，避免复制一套对话存储。
 - 显式选择远程会话可用的工作区、工具和记忆范围；不把所有本机配置自动传入任何群聊。
 
 执行记录区分 queued、running、waiting_approval、succeeded、failed、cancelled、interrupted/result_unknown。重启只能恢复可证明安全的步骤；不承诺任意 Agent 执行的透明断点续跑。
@@ -146,7 +146,7 @@ Python 示例弹窗保持独立：弹窗是工具交互，Electron 系统通知�
 
 “完全访问”是否覆盖所有应用内逐次审批尚待产品决策；若保留高风险确认，名称必须体现真实范围。此模式不绕过操作系统权限。任务和已配对渠道明确绑定执行策略，不能把任何群成员自动视作本机所有者。
 
-MCP 审批仅覆盖 Yuanpu 能力入口。当前 Pi 内置 bash/read/write/edit 和直接加载的扩展需要纳入权限评估；扩展与 Runtime 同权限，不构成安全沙箱，不能将 MCP 审批宣称为全进程隔离。
+MCP 审批仅覆盖 MindLink 能力入口。当前 Pi 内置 bash/read/write/edit 和直接加载的扩展需要纳入权限评估；扩展与 Runtime 同权限，不构成安全沙箱，不能将 MCP 审批宣称为全进程隔离。
 
 后台执行遇到缺失权限时进入等待授权，并记录原因和到期策略；App 退出后重新打开需重新校验执行上下文与授权，不复用已消费的一次性授权。
 
@@ -155,7 +155,7 @@ MCP 审批仅覆盖 Yuanpu 能力入口。当前 Pi 内置 bash/read/write/edit 
 ## 11. 用户数据与升级
 
 ```text
-~/.yuanpu/
+~/.mindlink/
 ├── app/
 │   ├── config.json             # 全局与提醒偏好
 │   └── channels/               # 内置渠道配置及凭据引用
@@ -165,7 +165,7 @@ MCP 审批仅覆盖 Yuanpu 能力入口。当前 Pi 内置 bash/read/write/edit 
     └── automation.sqlite       # 计划、会话映射、运行记录、去重和投递
 ```
 
-数据库内部按模块分表，Yuanpu 业务状态由 Runtime 单进程写入。后续市场渠道的包配置使用已有 `packages/config` 规则，通过连接实例引用，避免重复保存。
+数据库内部按模块分表，MindLink 业务状态由 Runtime 单进程写入。后续市场渠道的包配置使用已有 `packages/config` 规则，通过连接实例引用，避免重复保存。
 
 保留 Electron 与 SEA 分别发布、SEA 下载校验暂存及下次 App 启动激活的机制。Electron 是唯一 Runtime 版本切换负责人；App 运行期间不热替换正在执行的 Runtime。
 

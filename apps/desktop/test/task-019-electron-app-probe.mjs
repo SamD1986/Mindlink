@@ -113,10 +113,10 @@ async function startApp(appRoot, rendererPort, home) {
   const child = spawn(electron, [`--remote-debugging-port=${port}`, appRoot], {
     env: {
       ...process.env,
-      YUANPU_HOME: home,
-      YUANPU_RENDERER_URL: `http://127.0.0.1:${rendererPort}/`,
-      YUANPU_NODE_BINARY: process.execPath,
-      YUANPU_NOTIFICATIONS_ENABLED: '0',
+      MINDLINK_HOME: home,
+      MINDLINK_RENDERER_URL: `http://127.0.0.1:${rendererPort}/`,
+      MINDLINK_NODE_BINARY: process.execPath,
+      MINDLINK_NOTIFICATIONS_ENABLED: '0',
       TASK_019_PROVIDER_KEY: 'fixture-only',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -131,7 +131,7 @@ async function startApp(appRoot, rendererPort, home) {
     const renderer = await connectRenderer(port);
     await eventually(async () => {
       try {
-        const info = await renderer.evaluate('window.yuanpu.runtimeInfo()');
+        const info = await renderer.evaluate('window.mindlink.runtimeInfo()');
         return info?.protocolVersion ? info : undefined;
       } catch {
         return undefined;
@@ -157,7 +157,7 @@ async function stopApp(child) {
   });
 }
 
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-019-electron-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-019-electron-'));
 const appRoot = join(root, 'apps', 'desktop');
 const home = join(root, 'home');
 const workspace = join(root, 'workspace');
@@ -182,7 +182,7 @@ try {
   await mkdir(dirname(join(root, 'apps', 'runtime', 'dist')), { recursive: true });
   await symlink(runtimeDist, join(root, 'apps', 'runtime', 'dist'), 'dir');
   await writeFile(join(appRoot, 'package.json'), JSON.stringify({
-    name: 'yuanpu-task-019-isolated-app', version: '0.1.0', main: 'entry.cjs',
+    name: 'mindlink-task-019-isolated-app', version: '0.1.0', main: 'entry.cjs',
   }));
   await writeFile(join(appRoot, 'entry.cjs'), `
     const { app } = require('electron');
@@ -206,7 +206,7 @@ try {
   apps.push(first);
   const firstRuntimePid = await eventually(() => childRuntimePid(first.child.pid), 'First App Runtime child missing.');
   runtimePids.add(firstRuntimePid);
-  await first.renderer.evaluate("window.__task019Chat = window.yuanpu.chat('hold fixture model response').catch(() => undefined); 'submitted'", false);
+  await first.renderer.evaluate("window.__task019Chat = window.mindlink.chat('hold fixture model response').catch(() => undefined); 'submitted'", false);
   const databasePath = join(home, 'workflows', 'automation.sqlite');
   const runId = await eventually(() => {
     try {
@@ -232,7 +232,7 @@ try {
   apps.push(second);
   const secondRuntimePid = await eventually(() => childRuntimePid(second.child.pid), 'Reopened App Runtime child missing.');
   runtimePids.add(secondRuntimePid);
-  const recovered = await second.renderer.evaluate(`window.yuanpu.getAgentRun(${JSON.stringify(runId)})`);
+  const recovered = await second.renderer.evaluate(`window.mindlink.getAgentRun(${JSON.stringify(runId)})`);
   assert.equal(recovered.runId, runId);
   assert.equal(recovered.status, 'result_unknown');
   assert.equal(providerRequests, 1);

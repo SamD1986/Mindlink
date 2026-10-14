@@ -19,10 +19,10 @@ jobs:
 
       - name: Refuse ephemeral release signing
         env:
-          YUANPU_ARTIFACT_SIGNING_KEY_BASE64: ${{ secrets.YUANPU_ARTIFACT_SIGNING_KEY_BASE64 }}
-          YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64: ${{ secrets.YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64 }}
-          YUANPU_ARTIFACT_SIGNING_KEY_ID: ${{ secrets.YUANPU_ARTIFACT_SIGNING_KEY_ID }}
-          YUANPU_ARTIFACT_BASE_URL: ${{ secrets.YUANPU_ARTIFACT_BASE_URL }}
+          MINDLINK_ARTIFACT_SIGNING_KEY_BASE64: ${{ secrets.MINDLINK_ARTIFACT_SIGNING_KEY_BASE64 }}
+          MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64: ${{ secrets.MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64 }}
+          MINDLINK_ARTIFACT_SIGNING_KEY_ID: ${{ secrets.MINDLINK_ARTIFACT_SIGNING_KEY_ID }}
+          MINDLINK_ARTIFACT_BASE_URL: ${{ secrets.MINDLINK_ARTIFACT_BASE_URL }}
         run: node apps/python-capabilities/scripts/verify-release-signing-env.mjs
 
   native-artifacts:
@@ -30,7 +30,7 @@ jobs:
     uses: ./.github/workflows/runtime-bundle.yml
     secrets: inherit
     with:
-      artifact-prefix: yuanpu-agent-native
+      artifact-prefix: mindlink-native
       retention-days: 7
 
   desktop-artifacts:
@@ -39,7 +39,7 @@ jobs:
     secrets: inherit
     with:
       artifact-mode: grouped
-      artifact-prefix: yuanpu-agent-desktop
+      artifact-prefix: mindlink-desktop
       retention-days: 7
 
   publish:
@@ -57,14 +57,14 @@ jobs:
       - name: Download native artifacts
         uses: actions/download-artifact@v8
         with:
-          pattern: yuanpu-agent-native-*
+          pattern: mindlink-native-*
           path: dist-release
           merge-multiple: true
 
       - name: Download desktop artifacts
         uses: actions/download-artifact@v8
         with:
-          pattern: yuanpu-agent-desktop-*
+          pattern: mindlink-desktop-*
           path: dist-release
           merge-multiple: true
 
@@ -75,9 +75,9 @@ jobs:
 
       - name: Produce signed Python capability manifest
         env:
-          YUANPU_ARTIFACT_SIGNING_KEY_BASE64: ${{ secrets.YUANPU_ARTIFACT_SIGNING_KEY_BASE64 }}
-          YUANPU_ARTIFACT_SIGNING_KEY_ID: ${{ secrets.YUANPU_ARTIFACT_SIGNING_KEY_ID }}
-          YUANPU_ARTIFACT_BASE_URL: ${{ secrets.YUANPU_ARTIFACT_BASE_URL }}
+          MINDLINK_ARTIFACT_SIGNING_KEY_BASE64: ${{ secrets.MINDLINK_ARTIFACT_SIGNING_KEY_BASE64 }}
+          MINDLINK_ARTIFACT_SIGNING_KEY_ID: ${{ secrets.MINDLINK_ARTIFACT_SIGNING_KEY_ID }}
+          MINDLINK_ARTIFACT_BASE_URL: ${{ secrets.MINDLINK_ARTIFACT_BASE_URL }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: node apps/python-capabilities/scripts/produce-release-manifest.mjs dist-release "$RELEASE_TAG"
 

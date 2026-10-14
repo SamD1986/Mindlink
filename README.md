@@ -1,4 +1,4 @@
-# Yuanpu Agent
+# MindLink
 
 Electron 图形界面与 Node.js SEA Runtime 解耦的 pnpm monorepo。工程组织参考 OpenWork，独立 Runtime 更新机制参考 Kimi Code。
 
@@ -7,10 +7,10 @@ Electron 图形界面与 Node.js SEA Runtime 解耦的 pnpm monorepo。工程组
 - `apps/app`：React/Vite renderer，只能访问 preload 暴露的窄接口。
 - `apps/desktop`：Electron main/preload，负责窗口、Runtime 生命周期与桌面端更新。
 - `apps/runtime`：Node SEA sidecar，承载 Agent 与本地服务，可以独立于桌面壳更新。
-- `server`：Yuanpu 技能市场目录服务，提供搜索与详情 API。
+- `server`：MindLink 技能市场目录服务，提供搜索与详情 API。
 - `packages/agent` 等：从 Pi 上游按固定 commit 同步的原样源码包。
-- `packages/yuanpu-protocol`：Renderer、Electron 和 Runtime 共用的协议版本与类型。
-- `packages/yuanpu-runtime`：Yuanpu 后端实现，包含配置、Pi 适配、能力注册表、MCP 与能力包管理。
+- `packages/mindlink-protocol`：Renderer、Electron 和 Runtime 共用的协议版本与类型。
+- `packages/mindlink-runtime`：MindLink 后端实现，包含配置、Pi 适配、能力注册表、MCP 与能力包管理。
 
 Electron 首次使用安装包中携带的 Runtime。独立更新会下载到 Electron `userData/runtime/.staging`，校验文件大小和 SHA-256，执行 `--version` 冒烟测试，并在下次启动时原子切换。Runtime API 只监听 `127.0.0.1` 的随机端口。
 
@@ -30,18 +30,18 @@ pnpm dev
 
 ## 本地 Agent 配置
 
-Runtime 使用 Node 的系统主目录解析创建跨平台配置根目录：macOS/Linux 为 `~/.yuanpu`，Windows 为 `%USERPROFILE%\\.yuanpu`。首次启动会创建以下边界：
+Runtime 使用 Node 的系统主目录解析创建跨平台配置根目录：macOS/Linux 为 `~/.mindlink`，Windows 为 `%USERPROFILE%\\.mindlink`。首次启动会创建以下边界：
 
-- `app/config.json`：Yuanpu 全局配置，包括当前模型的 `provider`、`model` 和可选的 `catalogUrl`。
+- `app/config.json`：MindLink 全局配置，包括当前模型的 `provider`、`model` 和可选的 `catalogUrl`。
 - `app/auth.json`：模型供应商的 API Key 与 OAuth 凭据，由设置界面写入。
 - `app/models.json`：按需创建，仅保存自定义模型和端点定义；内置模型由 Pi 模型目录提供。
 - `agent/`：Pi 会话、模型缓存、插件设置、记忆和本地技能。
 - `packages/`：从技能市场安装的能力包及其独立配置。
-- `workflows/`：Yuanpu 工作流数据。
+- `workflows/`：MindLink 工作流数据。
 
 默认模型也可从 `OPENAI_API_KEY` 环境变量读取密钥。请在设置界面的“模型”页面选择内置模型、填写 API Key，或添加自定义端点。`app/config.json` 只保存当前的 `provider` 和 `model`；密钥保存在 `app/auth.json`，自定义端点保存在 `app/models.json`。旧版 `agent/auth.json`、`agent/models.json` 和 `config.json` 中的模型端点字段会在启动时迁移。
 
-本地技能放在 `~/.yuanpu/agent/skills/<name>/SKILL.md`。技能市场安装的是可包含技能、专家角色、工作流、扩展或服务连接的“能力包”，普通用户只需要理解“技能”这一入口。
+本地技能放在 `~/.mindlink/agent/skills/<name>/SKILL.md`。技能市场安装的是可包含技能、专家角色、工作流、扩展或服务连接的“能力包”，普通用户只需要理解“技能”这一入口。
 
 ## 构建产物
 

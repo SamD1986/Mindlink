@@ -6,18 +6,18 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { register } from 'tsx/esm/api';
 register();
-const { openYuanpuMetadataDatabase } = await import('../../../packages/yuanpu-runtime/src/persistence/index.ts');
+const { openMindlinkMetadataDatabase } = await import('../../../packages/mindlink-runtime/src/persistence/index.ts');
 const { WorkDirectoryMoveCoordinator } = await import('../src/work-directory-move.ts');
 import { SessionManager } from '@earendil-works/pi-coding-agent';
 
 async function fixture(t) {
-  const root = await realpath(await mkdtemp(join(tmpdir(), 'yuanpu-move-')));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'mindlink-move-')));
   const workspaceRoot = join(root, 'workspace');
   const sessionsRoot = join(root, 'sessions');
   const toolStateRoot = join(root, 'tools');
   for (const directory of [workspaceRoot,sessionsRoot,toolStateRoot]) await mkdir(directory);
   const file = join(root,'metadata.sqlite');
-  let db = openYuanpuMetadataDatabase(file);
+  let db = openMindlinkMetadataDatabase(file);
   t.after(async () => { db.close(); await rm(root,{recursive:true,force:true}); });
   const scope = '/scope';
   const targetId = `folder:${randomUUID()}`;
@@ -36,7 +36,7 @@ async function fixture(t) {
   const options = () => ({store:db.workConversations,workspaceId:scope,workspaceRoot,sessionsRoot,toolStateRoot,
     verifySession(cwd, piId, expected) { assert.equal(SessionManager.findById(cwd,piId,sessionsRoot),expected); }});
   return { root,workspaceRoot,sessionsRoot,toolStateRoot,scope,id,pi,old,jsonl,targetId,targetPath,conversation,
-    get db(){return db;}, options, restart(){ db.close(); db=openYuanpuMetadataDatabase(file); },
+    get db(){return db;}, options, restart(){ db.close(); db=openMindlinkMetadataDatabase(file); },
     request:()=>({requestId:randomUUID(),kind:'conversation',id,targetFolderId:targetId}) };
 }
 
@@ -108,9 +108,9 @@ for(const phase of ['prepared','directory:0','header:0','committed','settled']) 
     const script=join(f.root,'crash.mjs');
     await writeFile(script,`
       import { register } from ${JSON.stringify(import.meta.resolve('tsx/esm/api'))}; register();
-      const {openYuanpuMetadataDatabase}=await import(${JSON.stringify(new URL('../../../packages/yuanpu-runtime/src/persistence/index.ts',import.meta.url).href)});
+      const {openMindlinkMetadataDatabase}=await import(${JSON.stringify(new URL('../../../packages/mindlink-runtime/src/persistence/index.ts',import.meta.url).href)});
       const {WorkDirectoryMoveCoordinator}=await import(${JSON.stringify(new URL('../src/work-directory-move.ts',import.meta.url).href)});
-      const db=openYuanpuMetadataDatabase(${JSON.stringify(join(f.root,'metadata.sqlite'))});
+      const db=openMindlinkMetadataDatabase(${JSON.stringify(join(f.root,'metadata.sqlite'))});
       await new WorkDirectoryMoveCoordinator({store:db.workConversations,workspaceId:${JSON.stringify(f.scope)},workspaceRoot:${JSON.stringify(f.workspaceRoot)},sessionsRoot:${JSON.stringify(f.sessionsRoot)},toolStateRoot:${JSON.stringify(f.toolStateRoot)},checkpoint(name){if(name===${JSON.stringify(phase)})process.kill(process.pid,'SIGKILL');}}).move(${JSON.stringify(request)});
     `);
     const child=spawnSync(process.execPath,[script],{encoding:'utf8',timeout:15_000});
@@ -205,8 +205,8 @@ test('rejects moving a five-level folder subtree below another folder',async t=>
 
 import { createServer } from 'node:http';
 const { RuntimeAgentExecutor } = await import('../src/agent-runtime.ts');
-import { PersistentAgentService, readYuanpuChatTranscript } from '@yuanpu-agent/runtime-kit';
-import { AGENT_CONTRACT_VERSION } from '@yuanpu-agent/protocol';
+import { PersistentAgentService, readMindlinkChatTranscript } from '@mindlink-agent/runtime-kit';
+import { AGENT_CONTRACT_VERSION } from '@mindlink-agent/protocol';
 const { readWorkspaceFile } = await import('../src/workspace-files.ts');
 
 test('pooled Pi session is drained before move and the next model tool writes at new cwd',async t=>{
@@ -241,7 +241,7 @@ test('pooled Pi session is drained before move and the next model tool writes at
   };
   try {
     const first=await submit('Write the first file.');
-    const beforeTranscript=readYuanpuChatTranscript(f.old,f.pi,f.sessionsRoot,100_000,true);
+    const beforeTranscript=readMindlinkChatTranscript(f.old,f.pi,f.sessionsRoot,100_000,true);
     f.db.workConversations.recordSavedTurns(f.id,beforeTranscript);
     const beforeSources=f.db.workConversations.sources(f.id);
     assert.equal(await readFile(join(f.old,'model-1.txt'),'utf8'),'written-1');
@@ -253,7 +253,7 @@ test('pooled Pi session is drained before move and the next model tool writes at
     assert.equal((await readWorkspaceFile(next,'model-3.txt')).content,'written-3');
     await assert.rejects(stat(f.old),{code:'ENOENT'});
     assert.equal(SessionManager.findById(next,f.pi,f.sessionsRoot),f.jsonl);
-    const afterTranscript=readYuanpuChatTranscript(next,f.pi,f.sessionsRoot,100_000,true);
+    const afterTranscript=readMindlinkChatTranscript(next,f.pi,f.sessionsRoot,100_000,true);
     assert.deepEqual(afterTranscript.slice(0,beforeTranscript.length),beforeTranscript);
     f.db.workConversations.recordSavedTurns(f.id,afterTranscript);
     assert.deepEqual(f.db.workConversations.sources(f.id).slice(0,beforeSources.length),beforeSources);

@@ -10,7 +10,7 @@ const { createManagedWorkspaceDirectory, removeUncommittedWorkspaceDirectory } =
   await import('../src/workspace-directory.ts');
 
 test('managed workspace rejects a linked root and removes only an empty pending leaf', async (context) => {
-  const base = await mkdtemp(join(tmpdir(), 'yuanpu-managed-directory-'));
+  const base = await mkdtemp(join(tmpdir(), 'mindlink-managed-directory-'));
   context.after(() => rm(base, { recursive: true, force: true }));
   const root = join(base, 'workspace');
   const linked = join(base, 'linked');

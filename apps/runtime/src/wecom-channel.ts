@@ -12,16 +12,16 @@ import {
   type ChannelStore,
   type ChannelTransport,
   type RedactedChannelLogSink,
-} from '@yuanpu-agent/runtime-kit';
+} from '@mindlink-agent/runtime-kit';
 import type {
   WecomConnectionConfigInput,
   WecomConnectionList,
   WecomConnectionSummary,
-} from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
 
 const execFileAsync = promisify(execFile);
 const digestPattern = /^[a-f0-9]{64}$/;
-const credentialRefPattern = /^keychain:yuanpu\/im\/[A-Za-z0-9._-]+\/bot-secret$/;
+const credentialRefPattern = /^keychain:mindlink\/im\/[A-Za-z0-9._-]+\/bot-secret$/;
 
 interface PersistedWecomConnection {
   enabled: boolean;
@@ -68,7 +68,7 @@ export function configuredWecomDocument(
         provider: 'wecom',
         connectionId: input.connectionId,
         providerAccountRef: input.botId!.trim(),
-        credentialRefs: { botSecret: `keychain:yuanpu/im/${input.connectionId}/bot-secret` },
+        credentialRefs: { botSecret: `keychain:mindlink/im/${input.connectionId}/bot-secret` },
         directMessagePolicy: 'paired-only',
         groupPolicy: 'allowlist-paired-sender-and-provider-at-mention',
         groupEnabled: false,
@@ -107,9 +107,9 @@ export interface StartConfiguredWecomChannelOptions {
   store: ChannelStore;
   agent: AgentService;
   assistant?: {
-    ownsWecomMessage(message: import('@yuanpu-agent/runtime-kit').NormalizedChannelMessage): boolean;
-    handleWecom(message: import('@yuanpu-agent/runtime-kit').NormalizedChannelMessage,
-      transport: ChannelTransport): Promise<import('@yuanpu-agent/runtime-kit').ChannelInboundReceipt>;
+    ownsWecomMessage(message: import('@mindlink-agent/runtime-kit').NormalizedChannelMessage): boolean;
+    handleWecom(message: import('@mindlink-agent/runtime-kit').NormalizedChannelMessage,
+      transport: ChannelTransport): Promise<import('@mindlink-agent/runtime-kit').ChannelInboundReceipt>;
     recoverWecom(connectionId: string, transport: ChannelTransport): void;
   };
   connectionIds?: readonly string[];
@@ -308,7 +308,7 @@ export async function startConfiguredWecomChannels(
         !connection.providerAccountRef
         || !connection.credentialRefs?.botSecret
         || !credentialRefPattern.test(connection.credentialRefs.botSecret)
-        || connection.credentialRefs.botSecret !== `keychain:yuanpu/im/${connection.connectionId}/bot-secret`
+        || connection.credentialRefs.botSecret !== `keychain:mindlink/im/${connection.connectionId}/bot-secret`
         || connection.directMessagePolicy !== 'paired-only'
         || connection.groupPolicy !== 'allowlist-paired-sender-and-provider-at-mention'
         || connection.acceptedMessageTypes?.length !== 1

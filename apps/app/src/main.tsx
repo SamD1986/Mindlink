@@ -23,7 +23,7 @@ if (faviconUrl) {
   favicon.href = faviconUrl;
   document.head.append(favicon);
 }
-document.documentElement.dataset.yuanpuDesktop = window.yuanpu ? 'true' : 'false';
+document.documentElement.dataset.mindlinkDesktop = window.mindlink ? 'true' : 'false';
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false }, mutations: { retry: false } } });
 createRoot(document.getElementById('root')!).render(
   <StrictMode><HashRouter><QueryClientProvider client={queryClient}><App /></QueryClientProvider></HashRouter></StrictMode>,

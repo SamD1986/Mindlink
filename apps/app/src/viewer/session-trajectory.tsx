@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { SessionTrajectory, SessionTrajectoryRow } from '@yuanpu-agent/protocol';
+import type { SessionTrajectory, SessionTrajectoryRow } from '@mindlink-agent/protocol';
 
 const kindLabels: Record<SessionTrajectoryRow['kind'], string> = {
   user: '用户', assistant: '助手', tool: '工具', model: '模型', context: '上下文', subagent: '子智能体',

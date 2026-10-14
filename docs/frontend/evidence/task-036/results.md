@@ -1,4 +1,4 @@
-# 按 Muse 参考框架交付 Yuanpu 聊天 UI（TASK-036）验收
+# 按 Muse 参考框架交付 MindLink 聊天 UI（TASK-036）验收
 
 2026-09-24，macOS arm64，Node 24.15.0，pnpm 11.22.0。实现提交 `49af3bd`（UI 主提交 `c151456`）。独立工作区为 `.worktrees/codex-ui`；隔离 Vite 地址 `http://127.0.0.1:5186/`。运行器使用 coding-owner worktree-kit，依赖/输出位于本工作区，复用 pnpm 缓存和已有离线模型元数据；无 Pi 上游改动。
 
@@ -7,7 +7,7 @@
 | 浏览器 bridge fixture | 输入法组合 Enter 不提交；轮询断开后恢复原 run，提交次数不增加；保留下一条草稿 | PASS |
 | 浏览器 bridge fixture | 授权绑定尚未就绪时按钮禁用；就绪后可授权，授权后运行未结束仍禁止发送；取消后的迟到轮询不复活任务 | PASS |
 | 真实 Electron / Runtime + 受控本地模型服务 | 成功回复、HTTP 400 显示 failed 并保留输入、禁止重复提交、取消到达 cancelled；退出无残留 Runtime | PASS |
-| 真实 Electron / Runtime + 已配置 LongCat-2.0 | 普通文本回复；搜索并调用受管 Python `yuanpu_approved_echo`，允许一次得到回显且只展示一个结果；第二次拒绝后 run failed，工具不再标 completed | PASS |
+| 真实 Electron / Runtime + 已配置 LongCat-2.0 | 普通文本回复；搜索并调用受管 Python `mindlink_approved_echo`，允许一次得到回显且只展示一个结果；第二次拒绝后 run failed，工具不再标 completed | PASS |
 | 真实 Electron 管理数据 | 隔离目录创建并停用连接、预览/保存/停用计划，导航后可见真实状态；未连接企业微信或发送外部消息 | PASS |
 | 1440×900 / 1280×800 / 1024×768 / 390×844 | 无横向溢出、输入栏可达；窄屏原生 dialog 打开、Escape 关闭并恢复触发按钮焦点 | PASS |
 | 浏览器四个导航页面 | 聊天、技能、连接、定时任务页面 axe WCAG A/AA 均 0 violations / 0 incomplete | PASS |
@@ -23,7 +23,7 @@
 pnpm install --frozen-lockfile --ignore-pnpmfile
 pnpm build
 pnpm prepare:python-capabilities
-pnpm --filter @yuanpu-agent/app dev --host 127.0.0.1 --port 5186 --strictPort
+pnpm --filter @mindlink-agent/app dev --host 127.0.0.1 --port 5186 --strictPort
 ```
 
 另一个终端执行：
@@ -32,13 +32,13 @@ pnpm --filter @yuanpu-agent/app dev --host 127.0.0.1 --port 5186 --strictPort
 TASK_036_RENDERER_URL=http://127.0.0.1:5186/ node apps/app/test/task-036-chat-probe.mjs
 TASK_036_RENDERER_URL=http://127.0.0.1:5186/ node apps/desktop/test/task-036-ui-app-probe.mjs
 TASK_036_LIVE=1 TASK_036_RENDERER_URL=http://127.0.0.1:5186/ node apps/desktop/test/task-036-ui-app-probe.mjs
-node --test packages/yuanpu-runtime/test/pi.test.mjs
-pnpm --filter @yuanpu-agent/app typecheck
-pnpm --filter @yuanpu-agent/desktop test
+node --test packages/mindlink-runtime/test/pi.test.mjs
+pnpm --filter @mindlink-agent/app typecheck
+pnpm --filter @mindlink-agent/desktop test
 pnpm check
 ```
 
-浏览器探针需要已安装的 agent-browser。真实模型模式只读取本机既有模型配置，凭据通过既有环境变量传入，不打印、不写入证据；临时 YUANPU_HOME、工作区、userData 和数据库运行后删除。只发送合成提示词和调用无副作用回显。退出探针验证 Runtime 子进程清理。无模型环境时可跑 fixture，但不能声称真实模型验收。
+浏览器探针需要已安装的 agent-browser。真实模型模式只读取本机既有模型配置，凭据通过既有环境变量传入，不打印、不写入证据；临时 MINDLINK_HOME、工作区、userData 和数据库运行后删除。只发送合成提示词和调用无副作用回显。退出探针验证 Runtime 子进程清理。无模型环境时可跑 fixture，但不能声称真实模型验收。
 
 ## 证据与限制
 

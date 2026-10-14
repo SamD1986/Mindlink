@@ -15,14 +15,14 @@ const root = resolve(import.meta.dirname, '..');
 const output = join(root, 'dist-artifact');
 const work = join(root, '.pyinstaller');
 const target = `${process.platform}-${process.arch}`;
-const executableName = process.platform === 'win32' ? 'YuanpuEchoMcp.exe' : 'YuanpuEchoMcp';
+const executableName = process.platform === 'win32' ? 'MindlinkEchoMcp.exe' : 'MindlinkEchoMcp';
 const bundleRoot = join(output, 'bundle');
-const frozenRoot = join(bundleRoot, 'YuanpuEchoMcp');
-const archiveName = `YuanpuEchoMcp-${target}.tar.gz`;
+const frozenRoot = join(bundleRoot, 'MindlinkEchoMcp');
+const archiveName = `MindlinkEchoMcp-${target}.tar.gz`;
 const archivePath = join(output, archiveName);
 const pyproject = await readFile(join(root, 'pyproject.toml'), 'utf8');
 const projectVersion = /^version = "(\d+\.\d+\.\d+)"$/m.exec(pyproject)?.[1];
-const requestedVersion = process.env.YUANPU_CAPABILITY_VERSION
+const requestedVersion = process.env.MINDLINK_CAPABILITY_VERSION
   ?? (/^v?\d+\.\d+\.\d+$/.test(process.env.GITHUB_REF_NAME ?? '') ? process.env.GITHUB_REF_NAME : undefined);
 const capabilityVersion = requestedVersion?.replace(/^v/, '') ?? projectVersion;
 if (!capabilityVersion) throw new Error('Unable to determine the Python capability version.');
@@ -41,13 +41,13 @@ await mkdir(work, { recursive: true });
 await writeFile(
   frozenEntry,
   (await readFile(join(root, 'scripts', 'frozen-entry.py'), 'utf8'))
-    .replace('__YUANPU_CAPABILITY_VERSION__', capabilityVersion),
+    .replace('__MINDLINK_CAPABILITY_VERSION__', capabilityVersion),
 );
 
 execFileSync('uv', [
   'run', '--project', root, '--frozen', 'pyinstaller',
   '--noconfirm', '--clean', '--onedir',
-  '--name', 'YuanpuEchoMcp',
+  '--name', 'MindlinkEchoMcp',
   '--distpath', bundleRoot,
   '--workpath', join(work, 'work'),
   '--specpath', join(work, 'spec'),
@@ -64,13 +64,13 @@ execFileSync('uv', [
 ], { stdio: 'inherit' });
 
 const archive = await readFile(archivePath);
-const privateKeyFile = process.env.YUANPU_ARTIFACT_SIGNING_KEY_FILE;
-const privateKeyBase64 = process.env.YUANPU_ARTIFACT_SIGNING_KEY_BASE64;
-const publicKeyBase64 = process.env.YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64;
+const privateKeyFile = process.env.MINDLINK_ARTIFACT_SIGNING_KEY_FILE;
+const privateKeyBase64 = process.env.MINDLINK_ARTIFACT_SIGNING_KEY_BASE64;
+const publicKeyBase64 = process.env.MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64;
 if (privateKeyFile && privateKeyBase64) throw new Error('Configure only one artifact signing key source.');
 const hasProductionKey = Boolean(privateKeyFile || privateKeyBase64);
 const hasProductionTrustRoot = Boolean(hasProductionKey || publicKeyBase64);
-const keyId = resolveArtifactSigningKeyId(process.env.YUANPU_ARTIFACT_SIGNING_KEY_ID, hasProductionTrustRoot);
+const keyId = resolveArtifactSigningKeyId(process.env.MINDLINK_ARTIFACT_SIGNING_KEY_ID, hasProductionTrustRoot);
 
 let privateKey;
 let publicKey;
@@ -99,8 +99,8 @@ const manifest = {
     platform: process.platform,
     arch: process.arch,
     format: 'tar.gz',
-    url: process.env.YUANPU_ARTIFACT_BASE_URL
-      ? new URL(archiveName, `${process.env.YUANPU_ARTIFACT_BASE_URL.replace(/\/$/, '')}/`).toString()
+    url: process.env.MINDLINK_ARTIFACT_BASE_URL
+      ? new URL(archiveName, `${process.env.MINDLINK_ARTIFACT_BASE_URL.replace(/\/$/, '')}/`).toString()
       : `artifacts/${archiveName}`,
     size: archive.length,
     sha256: createHash('sha256').update(archive).digest('hex'),
@@ -120,7 +120,7 @@ const manifest = {
     default: { responsePrefix: '' },
   },
   permissions: ['notifications', 'background'],
-  connections: ['yuanpu_echo_mcp'],
+  connections: ['mindlink_echo_mcp'],
   issuedAt: process.env.SOURCE_DATE_EPOCH
     ? new Date(Number(process.env.SOURCE_DATE_EPOCH) * 1000).toISOString()
     : new Date().toISOString(),

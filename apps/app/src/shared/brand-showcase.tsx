@@ -2,11 +2,11 @@ import { useState } from 'react';
 import mindlinkSeal from '../../themes/assets/mindlink-seal.png';
 import { brandIconUrl } from '../emo.js';
 
-export function BrandShowcase({ variant, name = 'Yuanpu Agent' }: { variant: 'yuanpu' | 'mindlink'; name?: string }) {
+export function BrandShowcase({ variant, name = 'MindLink' }: { variant: 'default' | 'mindlink'; name?: string }) {
   const [iconFailed, setIconFailed] = useState(false);
   const iconUrl = brandIconUrl();
-  return variant === 'yuanpu'
-    ? <div className="brand-showcase brand-showcase-yuanpu" aria-label={`${name} 品牌`}>
+  return variant === 'default'
+    ? <div className="brand-showcase brand-showcase-default" aria-label={`${name} 品牌`}>
       <span className="brand-showcase-mark" aria-hidden="true">
         {iconUrl && !iconFailed ? <img src={iconUrl} alt="" onError={() => setIconFailed(true)} />
           : <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">

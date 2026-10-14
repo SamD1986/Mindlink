@@ -1,4 +1,4 @@
-import { normalizeHotkeyBinding } from '@yuanpu-agent/protocol';
+import { normalizeHotkeyBinding } from '@mindlink-agent/protocol';
 
 export interface HotkeyKeyEvent {
   code: string;

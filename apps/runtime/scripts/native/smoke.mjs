@@ -10,7 +10,7 @@ const appRoot = resolve(import.meta.dirname, '../..');
 const target = targetTriple();
 const binary = resolve(
   appRoot,
-  `dist-native/bin/YuanpuAgentRuntime-${target}${executableSuffix(target)}`,
+  `dist-native/bin/MindLinkRuntime-${target}${executableSuffix(target)}`,
 );
 const { version } = JSON.parse(await readFile(resolve(appRoot, 'package.json'), 'utf8'));
 
@@ -18,22 +18,22 @@ const greeting = execFileSync(binary, [], { encoding: 'utf8' }).trim();
 const reportedVersion = execFileSync(binary, ['--version'], { encoding: 'utf8' }).trim();
 const agentToolsSmoke = JSON.parse(execFileSync(binary, ['--agent-tools-smoke'], { encoding: 'utf8', timeout: 15000 }).trim());
 assert.deepEqual(agentToolsSmoke, { workflow: 'completed', result: ['native-worker-ok'], reader: true });
-const pythonRoot = resolve(appRoot, '../python-capabilities/dist-artifact/bundle/YuanpuEchoMcp');
+const pythonRoot = resolve(appRoot, '../python-capabilities/dist-artifact/bundle/MindlinkEchoMcp');
 const pythonExecutable = join(
   pythonRoot,
-  process.platform === 'win32' ? 'YuanpuEchoMcp.exe' : 'YuanpuEchoMcp',
+  process.platform === 'win32' ? 'MindlinkEchoMcp.exe' : 'MindlinkEchoMcp',
 );
 const capabilitySmoke = JSON.parse(execFileSync(binary, ['--capability-smoke'], {
   encoding: 'utf8',
   env: {
     ...process.env,
-    YUANPU_PYTHON_MCP_EXECUTABLE: pythonExecutable,
-    YUANPU_PYTHON_MCP_ROOT: pythonRoot,
-    YUANPU_PYTHON_MCP_ARGS: '[]',
+    MINDLINK_PYTHON_MCP_EXECUTABLE: pythonExecutable,
+    MINDLINK_PYTHON_MCP_ROOT: pythonRoot,
+    MINDLINK_PYTHON_MCP_ARGS: '[]',
     PATH: `${dirname(pythonExecutable)}${process.platform === 'win32' ? ';' : ':'}${process.env.PATH ?? ''}`,
   },
 }).trim());
-const sqliteRoot = await mkdtemp(join(tmpdir(), 'yuanpu-sea-sqlite-'));
+const sqliteRoot = await mkdtemp(join(tmpdir(), 'mindlink-sea-sqlite-'));
 let firstSqliteSmoke;
 let secondSqliteSmoke;
 let schedulerSmoke;
@@ -95,7 +95,7 @@ assert.equal(greeting, 'Hello, world!');
 assert.equal(reportedVersion, version);
 assert.deepEqual(capabilitySmoke.tools, ['search_capabilities', 'execute_capability']);
 assert.deepEqual(capabilitySmoke.result.structuredContent, {
-  text: 'YuanpuAgent SEA',
+  text: 'MindLink SEA',
   length: 15,
 });
 assert.equal(capabilitySmoke.errorResult.isError, true);

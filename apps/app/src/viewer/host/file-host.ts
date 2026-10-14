@@ -1,4 +1,4 @@
-import type { WorkDirectoryListing, WorkFilePreview } from '@yuanpu-agent/protocol';
+import type { WorkDirectoryListing, WorkFilePreview } from '@mindlink-agent/protocol';
 
 /**
  * Host seam for the viewer modules: everything the viewer needs from the

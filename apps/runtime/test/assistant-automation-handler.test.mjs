@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { AssistantAutomationEngine, AssistantAutomationStore, AssistantSourceStore,
-  AssistantWorkReviewStore } from '@yuanpu-agent/assistant';
+  AssistantWorkReviewStore } from '@mindlink-agent/assistant';
 
 const require = createRequire(import.meta.url);
 const { assistantAutomationHandler } = require('../dist/index.cjs');

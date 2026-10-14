@@ -38,8 +38,8 @@ async function freePort() {
 async function launch(appRoot, home, userData) {
   const debuggerPort = await freePort();
   const child = spawn(electron, [`--remote-debugging-port=${debuggerPort}`, appRoot], {
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_RENDERER_URL: rendererUrl,
-      YUANPU_NODE_BINARY: process.execPath, YUANPU_NOTIFICATIONS_ENABLED: '0',
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_RENDERER_URL: rendererUrl,
+      MINDLINK_NODE_BINARY: process.execPath, MINDLINK_NOTIFICATIONS_ENABLED: '0',
       TASK_060_PROVIDER_KEY: 'fixture-only' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -54,8 +54,8 @@ async function launch(appRoot, home, userData) {
     }, `Electron debugger did not start: ${diagnostics}`);
     const browser = await chromium.connectOverCDP(endpoint);
     const page = await eventually(() => browser.contexts()[0]?.pages()[0], 'Electron page missing');
-    await eventually(() => page.evaluate(() => Boolean(window.yuanpu?.runtimeInfo)), 'Electron preload missing');
-    await eventually(async () => (await page.evaluate(() => window.yuanpu.runtimeInfo())).workingDirectory,
+    await eventually(() => page.evaluate(() => Boolean(window.mindlink?.runtimeInfo)), 'Electron preload missing');
+    await eventually(async () => (await page.evaluate(() => window.mindlink.runtimeInfo())).workingDirectory,
       'Electron Runtime did not become ready');
     return { child, browser, page, diagnostics: () => diagnostics, async close() {
       await browser.close();
@@ -72,7 +72,7 @@ async function launch(appRoot, home, userData) {
   }
 }
 
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task060-electron-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task060-electron-'));
 const appRoot = join(root, 'apps', 'desktop');
 const home = join(root, 'home');
 const workspace = join(home, 'workspace');
@@ -117,7 +117,7 @@ try {
   let { page } = instance;
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(rendererUrl);
-  await page.evaluate(() => window.localStorage.setItem('yuanpu:right-panel-width', '1600'));
+  await page.evaluate(() => window.localStorage.setItem('mindlink:right-panel-width', '1600'));
   await page.reload();
   await page.goto(`${rendererUrl}#/work`);
   await page.getByRole('button', { name: '打开工作列表' }).click();
@@ -146,8 +146,8 @@ try {
   await page.getByRole('textbox', { name: '新文件夹名称' }).fill('Sibling');
   await page.getByRole('dialog', { name: '新建文件夹' }).getByRole('button', { name: '创建' }).click();
   await folderRow('Sibling').waitFor();
-  const sibling = (await page.evaluate(() => window.yuanpu.listWorkFolders())).find((item) => item.name === 'Sibling');
-  const platform = (await page.evaluate(() => window.yuanpu.listWorkFolders())).find((item) => item.name === 'Platform');
+  const sibling = (await page.evaluate(() => window.mindlink.listWorkFolders())).find((item) => item.name === 'Sibling');
+  const platform = (await page.evaluate(() => window.mindlink.listWorkFolders())).find((item) => item.name === 'Platform');
   assert.equal(sibling.parentId, platform.id, 'Sibling creation ignored the explicit placement');
   await folderRow('Milestones').click();
   await addFolder('Level4');
@@ -171,9 +171,9 @@ try {
   await page.keyboard.press('ArrowRight');
   assert.equal(Number(await page.getByRole('separator', { name: '调整工作列表宽度' }).getAttribute('aria-valuenow')), widthBefore + 20);
   await page.getByRole('button', { name: '新建会话' }).click();
-  await eventually(async () => (await page.evaluate(() => window.yuanpu.listWorkConversations())).length >= 2,
+  await eventually(async () => (await page.evaluate(() => window.mindlink.listWorkConversations())).length >= 2,
     'First nested conversation missing');
-  const first = (await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.current);
+  const first = (await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.current);
   assert.equal(first.folderId !== null, true);
   const firstRow = page.locator(`[data-tree-key="conversation:${first.id}"]`);
   await firstRow.press('F2');
@@ -181,9 +181,9 @@ try {
   await page.getByRole('textbox', { name: '重命名' }).press('Enter');
   await firstRow.getByText('Roadmap').waitFor();
   await page.getByRole('button', { name: '新建会话' }).click();
-  await eventually(async () => (await page.evaluate(() => window.yuanpu.listWorkConversations())).length >= 3,
+  await eventually(async () => (await page.evaluate(() => window.mindlink.listWorkConversations())).length >= 3,
     'Second nested conversation missing');
-  const second = (await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.current);
+  const second = (await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.current);
   assert.notEqual(first.id, second.id);
   assert.equal(first.folderId, second.folderId);
   await page.screenshot({ path: join(evidence, 'tree-created-light.png') });
@@ -202,27 +202,27 @@ try {
   await page.getByRole('menuitem', { name: '修改标签' }).click();
   await page.locator('.work-tree-dialog input[placeholder="输入新标签名称（可选）"]').fill('Priority');
   await page.getByRole('dialog', { name: '修改标签' }).getByRole('button', { name: '保存' }).click();
-  await eventually(async () => (await page.evaluate(() => window.yuanpu.listWorkConversations()))
+  await eventually(async () => (await page.evaluate(() => window.mindlink.listWorkConversations()))
     .find((item) => item.id === first.id)?.tagIds.length === 1, 'Icon/tag edit did not persist');
   await firstRow.click();
   await page.getByRole('textbox', { name: '消息' }).fill('Remember stage needle');
   await page.getByRole('button', { name: '发送消息' }).click();
   await eventually(() => providerRequests === 1, 'First UI model request was not received');
   await page.getByText('Saved reply 1.').waitFor({ timeout: 20_000 });
-  const original = (await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.id === first.id);
+  const original = (await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.id === first.id);
   await writeFile(join(original.workingDirectory, 'preview.txt'), 'synthetic preview survives');
   await page.getByRole('button', { name: 'Roadmap的操作' }).click();
   await page.getByRole('menuitem', { name: '移动到…' }).click();
   await page.getByRole('dialog', { name: '移动到文件夹' }).getByRole('combobox').selectOption({ label: 'Acme' });
   await page.getByRole('dialog', { name: '移动到文件夹' }).getByRole('button', { name: '移动' }).click();
   const moved = await eventually(async () => {
-    const item = (await page.evaluate(() => window.yuanpu.listWorkConversations())).find((row) => row.id === first.id);
+    const item = (await page.evaluate(() => window.mindlink.listWorkConversations())).find((row) => row.id === first.id);
     return item?.workingDirectory !== original.workingDirectory ? item : undefined;
   }, 'UI move did not change Work cwd');
   await assert.rejects(stat(original.workingDirectory), { code: 'ENOENT' });
   assert.equal(await readFile(join(moved.workingDirectory, 'preview.txt'), 'utf8'), 'synthetic preview survives');
-  assert.equal((await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.id === first.id).title, 'Roadmap');
-  assert.equal((await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.id === first.id).iconId, 'trophy');
+  assert.equal((await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.id === first.id).title, 'Roadmap');
+  assert.equal((await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.id === first.id).iconId, 'trophy');
   await page.screenshot({ path: join(evidence, 'electron-moved.png') });
   await page.getByRole('button', { name: '打开右侧面板' }).click();
   const resizeHandles = await page.evaluate(() => {
@@ -312,7 +312,7 @@ try {
   await page.getByRole('dialog', { name: '移动到文件夹' }).getByRole('button', { name: '移动' }).click();
   await page.locator('.work-tree-error').waitFor();
   assert.match(await page.locator('.work-tree-error').innerText(), /符号链接|link/i);
-  assert.equal((await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.id === first.id).workingDirectory,
+  assert.equal((await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.id === first.id).workingDirectory,
     moved.workingDirectory);
   assert.equal(await readFile(join(moved.workingDirectory, 'preview.txt'), 'utf8'), 'synthetic preview survives');
   await page.screenshot({ path: join(evidence, 'electron-move-rejected.png') });
@@ -329,12 +329,12 @@ try {
   await searchBox.fill('');
   await page.getByRole('button', { name: 'Roadmap的操作' }).click();
   await page.getByRole('menuitem', { name: '归档会话' }).click();
-  await eventually(async () => (await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.id === first.id)?.archived,
+  await eventually(async () => (await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.id === first.id)?.archived,
     'Archive did not persist');
   await page.getByRole('button', { name: '查看已归档' }).click();
   await page.getByRole('button', { name: 'Roadmap的操作' }).click();
   await page.getByRole('menuitem', { name: '恢复会话' }).click();
-  await eventually(async () => !(await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.id === first.id)?.archived,
+  await eventually(async () => !(await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.id === first.id)?.archived,
     'Restore did not persist');
   await page.getByRole('button', { name: '查看工作' }).click();
   await instance.close();
@@ -347,8 +347,8 @@ try {
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } }, timestamp: Date.now() });
     const legacyFile = SessionManager.findById(workspace, 'legacy-pi-session', join(home, 'agent', 'sessions'));
     assert.ok(legacyFile, 'Synthetic legacy JSONL was not discoverable');
-    const { readYuanpuChatTranscript } = await import('../../../packages/yuanpu-runtime/dist/index.mjs');
-    assert.match(JSON.stringify(readYuanpuChatTranscript(workspace, 'legacy-pi-session', join(home, 'agent', 'sessions'))),
+    const { readMindlinkChatTranscript } = await import('../../../packages/mindlink-runtime/dist/index.mjs');
+    assert.match(JSON.stringify(readMindlinkChatTranscript(workspace, 'legacy-pi-session', join(home, 'agent', 'sessions'))),
       /Legacy fixture question/, 'Synthetic legacy transcript was not readable before restart');
     const legacyDb = new DatabaseSync(join(home, 'workflows', 'automation.sqlite'));
     legacyDb.prepare(`INSERT INTO yp_conversation_bindings
@@ -365,7 +365,7 @@ try {
   await page.getByRole('button', { name: '打开工作列表' }).click();
   await page.getByRole('button', { name: '展开Acme' }).click();
   await page.getByRole('button', { name: 'Roadmap的操作' }).waitFor();
-  const restarted = (await page.evaluate(() => window.yuanpu.listWorkConversations())).find((item) => item.id === first.id);
+  const restarted = (await page.evaluate(() => window.mindlink.listWorkConversations())).find((item) => item.id === first.id);
   assert.equal(restarted.workingDirectory, moved.workingDirectory);
   assert.equal(restarted.iconId, 'trophy');
   assert.equal(restarted.tagIds.length, 1);
@@ -388,9 +388,9 @@ try {
     await page.screenshot({ path: join(evidence, 'electron-legacy-readonly.png') });
   }
   await page.goto(`${rendererUrl}#/settings`);
-  for (const [name, value] of [['浅色', 'yuanpu-light'], ['深色', 'yuanpu-dark'], ['MindLink 测试主题', 'mindlink']]) {
+  for (const [name, value] of [['浅色', 'mindlink-light'], ['深色', 'mindlink-dark'], ['MindLink 测试主题', 'mindlink']]) {
     await page.getByRole('group', { name: '界面主题' }).getByRole('button', { name }).click();
-    assert.equal(await page.evaluate(() => document.documentElement.dataset.yuanpuTheme), value);
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.mindlinkTheme), value);
     await page.goto(`${rendererUrl}#/work`);
     if (await page.getByRole('button', { name: '打开工作列表' }).isVisible().catch(() => false)) {
       await page.getByRole('button', { name: '打开工作列表' }).click();

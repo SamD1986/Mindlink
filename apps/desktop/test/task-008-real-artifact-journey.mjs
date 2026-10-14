@@ -7,14 +7,14 @@ import { join, resolve } from 'node:path';
 
 import { RuntimeManager } from '../dist/runtime-manager.cjs';
 import { createCatalogServer } from '../../../server/dist/index.mjs';
-import { ManagedMcpCapabilitySource } from '../../../packages/yuanpu-runtime/dist/index.mjs';
+import { ManagedMcpCapabilitySource } from '../../../packages/mindlink-runtime/dist/index.mjs';
 
 const fixtureRoot = resolve(process.argv[2] || '.');
 const fixture = JSON.parse(await readFile(join(fixtureRoot, 'metadata/fixture.json'), 'utf8'));
 assert.equal(fixture.target, `${process.platform}-${process.arch}`);
 const repo = resolve(import.meta.dirname, '../../..');
 const root = process.argv[3]
-  ? resolve(process.argv[3]) : await mkdtemp(join(tmpdir(), 'yuanpu-task008-journey-'));
+  ? resolve(process.argv[3]) : await mkdtemp(join(tmpdir(), 'mindlink-task008-journey-'));
 if (process.argv[3]) await mkdir(root);
 const home = join(root, 'home');
 const resources = join(root, 'resources');
@@ -60,7 +60,7 @@ async function openInstalled(expectedVersion) {
     env: {
       PATH: process.platform === 'win32' ? join(process.env.SYSTEMROOT, 'System32') : join(root, 'empty-path'),
       ...(process.env.SYSTEMROOT ? { SYSTEMROOT: process.env.SYSTEMROOT } : {}),
-      YUANPU_CAPABILITY_CONFIG_FILE: join(home, 'packages/config', name, 'user.json'),
+      MINDLINK_CAPABILITY_CONFIG_FILE: join(home, 'packages/config', name, 'user.json'),
     },
   });
 }
@@ -69,9 +69,9 @@ async function callInstalled(expectedVersion) {
   const source = await openInstalled(expectedVersion);
   try {
     const tools = await source.list({});
-    assert.ok(tools.some((tool) => tool.name === 'yuanpu_echo_text'));
+    assert.ok(tools.some((tool) => tool.name === 'mindlink_echo_text'));
     const result = await source.execute({
-      capabilityId: 'yuanpu_echo_text', originalName: 'yuanpu_echo_text',
+      capabilityId: 'mindlink_echo_text', originalName: 'mindlink_echo_text',
       arguments: { text: 'installed' },
     }, {});
     assert.deepEqual(result.structuredContent, { text: 'TASK008: installed', length: 18 });
@@ -92,12 +92,12 @@ try {
   }));
   await new Promise((done) => server.listen(0, '127.0.0.1', done));
   serverOpen = true;
-  process.env.YUANPU_HOME = home;
-  process.env.YUANPU_CATALOG_URL = `http://127.0.0.1:${server.address().port}`;
+  process.env.MINDLINK_HOME = home;
+  process.env.MINDLINK_CATALOG_URL = `http://127.0.0.1:${server.address().port}`;
   process.env.PATH = process.platform === 'win32'
     ? join(process.env.SYSTEMROOT, 'System32') : join(root, 'empty-path');
   const executable = join(repo, 'apps/runtime/dist-native/bin',
-    `YuanpuAgentRuntime-${fixture.target}${process.platform === 'win32' ? '.exe' : ''}`);
+    `MindLinkRuntime-${fixture.target}${process.platform === 'win32' ? '.exe' : ''}`);
   manager = new RuntimeManager(join(resources, 'app'), resources, join(root, 'user-data'), true, '0.1.0', {
     command: { executable, args: [] }, startupTimeoutMs: 30_000,
     restartLimit: 0, onError: (error) => errors.push(error.message),
@@ -131,7 +131,7 @@ try {
     await runningOld.list({});
     assert.equal((await manager.installPlugin(item.source, item.artifactManifestDigest)).version, '0.2.0');
     const oldResult = await runningOld.execute({
-      capabilityId: 'yuanpu_echo_text', originalName: 'yuanpu_echo_text',
+      capabilityId: 'mindlink_echo_text', originalName: 'mindlink_echo_text',
       arguments: { text: 'still-running' },
     }, {});
     assert.equal(oldResult.structuredContent.text, 'TASK008: still-running');
@@ -168,7 +168,7 @@ try {
 } finally {
   await manager?.stop();
   if (serverOpen) await new Promise((done) => server.close(done));
-  for (const key of ['YUANPU_HOME', 'YUANPU_CATALOG_URL', 'PATH']) {
+  for (const key of ['MINDLINK_HOME', 'MINDLINK_CATALOG_URL', 'PATH']) {
     if (originalEnv[key] === undefined) delete process.env[key];
     else process.env[key] = originalEnv[key];
   }

@@ -4,7 +4,7 @@ import { basename, relative, resolve, sep } from 'node:path';
 import { createServer, type Server } from 'node:http';
 import { fileURLToPath } from 'node:url';
 
-import type { SkillCatalogItem } from '@yuanpu-agent/protocol';
+import type { SkillCatalogItem } from '@mindlink-agent/protocol';
 
 import { catalog } from './catalog.js';
 
@@ -85,7 +85,7 @@ async function serveCapabilityArtifact(
       writeJson(response, 200, manifest);
       return true;
     }
-    if (!/^YuanpuEchoMcp-(?:darwin|linux|win32)-(?:arm64|x64)\.tar\.gz$/.test(filename)) {
+    if (!/^MindlinkEchoMcp-(?:darwin|linux|win32)-(?:arm64|x64)\.tar\.gz$/.test(filename)) {
       writeJson(response, 404, { error: 'Artifact filename is outside the published capability layout' });
       return true;
     }
@@ -165,11 +165,11 @@ const isEntrypoint = process.argv[1] && fileURLToPath(import.meta.url) === proce
 if (isEntrypoint) {
   const portIndex = process.argv.indexOf('--port');
   const port = portIndex >= 0 ? Number(process.argv[portIndex + 1]) : 8787;
-  const artifactRoot = process.env.YUANPU_ARTIFACT_ROOT
-    ? resolve(process.env.YUANPU_ARTIFACT_ROOT)
+  const artifactRoot = process.env.MINDLINK_ARTIFACT_ROOT
+    ? resolve(process.env.MINDLINK_ARTIFACT_ROOT)
     : undefined;
   const server = createCatalogServer(catalog, { artifactRoot });
   server.listen(port, '127.0.0.1', () => {
-    console.log(`YuanpuAgent catalog server listening on http://127.0.0.1:${port}`);
+    console.log(`MindLink catalog server listening on http://127.0.0.1:${port}`);
   });
 }

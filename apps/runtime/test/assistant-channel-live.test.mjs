@@ -9,7 +9,7 @@ import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { promisify } from 'node:util';
 
-import { ChannelRouter, digestChannelValue, openYuanpuMetadataDatabase } from '@yuanpu-agent/runtime-kit';
+import { ChannelRouter, digestChannelValue, openMindlinkMetadataDatabase } from '@mindlink-agent/runtime-kit';
 import { AssistantHostService } from '../src/assistant-host.ts';
 
 const require = createRequire(import.meta.url);
@@ -43,7 +43,7 @@ async function eventually(check, message) {
 }
 
 async function modelFixture(t) {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-assistant-channel-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-assistant-channel-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const appPath = join(root, 'app');
   const agentPath = join(root, 'agent');
@@ -82,8 +82,8 @@ test('real Runtime HTTP accepts desktop assistant once and two independent clien
     .export({ type: 'spki', format: 'der' }).toString('base64');
   const runtime = spawn(process.execPath, [entry, '--serve', '--port', '0'], {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, YUANPU_HOME: fixture.root, YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: fixture.root, MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   let stderr = '';
   runtime.stderr.on('data', (chunk) => { stderr += chunk; });
@@ -131,7 +131,7 @@ test('real Runtime HTTP accepts desktop assistant once and two independent clien
 
 test('WeCom ChannelRouter and desktop use one real Assistant Worker with separate sessions', async (t) => {
   const fixture = await modelFixture(t);
-  const metadata = openYuanpuMetadataDatabase(':memory:');
+  const metadata = openMindlinkMetadataDatabase(':memory:');
   t.after(() => metadata.close());
   const manager = new AssistantWorkerManager({ home: join(fixture.root, 'assistant'),
     model: { appPath: fixture.appPath, agentPath: fixture.agentPath,

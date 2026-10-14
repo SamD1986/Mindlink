@@ -1,5 +1,5 @@
-appId: com.yuanpu.agent
-productName: Yuanpu Agent
+appId: com.mindlink.agent
+productName: MindLink
 asar: true
 directories:
   output: release
@@ -24,13 +24,13 @@ extraResources:
   - from: ../runtime/dist-native/bin
     to: runtime
     filter:
-      - 'YuanpuAgentRuntime-*'
+      - 'MindLinkRuntime-*'
   - from: ../python-capabilities/dist-artifact/bundle
     to: capabilities/builtin.python.echo
     filter:
       - '**/*'
-artifactName: 'YuanpuAgent-${version}-${os}-${arch}.${ext}'
-executableName: YuanpuAgent
+artifactName: 'MindLink-${version}-${os}-${arch}.${ext}'
+executableName: MindLink
 mac:
   icon: dist/emo-icon.png
   target:
@@ -49,4 +49,4 @@ linux:
 publish:
   provider: github
   owner: linxinhong
-  repo: yuanpu-agent
+  repo: mindlink

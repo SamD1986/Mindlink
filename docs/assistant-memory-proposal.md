@@ -1,19 +1,19 @@
 # 工作对话与独立助理：会话、记忆、专属技能与工作整理设计提案
 
-状态：开发设计与任务拆分；2026-09-26。产品边界依据用户确认，具体通信适配由首张任务验证；本文不代表功能已实施或验收。用户已确认助理随 App 运行，关闭 App 后停止，不设独立常驻后台服务。检索证据：zvec-grep 查询 Work/Assistant 会话与记忆归属，定位 `apps/runtime/src/index.ts`、`packages/yuanpu-runtime/src/pi/index.ts`、`packages/yuanpu-runtime/src/persistence/assistant-link-store.ts`、`docs/agent-runtime-contracts.md`，再按符号核对当前源码。
+状态：开发设计与任务拆分；2026-09-26。产品边界依据用户确认，具体通信适配由首张任务验证；本文不代表功能已实施或验收。用户已确认助理随 App 运行，关闭 App 后停止，不设独立常驻后台服务。检索证据：zvec-grep 查询 Work/Assistant 会话与记忆归属，定位 `apps/runtime/src/index.ts`、`packages/mindlink-runtime/src/pi/index.ts`、`packages/mindlink-runtime/src/persistence/assistant-link-store.ts`、`docs/agent-runtime-contracts.md`，再按符号核对当前源码。
 
 2026-09-26 补充：参考本地 `~/projects/hermes-agent`。该仓库的 zvec-grep 索引缺失，未创建索引；以下结论来自限定路径的 `rg` 与所列文件阅读。
 
 ## 从 Hermes 借鉴的边界
 
-| Hermes 中已实现的机制 | Yuanpu 的取法 |
+| Hermes 中已实现的机制 | MindLink 的取法 |
 | --- | --- |
-| 一个 profile 拥有独立身份、配置、会话和记忆，同一目录避免双写（`website/docs/user-guide/profiles.md:5-15`） | 助理目录是一个固定身份域，只有 Assistant Worker 写助理记忆。Work 通过有来源的事件向它提供材料，不共享可写 Pi 目录。Yuanpu 仍按已确认要求使用独立子进程。 |
-| `SOUL.md` 管代理身份，`USER.md` 管用户画像，`MEMORY.md` 管代理经验；小份核心记忆在会话开始时冻结，历史由 session search 按需读取（`website/docs/user-guide/features/memory.md:11-20,36-65,218-244`） | 保留“助理身份 / 关于用户 / 工作经验 / 原始对话”四层，核心文件沿用 SOUL/USER/MEMORY 命名，专题笔记使用英文文件名。Yuanpu 只冻结 SOUL 与助理技能身份；用户画像和核心记忆按当前有效版本、受众及来源有界检索，避免同一长期会话沿用已纠正的旧事实。Work 不读取这些内容。 |
+| 一个 profile 拥有独立身份、配置、会话和记忆，同一目录避免双写（`website/docs/user-guide/profiles.md:5-15`） | 助理目录是一个固定身份域，只有 Assistant Worker 写助理记忆。Work 通过有来源的事件向它提供材料，不共享可写 Pi 目录。MindLink 仍按已确认要求使用独立子进程。 |
+| `SOUL.md` 管代理身份，`USER.md` 管用户画像，`MEMORY.md` 管代理经验；小份核心记忆在会话开始时冻结，历史由 session search 按需读取（`website/docs/user-guide/features/memory.md:11-20,36-65,218-244`） | 保留“助理身份 / 关于用户 / 工作经验 / 原始对话”四层，核心文件沿用 SOUL/USER/MEMORY 命名，专题笔记使用英文文件名。MindLink 只冻结 SOUL 与助理技能身份；用户画像和核心记忆按当前有效版本、受众及来源有界检索，避免同一长期会话沿用已纠正的旧事实。Work 不读取这些内容。 |
 | 回合后后台 review 可自动写记忆，可用独立低价模型、输入预算与工具白名单；前台消息优先（`website/docs/user-guide/features/memory.md:293-325,350-467`；`agent/background_review.py:1-15,103-130`） | Worker 在 Work/助理回合落盘后排队整理，配置专用模型、费用与时间预算；新用户消息优先。自动写入为默认，但每次修订可见、可纠正或撤销。无需把 Hermes 的线程 fork 结构搬过来。 |
 | heartbeat 复用当前会话，cron 每次用新会话；错过的 heartbeat 合并，用户消息优先（`website/docs/user-guide/features/heartbeat.md:17-53`） | 助理的日常建议使用独立短会话，每次从最新记忆和近期变化出发；不在正在聊天的助理会话中注入定时“用户消息”。错过的检查合并一次，无新事实时保持安静。 |
 
-Hermes 的小文件字符上限是为了限制每次提示词成本，不是 Yuanpu 所有记忆的容量上限。Yuanpu 的人可读专题文件可以持续增长，但“随身摘要”必须保持固定 token 预算。Hermes 的通用多 profile、后台 gateway、多平台 cron 与用户已确认的 Yuanpu 单助理、App 生命周期范围不同，不引入这些额外产品面。
+Hermes 的小文件字符上限是为了限制每次提示词成本，不是 MindLink 所有记忆的容量上限。MindLink 的人可读专题文件可以持续增长，但“随身摘要”必须保持固定 token 预算。Hermes 的通用多 profile、后台 gateway、多平台 cron 与用户已确认的 MindLink 单助理、App 生命周期范围不同，不引入这些额外产品面。
 
 ## 用户能感知的行为
 
@@ -26,27 +26,27 @@ Hermes 的小文件字符上限是为了限制每次提示词成本，不是 Yua
 ## 当前实现与变化
 
 - Work 消息现在固定写入桌面 `default` 会话，Assistant 固定写入 `assistant` 会话：`apps/runtime/src/index.ts:717-746`。界面只有 Work/Assistant 两个固定面板，工作列表尚是预览：`apps/app/src/composition/catalog.tsx:21-30`、`apps/app/src/modules/chat.tsx:580-623`。
-- 两个入口现在共用 `home.agentPath`、`home.sessionsPath` 和一个 `RuntimeAgentExecutor`：`apps/runtime/src/index.ts:510-535`。Pi 适配把 `agent/memory/MEMORY.md` 注入聊天系统提示词：`packages/yuanpu-runtime/src/pi/index.ts:251-299`。因此目前不能称 Work 为全新记忆。
-- 当前“绑定助理到企业微信”实际将桌面助理会话指向企业微信 Pi 会话：`packages/yuanpu-runtime/src/persistence/assistant-link-store.ts:85-147`。目标设计要把渠道绑定改为助理身份和回复目标的绑定，不能继续用会话 ID 共享来代表同一个助理。
+- 两个入口现在共用 `home.agentPath`、`home.sessionsPath` 和一个 `RuntimeAgentExecutor`：`apps/runtime/src/index.ts:510-535`。Pi 适配把 `agent/memory/MEMORY.md` 注入聊天系统提示词：`packages/mindlink-runtime/src/pi/index.ts:251-299`。因此目前不能称 Work 为全新记忆。
+- 当前“绑定助理到企业微信”实际将桌面助理会话指向企业微信 Pi 会话：`packages/mindlink-runtime/src/persistence/assistant-link-store.ts:85-147`。目标设计要把渠道绑定改为助理身份和回复目标的绑定，不能继续用会话 ID 共享来代表同一个助理。
 - 当前知识库页的保存内容在 renderer 本地存储，尚不是助理的持久记忆或检索来源：`apps/app/src/modules/knowledge.tsx:7-30`。后续界面需把“助理记忆”的查看、纠正和来源导航接入真实目录与 Runtime 契约。
-- 现有数据根是 `~/.yuanpu/{app,agent,packages,workflows}`：`packages/yuanpu-runtime/src/config/index.ts:217-290`。现有调度器、Agent run、通知和交付记录可复用，但助理的记忆整理不应伪装成普通用户定时任务。
+- 现有数据根是 `~/.mindlink/{app,agent,packages,workflows}`：`packages/mindlink-runtime/src/config/index.ts:217-290`。现有调度器、Agent run、通知和交付记录可复用，但助理的记忆整理不应伪装成普通用户定时任务。
 
 ## Package 与执行入口边界
 
-2026-09-26 补充确认：助理使用专门的 package，不与默认工作 Agent runtime 混用。新增 `packages/yuanpu-assistant`（包名建议 `@yuanpu-agent/assistant`），独立拥有助理会话执行器、提示词构建、技能发现、记忆与台账、整理循环及委派协调。不能只在现有 `RuntimeAgentExecutor` 上增加 `mode: assistant`，也不能包装 `createYuanpuChatSession` 后仅替换目录来充当独立助理。
+2026-09-26 补充确认：助理使用专门的 package，不与默认工作 Agent runtime 混用。新增 `packages/mindlink-assistant`（包名建议 `@mindlink-agent/assistant`），独立拥有助理会话执行器、提示词构建、技能发现、记忆与台账、整理循环及委派协调。不能只在现有 `RuntimeAgentExecutor` 上增加 `mode: assistant`，也不能包装 `createMindlinkChatSession` 后仅替换目录来充当独立助理。
 
-当前 `apps/runtime/src/agent-runtime.ts` 从 `@yuanpu-agent/runtime-kit` 导入 `createYuanpuChatSession` 并维护会话池；`packages/yuanpu-runtime/src/pi/index.ts` 的工厂同时装配工作提示词、默认资源加载器、记忆和工具。该工厂不是无业务语义的通用底座，因此助理 package 不依赖它。检索证据：zvec-grep 查询 RuntimeAgentExecutor / Pi / separate runtime package boundary，结合上述精确源码与两个 package.json、`apps/runtime/tsdown.config.ts` 核实。
+当前 `apps/runtime/src/agent-runtime.ts` 从 `@mindlink-agent/runtime-kit` 导入 `createMindlinkChatSession` 并维护会话池；`packages/mindlink-runtime/src/pi/index.ts` 的工厂同时装配工作提示词、默认资源加载器、记忆和工具。该工厂不是无业务语义的通用底座，因此助理 package 不依赖它。检索证据：zvec-grep 查询 RuntimeAgentExecutor / Pi / separate runtime package boundary，结合上述精确源码与两个 package.json、`apps/runtime/tsdown.config.ts` 核实。
 
 | 所有者 | 职责与依赖边界 |
 | --- | --- |
-| `packages/yuanpu-assistant`（新增） | 助理业务与独立执行器；依赖共享协议和 Pi 底层库，不导入工作 `runtime-kit` 或 `apps/runtime` 实现。专属技能随包提供初始模板，运行时仅从助理自己的技能目录加载。 |
-| `packages/yuanpu-runtime`（现有 `@yuanpu-agent/runtime-kit`） | 保留现有工作执行与宿主能力；不加入助理记忆、画像或助理整理调度。当前还含其他宿主服务，不以一次改名假定它已是纯 Work 包。 |
-| `packages/yuanpu-protocol` | 新增助理 IPC、来源变更、委派与结果契约；不放执行器、存储或提示词实现。 |
+| `packages/mindlink-assistant`（新增） | 助理业务与独立执行器；依赖共享协议和 Pi 底层库，不导入工作 `runtime-kit` 或 `apps/runtime` 实现。专属技能随包提供初始模板，运行时仅从助理自己的技能目录加载。 |
+| `packages/mindlink-runtime`（现有 `@mindlink-agent/runtime-kit`） | 保留现有工作执行与宿主能力；不加入助理记忆、画像或助理整理调度。当前还含其他宿主服务，不以一次改名假定它已是纯 Work 包。 |
+| `packages/mindlink-protocol` | 新增助理 IPC、来源变更、委派与结果契约；不放执行器、存储或提示词实现。 |
 | `apps/runtime` | 宿主与装配层；监护助理进程，提供来源读取、模型认证、委派执行、审批与渠道投递接口。Work 请求进入工作执行器，助理请求只进入 Worker。 |
 
 助理通过注入的窄 host 接口获取来源、委派执行和投递结果，不能直接拿到工作执行器、会话池或数据库连接。执行子代理可以采用普通工作对话引擎和专业技能，但必须是单独的执行器实例、任务会话池与任务配置，不借用用户正在使用的 Work 会话；这一专业执行由宿主适配，助理 package 只知道委派协议。
 
-可以复用 Pi 的模型调用、Agent 循环、会话序列化等底层代码；不得共享可变执行实例、提示词装配、技能注册表、工具集合或记忆存储。确需复用的 Yuanpu 底层逻辑先提取为不含 Work/Assistant 策略的模块，再由两端依赖；首期不为潜在复用预建大而全的 core package。上游同步的 Pi packages 保持不改。
+可以复用 Pi 的模型调用、Agent 循环、会话序列化等底层代码；不得共享可变执行实例、提示词装配、技能注册表、工具集合或记忆存储。确需复用的 MindLink 底层逻辑先提取为不含 Work/Assistant 策略的模块，再由两端依赖；首期不为潜在复用预建大而全的 core package。上游同步的 Pi packages 保持不改。
 
 在 `apps/runtime` 增加专门的 Assistant Worker 启动入口，调用新 package，而非进入 HTTP/Work 主入口再切换模式。源码 package、进程入口和发行产物是三个不同边界：当前 Runtime 只有单一 CJS/SEA 入口，实施时需接入 Worker 打包和启动分发。可与主 Runtime 同版本交付，不要求独立安装或更新产品；必须保证 SEA 环境无需用户安装 Node 也能启动并回收 Worker。新包的独立构建、类型检查、测试和根工作区检查都要接入。
 
@@ -62,7 +62,7 @@ Hermes 的小文件字符上限是为了限制每次提示词成本，不是 Yua
 
 | 边界 | 本轮交付约束 | 未来云端替换点 |
 | --- | --- | --- |
-| 助理核心与生命周期 | `yuanpu-assistant` 只依赖 Pi 底层及共享协议；显式 Home 与窄 host 接口，不导入 Electron。关闭 App 后停止由桌面宿主控制；无界面测试宿主可运行助理。 | 云端宿主管理常驻生命周期，复用助理整理、技能和记忆逻辑。 |
+| 助理核心与生命周期 | `mindlink-assistant` 只依赖 Pi 底层及共享协议；显式 Home 与窄 host 接口，不导入 Electron。关闭 App 后停止由桌面宿主控制；无界面测试宿主可运行助理。 | 云端宿主管理常驻生命周期，复用助理整理、技能和记忆逻辑。 |
 | 来源与内容 | 来源落盘后产生可补扫事件；稳定 ID、版本、受众及不透明内容引用不依赖绝对路径或连接。正文与产物由 host 解析，助理可以写自己的 Home，但不得绕过 host 读取来源系统目录。 | 本地来源上传、云端来源存储与内容读取适配器；仅同步授权材料。 |
 | 不可用与删除 | 暂时无法访问与已删除分别表达；恢复后按来源版本继续，删除及遗忘不因旧事件重放复活。 | 网络断线、设备离线和云端补收事件。 |
 | 单写入与状态 | 一个 Worker 独占 Home；另一个写入者被拒绝。客户端使用服务修改记忆；请求去重、交付和队列状态持久化。 | 停写后迁移一致快照并转移所有权；不双向同步运行中的 SQLite 和会话文件。跨机租约与故障切换届时另行设计。 |
@@ -74,35 +74,35 @@ Hermes 的小文件字符上限是为了限制每次提示词成本，不是 Yua
 
 落实入口：创建独立助理包与专属执行环境（TASK-038）、隔离工作会话并保留历史（TASK-039）、接入助理进程与 SEA 生命周期（TASK-040）、接通本地与企业微信独立助理（TASK-041）、实现来源与可修订记忆存储（TASK-043）、建立工作工具结果与产物的助理来源契约（TASK-061）、接通助理专业任务委派与核验（TASK-046）、接通助理记忆工作评估与任务界面（TASK-049）和实现助理内部自动化与定时调度（TASK-051）。独立助理与双入口阶段验证（TASK-042）验证无 Electron 宿主、断线恢复及单写入；后续阶段验收检查来源与委派适配。状态和依赖仍以任务注册表为准。
 
-证据：沿用本轮 ZG 查询 assistant / local App lifecycle / Pi server client / cloud VM / 企业微信路由，命中本提案、`apps/runtime/src/index.ts`；再核对 `packages/yuanpu-protocol/src/assistant.ts`、`apps/runtime/src/wecom-channel.ts` 和渠道 router。既有来源 ID/版本与业务请求契约可作为接缝，跨网络同步尚未实现；本次不改已完成契约卡的状态或证据。
+证据：沿用本轮 ZG 查询 assistant / local App lifecycle / Pi server client / cloud VM / 企业微信路由，命中本提案、`apps/runtime/src/index.ts`；再核对 `packages/mindlink-protocol/src/assistant.ts`、`apps/runtime/src/wecom-channel.ts` 和渠道 router。既有来源 ID/版本与业务请求契约可作为接缝，跨网络同步尚未实现；本次不改已完成契约卡的状态或证据。
 
 ## Pi client/server 适用性评估
 
 结论（按多渠道需求修订）：用户最新收敛本轮仅包含本地与企业微信两个入口，飞书、微信、钉钉不纳入本轮开发或验收；两入口的统一助理服务与会话路由进入首期设计。优先验证 Pi client/server 作为这一通信层，不再把它完全推迟到远程执行阶段；首个验证覆盖本地入口与现有企业微信入口。平台接入由渠道适配器完成，不要求 IM 平台直接理解 Pi 协议。Pi 的实验性接口仍需验证，尚未宣称完成选型或迁移；无论最终传输实现如何，渠道契约和助理业务边界保持一致。
 
-本地证据：zvec-grep 查询 Pi server/client Session worker transport routing，定位 `packages/agent/docs/plugins.md`、`packages/coding-agent/docs/development.md`，再核对 `packages/server/README.md`、`packages/client/README.md` 和 package.json。当前同步版本为 0.86.1，两端文档仍标记 experimental；server 面向 durable Session / Agent Harness，应用需提供服务 host、Session resolver 和 routed Session factory。现有 Yuanpu 使用 `createYuanpuChatSession`，不能把新 server 直接套上后宣称已经兼容。
+本地证据：zvec-grep 查询 Pi server/client Session worker transport routing，定位 `packages/agent/docs/plugins.md`、`packages/coding-agent/docs/development.md`，再核对 `packages/server/README.md`、`packages/client/README.md` 和 package.json。当前同步版本为 0.86.1，两端文档仍标记 experimental；server 面向 durable Session / Agent Harness，应用需提供服务 host、Session resolver 和 routed Session factory。现有 MindLink 使用 `createMindlinkChatSession`，不能把新 server 直接套上后宣称已经兼容。
 
-- 会话消息、进度订阅、多个界面连接同一会话是其适用范围。它提供路由与订阅基础，具体聊天、目录和管理服务契约仍由应用提供。浏览器 WebSocket 传输与认证、Electron preload 桥接、三平台与 SEA 集成需由 Yuanpu 适配和验证，不因 client 是 transport-neutral 就视为已经完成。
-- `yuanpu-assistant` 继续拥有记忆、技能、用户理解、工作台账、整理调度和委派策略；共享 server 仅负责路由，不允许 Work 与 Assistant 共享执行器、默认资源加载或存储。传输适配在 Yuanpu 自有模块实现，不修改同步的上游包，助理核心不直接依赖具体 client/server 连接。
+- 会话消息、进度订阅、多个界面连接同一会话是其适用范围。它提供路由与订阅基础，具体聊天、目录和管理服务契约仍由应用提供。浏览器 WebSocket 传输与认证、Electron preload 桥接、三平台与 SEA 集成需由 MindLink 适配和验证，不因 client 是 transport-neutral 就视为已经完成。
+- `mindlink-assistant` 继续拥有记忆、技能、用户理解、工作台账、整理调度和委派策略；共享 server 仅负责路由，不允许 Work 与 Assistant 共享执行器、默认资源加载或存储。传输适配在 MindLink 自有模块实现，不修改同步的上游包，助理核心不直接依赖具体 client/server 连接。
 - 助理身份与 Session 分开：一个助理有多个聊天、回顾和整理会话。仅当两个界面确实要观察同一对话时才 attach 同一 Session；桌面与消息渠道共享助理记忆，不必共享聊天上下文。跨会话的记忆和工作台账通过助理专属服务访问，不冒充某个聊天 Session 的消息。后台服务不因最后一个界面断开而结束。
 - 多个独立 Session worker 不能各自写同一个 assistant Home。保持一个 Assistant Worker 持有记忆与台账写入权；如采用每 Session 一个执行 worker，记忆修订必须向该单写入者提交。Pi Session 的 writer 所有权并不自动解决助理跨会话记忆写入冲突。
 - UI 断开不等于取消任务；但 App 完整退出仍按用户已确认的策略停止助理与子代理。进程生命周期属于宿主策略，不由选择 client/server 自动改变。真正远程常驻执行是未来单独的产品边界。
-- client 不自动重连或重放请求；重新连接需要重新 attach，再取得当前状态。Yuanpu 必须用业务任务 ID 查询已接收请求的结果，避免把断线误判为执行失败并重复委派或发送消息。多界面并发输入、取消权限和任务顺序也需明确规则。
+- client 不自动重连或重放请求；重新连接需要重新 attach，再取得当前状态。MindLink 必须用业务任务 ID 查询已接收请求的结果，避免把断线误判为执行失败并重复委派或发送消息。多界面并发输入、取消权限和任务顺序也需明确规则。
 - Pi 提供路由校验，应用认证和业务授权仍由宿主负责；团队身份、租户、审批、审计及远程资源管理由未来 EAP 或相应应用服务承担。现阶段个人助理不以接入完整团队平台为前提。
 
 接入验证应覆盖：同一会话两个客户端的状态一致；断线期间任务继续且重连后可恢复状态；请求结果丢失时不重复执行；过期 attachment 被拒绝；未授权界面无法读取助理服务；独立 Work/Assistant 的技能及存储边界仍成立；无界面连接时整理仍可工作；App 退出后所有工作进程被回收。先用本地与企业微信两个入口、独立聊天会话和一个后台整理任务做适配验证，再决定具体通信迁移方案。
 
 ### TASK-037 通信适配结论与契约
 
-`packages/yuanpu-protocol/src/assistant.ts` 定义助理 IPC v1，独立于现有桌面 HTTP `PROTOCOL_VERSION=4`。添加字段时保持旧字段语义和读取兼容；更改必填字段、身份含义或状态终态时提升 `ASSISTANT_CONTRACT_VERSION`，宿主与 Worker 启动握手拒绝不支持的版本。持久来源、记忆和评估各保留自己的 `sourceVersion`、`version`、`reviewVersion`，不是用 IPC 版本覆盖内容版本。迁移旧记录时写新格式和来源引用，旧 Pi 会话原件只读保留；不在旧会话文件上原地改格式。
+`packages/mindlink-protocol/src/assistant.ts` 定义助理 IPC v1，独立于现有桌面 HTTP `PROTOCOL_VERSION=4`。添加字段时保持旧字段语义和读取兼容；更改必填字段、身份含义或状态终态时提升 `ASSISTANT_CONTRACT_VERSION`，宿主与 Worker 启动握手拒绝不支持的版本。持久来源、记忆和评估各保留自己的 `sourceVersion`、`version`、`reviewVersion`，不是用 IPC 版本覆盖内容版本。迁移旧记录时写新格式和来源引用，旧 Pi 会话原件只读保留；不在旧会话文件上原地改格式。
 
 宿主在接入层核验桌面本地身份或企微配对，生成 `AssistantPrincipal`；持久化 `AssistantConversationBinding`，决定独立 `conversationId`、`sessionId`、受众和回复目标。入站消息不能指定身份、Session、受众或投递路由。`validateAssistantIngress` 对照宿主可信身份和会话绑定，个人受众 ID 必须等于可信 `principalId`；去重键包含渠道、账号、组织、会话、线程和平台消息 ID。宿主先持久化已接受请求和去重键，再交给 Worker；断线后按 `requestId` 查询结果，已有请求不得重放执行。相同 Session 的输入由 Worker 串行，取消绑定具体 run。默认桌面和企微各有聊天 Session，同一 `assistantId` 共享经受众过滤的助理记忆；只有用户明确续接且受众相同才绑定同一 Session。
 
 宿主拥有平台凭据、配对、渠道原始消息、业务请求去重、`replyTarget` 和出站状态，以及 `automation.sqlite`。普通回复只投递到请求绑定的原渠道会话与线程；投递结果未知时保留 `unknown`，核对平台记录后再决定重试。Assistant Worker 独占助理目录、会话、记忆、台账、评估、建议和委派记录的写入权；执行子代理只返回有界结果引用，不能直接写助理目录。来源 `AssistantSourceChange` 携带稳定 ID、版本、受众和内容引用；Worker 按来源版本排除重复、乱序和已撤回材料。`AssistantWorkReview` 的判断只针对工作目标、过程与产物，每项结论带来源版本；无足够证据记 `unverified`。记忆更正与遗忘使用 `expectedVersion` 并传播到派生摘要、评估引用和跨渠道展示；委派的 `completed` 只表示专业任务有终态，工作完成仍要核对产物。个人记忆仅允许同一 `personal` 受众读取，组织或会话范围只读取同范围或明确另行授权的材料。
 
-本地探针 `packages/yuanpu-runtime/test/assistant-pi-session-probe.test.mjs` 实际启动 Pi 0.86.1 的 Unix server、两个 Pi client、`JsonlSessionRepo` 和 `AgentHarness`。两个已获探针凭证的连接 attach 同一 Session，取得订阅快照与后续状态；第三个无凭证连接不能 attach 或借用别人的 attachment 读取。企微代表连接在请求已接收而响应未返回时断开，显式 reconnect/attach 后按业务 ID 查询；旧 attachment 被拒。探针在临时目录持久化请求记录，重启 Pi server、重新载入记录并重复提交后，离线模型提供者仍只执行一次。这证明宿主服务可在 Pi 路由之上实现该恢复路径；探针凭证和 JSON 日志仅是测试适配器，真实配对、并发事务与进程崩溃一致性仍由 TASK-041 实现和验证。探针还实际创建现有 `createYuanpuChatSession`，确认它仍走 `SessionManager` 的旧会话接缝。Pi server 要求新的 durable `Session` 和 `RoutedSessionHandle`；现有聊天工厂返回的是旧 `YuanpuChatSession`，不能直接作为其 `openSession`。因此新助理包以 Pi Session/Harness 装配自己的服务，现有 Work 适配维持旧路径与只读归档；迁移旧助理历史时以来源引用导入新助理，不复制原始 Session 文件。Yuanpu 自有的服务层实现鉴权、会话目录、订阅、请求去重和结果查询；Pi 只提供连接、路由及状态传输。私有 Unix socket 仅用于本地进程；桌面 preload 与企微长连接由宿主接入此服务，不让平台直接连接 socket。
+本地探针 `packages/mindlink-runtime/test/assistant-pi-session-probe.test.mjs` 实际启动 Pi 0.86.1 的 Unix server、两个 Pi client、`JsonlSessionRepo` 和 `AgentHarness`。两个已获探针凭证的连接 attach 同一 Session，取得订阅快照与后续状态；第三个无凭证连接不能 attach 或借用别人的 attachment 读取。企微代表连接在请求已接收而响应未返回时断开，显式 reconnect/attach 后按业务 ID 查询；旧 attachment 被拒。探针在临时目录持久化请求记录，重启 Pi server、重新载入记录并重复提交后，离线模型提供者仍只执行一次。这证明宿主服务可在 Pi 路由之上实现该恢复路径；探针凭证和 JSON 日志仅是测试适配器，真实配对、并发事务与进程崩溃一致性仍由 TASK-041 实现和验证。探针还实际创建现有 `createMindlinkChatSession`，确认它仍走 `SessionManager` 的旧会话接缝。Pi server 要求新的 durable `Session` 和 `RoutedSessionHandle`；现有聊天工厂返回的是旧 `MindlinkChatSession`，不能直接作为其 `openSession`。因此新助理包以 Pi Session/Harness 装配自己的服务，现有 Work 适配维持旧路径与只读归档；迁移旧助理历史时以来源引用导入新助理，不复制原始 Session 文件。MindLink 自有的服务层实现鉴权、会话目录、订阅、请求去重和结果查询；Pi 只提供连接、路由及状态传输。私有 Unix socket 仅用于本地进程；桌面 preload 与企微长连接由宿主接入此服务，不让平台直接连接 socket。
 
-此探针证明本地传输和离线模型回合可组合，尚未证明真实企微账号、模型、SEA Worker 生命周期或进程崩溃恢复；这些由 TASK-040、TASK-041 和阶段验收覆盖。`JsonlSessionRepo` 用独立助理目录，不能与现有 `SessionManager` 同写。若后续 Pi 实验接口变化，保持上述助理 v1 业务契约，替换 Yuanpu 的窄传输层及 Session 路由适配，先重跑此探针再迁移生产连接。
+此探针证明本地传输和离线模型回合可组合，尚未证明真实企微账号、模型、SEA Worker 生命周期或进程崩溃恢复；这些由 TASK-040、TASK-041 和阶段验收覆盖。`JsonlSessionRepo` 用独立助理目录，不能与现有 `SessionManager` 同写。若后续 Pi 实验接口变化，保持上述助理 v1 业务契约，替换 MindLink 的窄传输层及 Session 路由适配，先重跑此探针再迁移生产连接。
 
 TASK-041 本地实现采用 Runtime 宿主 HTTP/Electron IPC 接入桌面，以及现有企业微信 SDK/ChannelRouter 接入私聊；宿主用持久身份、会话、请求和交付账本转发到单个 `AssistantWorkerManager`，由 Worker 持有独立 Pi Session。此实现没有将 Pi client/server 的 attach/订阅接口接入生产路径。TASK-037 的 Pi server/client 实验仍仅是可行性证据；在本地单宿主双入口阶段，现有私有 HTTP/IPC 和持久业务 ID 足以实现重连查询与原路回复。以后替换通信层时，保持助理请求契约及宿主鉴权/去重/投递边界，通过 `AssistantHostService` 与 Worker manager 的窄接口切换传输；不得把实验探针当成生产验收。
 
@@ -119,7 +119,7 @@ TASK-041 本地实现采用 Runtime 宿主 HTTP/Electron IPC 接入桌面，以�
                                                        └─ 工作评估与子代理委派
 ```
 
-渠道适配器负责平台连接、校验消息来源、将文本与附件引用转换为统一输入，以及将助理输出转换为该渠道支持的格式。内部可通过 Pi client 调用和订阅服务；平台回调和长连接接入不直接暴露给助理核心。Pi server 承担应用服务与 Session 路由，Yuanpu 宿主补齐身份、配对、权限、顺序、去重及交付策略。`yuanpu-assistant` 只接收归一化请求，不导入各 IM SDK，也不根据平台名拼装自己的业务循环。
+渠道适配器负责平台连接、校验消息来源、将文本与附件引用转换为统一输入，以及将助理输出转换为该渠道支持的格式。内部可通过 Pi client 调用和订阅服务；平台回调和长连接接入不直接暴露给助理核心。Pi server 承担应用服务与 Session 路由，MindLink 宿主补齐身份、配对、权限、顺序、去重及交付策略。`mindlink-assistant` 只接收归一化请求，不导入各 IM SDK，也不根据平台名拼装自己的业务循环。
 
 统一输入至少区分：`assistantId`、已验证的 `principalId`、`channel`、`accountId`、渠道租户/组织范围（如有）、`externalConversationId`、`threadId`（如有）、`externalMessageId`、消息内容与附件引用、接收时间、来源可见范围及 `replyTarget`。宿主根据绑定映射得到内部 `conversationId` 和 `sessionId`，并生成可追踪的业务请求 ID；适配器给出的名称或文本不能自行声明已绑定身份。以账号/组织/会话范围内的平台消息 ID 去重，不把不同账号下相同 ID 合并。
 
@@ -153,7 +153,7 @@ Runtime 启动、监护和有界关闭 Assistant Worker；父进程退出时 Wor
 建议目录（专题文件按内容积累创建，以下是归属约定，不是首次启动必须生成的空目录模板）：
 
 ```text
-~/.yuanpu/assistant/
+~/.mindlink/assistant/
 ├── config.json                  # 模型、来源范围、预算、整理频率和渠道
 ├── SOUL.md                      # 助理身份、职责与相处原则
 ├── memories/
@@ -213,11 +213,11 @@ Runtime 启动、监护和有界关闭 Assistant Worker；父进程退出时 Wor
 本轮核对本地 Hermes 的 `hermes_cli/config.py:535-555`（实际创建的目录骨架）、`tools/skills_tool.py:174-181`（技能搜索顺序）、`website/docs/user-guide/features/memory.md:11-55`（记忆文件及冻结策略）、`website/docs/user-guide/profiles.md:389-410`（Home 解析与工作目录区别）。此前已确认 Hermes 索引缺失，本轮按上述已知路径精确检索，没有创建索引。
 
 - 采用 `SOUL.md`、`memories/USER.md`、`memories/MEMORY.md`：分别表示助理身份、用户画像、工作经验与当前脉络。目录和文件名统一使用英文；核心文件保留大写约定，专题文件使用 kebab-case（如 `working-style.md`、`goals.md`），正文和 UI 标签可使用中文。不保留旧命名的重复文件。此时尚未实现，无用户数据迁移。
-- 学习 Hermes 的统一 Home 解析。`yuanpu-assistant` 接收显式绝对路径 `assistantHome`，所有自有持久路径从它派生，生产环境由宿主传入 `~/.yuanpu/assistant`。不存在文件时初始化自己的默认文件，不回退到 `~/.yuanpu/agent`。不得用修改操作系统 `HOME` 的方式隔离助理。模型认证仍通过宿主接口访问应用凭据。
+- 学习 Hermes 的统一 Home 解析。`mindlink-assistant` 接收显式绝对路径 `assistantHome`，所有自有持久路径从它派生，生产环境由宿主传入 `~/.mindlink/assistant`。不存在文件时初始化自己的默认文件，不回退到 `~/.mindlink/agent`。不得用修改操作系统 `HOME` 的方式隔离助理。模型认证仍通过宿主接口访问应用凭据。
 - `config.json` 是助理配置的唯一编辑入口，不另设一份可编辑的 Pi `settings.json` 与它竞争。Pi 设置由适配层从助理配置生成并显式注入；如果底层必须落盘，使用 `cache/` 中可重建的派生文件，禁止隐式加载 Work 配置。
-- Hermes 实际有 `sessions/`，同时以 `state.db` 保存可检索的消息记录；Yuanpu 保留 Pi 会话格式，`sessions/` 是助理会话的正文来源，`state.sqlite` 保存索引和业务处理状态，不把它们当作两套可编辑聊天记录。会话与记忆正文、委派归档、修订历史及数据库均需备份；`logs/` 和 `cache/` 不承担持久事实来源。
-- Hermes 的技能工具会合并项目、本 profile、外部技能目录。Yuanpu 助理明确只使用自己的 `skills/`，不照搬这条发现链；技能中的软链接及引用也不能绕过技能根的路径边界。专业技能由子代理环境加载。
-- Hermes 的 `cron/`、`pairing/`、`hooks/` 以及 gateway 状态不整体复制。Yuanpu 的渠道配对和投递仍归宿主；助理整理频率在 `config.json`、待处理状态在 `state.sqlite`，由 App 生命周期内的 Worker 执行。无需为了相似的目录树再建一套渠道服务或常驻调度器。
+- Hermes 实际有 `sessions/`，同时以 `state.db` 保存可检索的消息记录；MindLink 保留 Pi 会话格式，`sessions/` 是助理会话的正文来源，`state.sqlite` 保存索引和业务处理状态，不把它们当作两套可编辑聊天记录。会话与记忆正文、委派归档、修订历史及数据库均需备份；`logs/` 和 `cache/` 不承担持久事实来源。
+- Hermes 的技能工具会合并项目、本 profile、外部技能目录。MindLink 助理明确只使用自己的 `skills/`，不照搬这条发现链；技能中的软链接及引用也不能绕过技能根的路径边界。专业技能由子代理环境加载。
+- Hermes 的 `cron/`、`pairing/`、`hooks/` 以及 gateway 状态不整体复制。MindLink 的渠道配对和投递仍归宿主；助理整理频率在 `config.json`、待处理状态在 `state.sqlite`，由 App 生命周期内的 Worker 执行。无需为了相似的目录树再建一套渠道服务或常驻调度器。
 
 所有自动写入经过 Worker 内部串行提交和版本检查，同一个助理 Home 只允许一个 Worker 持有写入锁。用户手动修改笔记通过文件版本检测识别，生成期间发生修改则重新合并，不能直接覆盖。目录组织和锁都不等同于 OS 沙箱，工具执行仍需通过既定宿主接口。
 
@@ -253,7 +253,7 @@ updated: 2026-09-26
 
 助理目录是完整的个人代理环境，不只是放一份长期记忆的文件夹。`skills/` 的初始职责可以是：理解用户、整理记忆、梳理项目、跟进承诺、委派与验收、日常回顾。这些技能教助理如何观察、核实、组织和协作；编程、绘图、表格处理等专业技能继续属于系统或其他技能环境。自动整理更新的是知识与工作状态，不把某次专业任务的提示词自动安装为助理技能，也不自动改写身份和权限规则。
 
-技能隔离必须在资源加载层落实。当前 Pi 适配使用 `DefaultResourceLoader` 和 `SettingsManager.create(cwd, agentDir)`（`packages/yuanpu-runtime/src/pi/index.ts`）；新的助理 package 自行装配资源加载器，显式指定技能根和允许的能力，不调用该工作会话工厂。助理仅发现 `assistant/skills/`，不得通过默认用户目录、当前项目、父目录、Work 的 `settings.json.packages` 或扩展自动发现机制间接加载专业技能。助理的工作目录固定在自己的环境；项目资料是读取对象，项目里的代理指令不能取代助理身份。共用模型认证和底层执行代码不意味着共享提示词、会话或技能注册表。
+技能隔离必须在资源加载层落实。当前 Pi 适配使用 `DefaultResourceLoader` 和 `SettingsManager.create(cwd, agentDir)`（`packages/mindlink-runtime/src/pi/index.ts`）；新的助理 package 自行装配资源加载器，显式指定技能根和允许的能力，不调用该工作会话工厂。助理仅发现 `assistant/skills/`，不得通过默认用户目录、当前项目、父目录、Work 的 `settings.json.packages` 或扩展自动发现机制间接加载专业技能。助理的工作目录固定在自己的环境；项目资料是读取对象，项目里的代理指令不能取代助理身份。共用模型认证和底层执行代码不意味着共享提示词、会话或技能注册表。
 
 专业任务通过以下对话过程完成：
 
@@ -262,7 +262,7 @@ updated: 2026-09-26
 3. 子代理返回状态、结果摘要、产物位置、证据、待确认事项及实际执行记录。失败、取消、执行结果不确定都必须明确表示，不能把计划说成完成。
 4. 助理核对完成条件，更新自己的工作台账，决定哪些结论值得进入记忆，再向用户汇报。子代理不能直接修改助理的记忆、身份、技能或配置；专门知识以有来源的结论进入记忆，专业技能本身不进入助理环境。
 
-这是待实现的助理委派契约。当前工作区已经有 `packages/yuanpu-runtime/src/pi/subagents/`（见 `docs/pi-subagents.md`），支持独立子会话、查询和取消，但沿用父环境技能发现，进程退出不恢复，不能直接视为满足助理的隔离、持久跟进和续聊要求。应复用已有能力并通过宿主适配补齐，助理包不导入工作 runtime-kit。Runtime 需要维护父子 run ID、任务会话 ID、所选技能及版本、预算、超时与取消；助理的 `delegations/` 保存可读委派记录和执行会话的持久归档，Runtime 的执行状态通过 IPC 同步，由 Worker 统一写入该目录。子代理调用不扩大已有工具权限。自动发起的查询和整理可在已授权范围内运行；发送消息、发布或修改外部工作成果仍遵守对应操作的授权要求。App 退出时取消委派并回收工具子进程；重启后先核对外部操作结果，再决定是否重试，避免重复副作用。
+这是待实现的助理委派契约。当前工作区已经有 `packages/mindlink-runtime/src/pi/subagents/`（见 `docs/pi-subagents.md`），支持独立子会话、查询和取消，但沿用父环境技能发现，进程退出不恢复，不能直接视为满足助理的隔离、持久跟进和续聊要求。应复用已有能力并通过宿主适配补齐，助理包不导入工作 runtime-kit。Runtime 需要维护父子 run ID、任务会话 ID、所选技能及版本、预算、超时与取消；助理的 `delegations/` 保存可读委派记录和执行会话的持久归档，Runtime 的执行状态通过 IPC 同步，由 Worker 统一写入该目录。子代理调用不扩大已有工具权限。自动发起的查询和整理可在已授权范围内运行；发送消息、发布或修改外部工作成果仍遵守对应操作的授权要求。App 退出时取消委派并回收工具子进程；重启后先核对外部操作结果，再决定是否重试，避免重复副作用。
 
 ## 信息来源与主动工作整理
 
@@ -285,7 +285,7 @@ updated: 2026-09-26
 3. 与已有记忆对照：合并重复项，为冲突保留时间线或标记待核实；用户明确纠正优先。过期目标归档，不让旧目标继续触发建议。
 4. 生成小范围 Markdown 修订并写入修订记录。概览文件只承载稳定、对未来有用的摘要；细节留在项目文档和原始工作会话中。助理回答时按主题检索相关记忆与来源，不把全部历史塞进提示词。
 
-检索分两层：先查经过整理的专题记忆，再按来源 ID 回到原始 Work/助理会话核实细节。原始会话建立本地全文索引，搜索结果展示会话、回合和时间，不把所有原文复制到 `assistant/memories/`。Hermes 使用 SQLite FTS5 搜索历史会话（`website/docs/user-guide/features/memory.md:218-244`）；Yuanpu 可复用该思路，但必须先在 Node SEA 和三平台构建中验证全文索引可用，并用中文短语回归测试选择合适的分词方式。
+检索分两层：先查经过整理的专题记忆，再按来源 ID 回到原始 Work/助理会话核实细节。原始会话建立本地全文索引，搜索结果展示会话、回合和时间，不把所有原文复制到 `assistant/memories/`。Hermes 使用 SQLite FTS5 搜索历史会话（`website/docs/user-guide/features/memory.md:218-244`）；MindLink 可复用该思路，但必须先在 Node SEA 和三平台构建中验证全文索引可用，并用中文短语回归测试选择合适的分词方式。
 
 候选记忆在写入前检查提示词注入、不可见字符和凭据泄漏；从 Markdown 重新加载进助理时也再检查一次。被拦截的内容保持为可定位的来源记录，但不得进入高信任的系统提示词。Hermes 对记忆写入与加载都做了此类检查（`website/docs/user-guide/features/memory.md:214-216`；`tools/memory_tool_store.py`），这里的目的同样是防止某段工作资料变成助理的行为指令。
 
@@ -301,7 +301,7 @@ updated: 2026-09-26
 
 `packages/evals` 当前是 Pi Coding Agent 的离线行为评测工程，使用 vitest-evals，harness 自行创建测试会话，文档对照模式还会启动 Docker；package.json 无通用运行时导出。检索证据：ZG 查询 packages/evals agent evaluation runner graders trajectories，核对其 README、package.json、src/harness.ts。可借鉴其按案例保留证据、缺失数据不记作成功、评分与基础设施失败分开的思路，不将其作为助理生产依赖，不在每次用户工作后启动评测容器。本轮不另设“评测助理自身”开发目标；正常行为测试仍用于验证实现。
 
-评估由 `yuanpu-assistant` 的工作审阅服务与专属 `review-work` 技能协作完成：
+评估由 `mindlink-assistant` 的工作审阅服务与专属 `review-work` 技能协作完成：
 
 1. 对照原始目标、约束与用户更正，识别这次工作要解决的问题；材料不足则标明无法判断。
 2. 检查结论是否有来源、执行是否有实际结果、产物是否满足完成条件；区分成功、部分完成、失败和待核实，不把一句“完成了”当作完成证据。
@@ -325,7 +325,7 @@ updated: 2026-09-26
 
 新增隔离验收：即使 Work 安装了全局技能、项目含代理指令或能力包声明了扩展，助理可见技能仍只有专属技能；子代理能以任务会话使用所选专业技能并返回可追溯产物；子代理不会继承全部用户记忆，也不能写助理目录；后续追问保留任务上下文，新委派不继承上一任务；App 退出后子代理及工具进程被回收。验证多来源增量、重复与乱序事件、人工纠正、来源失效、同步失败可见，以及自动台账更新不误报完成；Work 页面没有主动建议和记忆整理动态。
 
-最小业务验收：两个新工作对话互不携带上下文；助理能引用其中一项并指出来源；人工纠正后不被下一轮覆盖；删除来源后相关记忆撤回；App 退出时 Worker 停止，重启不重复整理和发送建议；Worker 崩溃时 Work 可继续；未获权限的渠道用户不能读取助理记忆；真实企业微信往返与桌面助理共享记忆但不混用会话。补充验证长助理会话的系统提示词不随记忆更新改变、中文短语能找回历史、前台消息可抢占后台整理、定时检查无新信息时静默且配置错误时不消耗模型调用。验证从 `packages/yuanpu-runtime/test`、`apps/runtime/test`、`apps/desktop/test` 与 `apps/app/test` 的相邻行为测试入手，最后运行 `pnpm check`，并对 SEA 与打包进程生命周期做针对性冒烟。
+最小业务验收：两个新工作对话互不携带上下文；助理能引用其中一项并指出来源；人工纠正后不被下一轮覆盖；删除来源后相关记忆撤回；App 退出时 Worker 停止，重启不重复整理和发送建议；Worker 崩溃时 Work 可继续；未获权限的渠道用户不能读取助理记忆；真实企业微信往返与桌面助理共享记忆但不混用会话。补充验证长助理会话的系统提示词不随记忆更新改变、中文短语能找回历史、前台消息可抢占后台整理、定时检查无新信息时静默且配置错误时不消耗模型调用。验证从 `packages/mindlink-runtime/test`、`apps/runtime/test`、`apps/desktop/test` 与 `apps/app/test` 的相邻行为测试入手，最后运行 `pnpm check`，并对 SEA 与打包进程生命周期做针对性冒烟。
 
 建议实施顺序：①固定 Work/Assistant/渠道输入与回复/身份和会话绑定/来源/记忆/工作台账/委派契约与迁移策略，完成 Pi client/server 本地与企业微信适配验证；②实现独立 Work 会话和历史列表；③创建独立助理 package，接入专用 Worker 入口、独立目录及技能加载隔离；④实现多来源自动整理、可读文件和纠正/删除；⑤接入普通任务会话式子代理与结果回收；⑥接入助理页回顾、建议及渠道；⑦完成真实桌面、重启和企业微信验收。共享协议先于界面与进程消费者变化。
 

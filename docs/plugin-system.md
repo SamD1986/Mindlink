@@ -1,24 +1,24 @@
-# YuanpuAgent 技能与能力包系统
+# MindLink 技能与能力包系统
 
-YuanpuAgent 对普通用户统一呈现“技能”。技能背后是一个可版本化的能力包，可包含 Pi skills、extensions、prompts、themes、专家角色、工作流或服务连接。Pi 上游包保持不变，YuanpuAgent 只通过公开的 package/resource loader 契约加载能力包。
+MindLink 对普通用户统一呈现“技能”。技能背后是一个可版本化的能力包，可包含 Pi skills、extensions、prompts、themes、专家角色、工作流或服务连接。Pi 上游包保持不变，MindLink 只通过公开的 package/resource loader 契约加载能力包。
 
 ## 用户目录
 
 用户数据按所有权分为四个根目录：
 
 ```text
-~/.yuanpu/
-├── app/             # YuanpuAgent 全局配置、更新、缓存和日志
+~/.mindlink/
+├── app/             # MindLink 全局配置、更新、缓存和日志
 ├── agent/           # Pi Agent 目录：settings、skills、memory、sessions 等
 ├── packages/        # 市场能力包、配置和安装事务
 └── workflows/       # 用户工作流与项目运行状态
 ```
 
-能力包安装成功后，安装器把已启用包的绝对路径同步到 `~/.yuanpu/agent/settings.json` 的 `packages` 字段。Pi 的 `DefaultResourceLoader` 因此可以按标准 Pi package 规则发现 extensions、skills、prompts 和 themes。
+能力包安装成功后，安装器把已启用包的绝对路径同步到 `~/.mindlink/agent/settings.json` 的 `packages` 字段。Pi 的 `DefaultResourceLoader` 因此可以按标准 Pi package 规则发现 extensions、skills、prompts 和 themes。
 
 ## 安装流程
 
-1. “技能市场”优先查询配置的 Yuanpu 目录服务；未配置目录时回退到 npm registry 的 `pi-package` 搜索。
+1. “技能市场”优先查询配置的 MindLink 目录服务；未配置目录时回退到 npm registry 的 `pi-package` 搜索。
 2. 搜索结果始终使用精确版本安装，例如 `npm:example-plugin@1.2.3`。
 3. 也可以输入固定到完整 40 位 commit SHA 的 GitHub HTTPS 地址。
 4. 安装器在 `.staging/<transaction>` 中创建独立 package root，并用 Arborist 解析完整依赖树。
@@ -57,8 +57,8 @@ runtime 是唯一执行安装事务和修改插件状态的进程。
 
 ## 能力包配置
 
-- 现有 Pi 扩展继续使用自己的配置约定。`pi-mcp-adapter` 的用户级配置为 `~/.yuanpu/agent/mcp.json`，工作区覆盖为 `<workspace>/.pi/mcp.json`。
-- Yuanpu-aware 能力包可在 `package.json` 的 `yuanpu.config.schema` 声明包内 JSON Schema。用户配置写入 `~/.yuanpu/packages/config/<package>/`，不会进入可替换的安装目录。
+- 现有 Pi 扩展继续使用自己的配置约定。`pi-mcp-adapter` 的用户级配置为 `~/.mindlink/agent/mcp.json`，工作区覆盖为 `<workspace>/.pi/mcp.json`。
+- MindLink-aware 能力包可在 `package.json` 的 `mindlink.config.schema` 声明包内 JSON Schema。用户配置写入 `~/.mindlink/packages/config/<package>/`，不会进入可替换的安装目录。
 - 配置先校验再原子写入；保存或重置后 runtime 结束当前 Pi 会话，下一次对话加载新配置。
 - 名为 API Key、Token、Secret、Password 或 Authorization 的敏感字段只接受 `${ENV_NAME}` 或 `$env:ENV_NAME` 引用，拒绝明文落盘。
 
@@ -66,7 +66,7 @@ runtime 是唯一执行安装事务和修改插件状态的进程。
 
 ```json
 {
-  "yuanpu": {
+  "mindlink": {
     "config": {
       "schema": "./config.schema.json",
       "schemaVersion": 1,
@@ -80,11 +80,11 @@ runtime 是唯一执行安装事务和修改插件状态的进程。
 }
 ```
 
-`schema` 必须指向插件安装目录内的 JSON Schema；越界路径会被拒绝。未声明此清单且没有内置适配器的插件仍可安装和运行，但界面不显示“配置”。工作区配置由 YuanpuAgent 按工作区绝对路径散列后独立保存，避免写入插件目录或相互覆盖。
+`schema` 必须指向插件安装目录内的 JSON Schema；越界路径会被拒绝。未声明此清单且没有内置适配器的插件仍可安装和运行，但界面不显示“配置”。工作区配置由 MindLink 按工作区绝对路径散列后独立保存，避免写入插件目录或相互覆盖。
 
 ## 当前限制
 
 - 需要本机编译或依赖安装脚本生成 addon 的插件仍不兼容；只有包内已提供当前平台预编译产物的插件可用。
-- 普通第三方 `pi-mcp-adapter` 会直接向 Pi 注册工具；YuanpuAgent 自带的 MCP 能力仍只通过 `search_capabilities` 和 `execute_capability` 两个元工具暴露。
+- 普通第三方 `pi-mcp-adapter` 会直接向 Pi 注册工具；MindLink 自带的 MCP 能力仍只通过 `search_capabilities` 和 `execute_capability` 两个元工具暴露。
 - 插件启停通过重建 Pi 会话生效，当前正在执行的 prompt 不会被中途热替换。
 - 系统密钥库尚未接入；首版使用环境变量引用，避免把密钥写入插件配置文件。

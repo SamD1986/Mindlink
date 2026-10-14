@@ -3,11 +3,11 @@ import { parseWorkReviewProposal, parseUnderstandingProposal, parseSuggestionPro
   suggestionCandidateKeys, isDirectUserStatement,
   type WorkReviewProposal, type AssistantUserUnderstanding,
   type UnderstandingSnapshot, type UnderstandingProposal, type SuggestionCandidate,
-  type SuggestionProposal, type AssistantSuggestionStore } from '@yuanpu-agent/assistant';
+  type SuggestionProposal, type AssistantSuggestionStore } from '@mindlink-agent/assistant';
 import type { AssistantMemoryRepository, AssistantAutomationStore, AutomationHandler,
   AutomationJob, AutomationProposal, AssistantWorkReviewStore, WorkReviewSnapshot,
-  AssistantWorkOrganization } from '@yuanpu-agent/assistant';
-import type { AssistantDelegationRecord } from '@yuanpu-agent/protocol';
+  AssistantWorkOrganization } from '@mindlink-agent/assistant';
+import type { AssistantDelegationRecord } from '@mindlink-agent/protocol';
 
 export interface DelegationAutomationHost {
   current(taskId: string): Promise<AssistantDelegationRecord | undefined>;

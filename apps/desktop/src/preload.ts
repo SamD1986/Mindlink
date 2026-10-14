@@ -1,4 +1,4 @@
-import type { DesktopBridge } from '@yuanpu-agent/protocol';
+import type { DesktopBridge } from '@mindlink-agent/protocol';
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 
 const bridge: DesktopBridge = {
@@ -119,4 +119,4 @@ const bridge: DesktopBridge = {
   },
 };
 
-contextBridge.exposeInMainWorld('yuanpu', bridge);
+contextBridge.exposeInMainWorld('mindlink', bridge);

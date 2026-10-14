@@ -22,7 +22,7 @@ const {
 } = await import('../src/workspace-files.ts');
 
 async function createWorkspace() {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-workspace-files-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-workspace-files-'));
   await mkdir(join(root, 'src'));
   await mkdir(join(root, 'docs'));
   await writeFile(join(root, 'README.md'), '# 标题\n\n工作区说明。\n');
@@ -69,7 +69,7 @@ test('resolveWorkspacePath rejects .., absolute escape and missing paths', async
 
 test('resolveWorkspacePath rejects symlink escapes but allows in-workspace links', async () => {
   const root = await createWorkspace();
-  const outside = await mkdtemp(join(tmpdir(), 'yuanpu-outside-'));
+  const outside = await mkdtemp(join(tmpdir(), 'mindlink-outside-'));
   try {
     await writeFile(join(outside, 'secret.txt'), 'outside');
     await symlink(outside, join(root, 'escape-dir'));
@@ -87,7 +87,7 @@ test('resolveWorkspacePath rejects symlink escapes but allows in-workspace links
 
 test('resolveWorkspaceFilePath accepts regular files and rejects directories or escapes', async () => {
   const root = await createWorkspace();
-  const outside = await mkdtemp(join(tmpdir(), 'yuanpu-outside-'));
+  const outside = await mkdtemp(join(tmpdir(), 'mindlink-outside-'));
   try {
     await writeFile(join(outside, 'secret.txt'), 'outside');
     await symlink(join(outside, 'secret.txt'), join(root, 'escape-file.txt'));
@@ -195,7 +195,7 @@ test('listWorkspaceTree flattens descendants and reports truncation', async () =
 
 test('listWorkspaceTree skips symlink escapes and cuts symlink cycles', async () => {
   const root = await createWorkspace();
-  const outside = await mkdtemp(join(tmpdir(), 'yuanpu-outside-'));
+  const outside = await mkdtemp(join(tmpdir(), 'mindlink-outside-'));
   try {
     await writeFile(join(outside, 'secret.txt'), 'outside');
     await symlink(outside, join(root, 'escape-dir'));
@@ -212,7 +212,7 @@ test('listWorkspaceTree skips symlink escapes and cuts symlink cycles', async ()
 });
 
 test('listWorkspaceTree stops growing at the entry cap', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-tree-cap-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-tree-cap-'));
   try {
     for (let index = 0; index < MAX_TREE_ENTRIES + 10; index += 1) {
       await writeFile(join(root, `file-${String(index).padStart(5, '0')}.txt`), 'x');

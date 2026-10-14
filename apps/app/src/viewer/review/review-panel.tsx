@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { WorkFileChangeEntry } from '@yuanpu-agent/protocol';
+import type { WorkFileChangeEntry } from '@mindlink-agent/protocol';
 
 import { AppIcon } from '../../shared/app-icon.js';
 import { FileDiffView } from '../preview/file-diff-view.js';
@@ -18,7 +18,7 @@ export function ReviewPanel({ conversationId, lastRunId, refreshKey, active }: {
   refreshKey: number;
   active: boolean;
 }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const [scope, setScope] = useState<ReviewScope>('last-run');
   const [expandedPath, setExpandedPath] = useState<string>();
   const query = useQuery({

@@ -1,8 +1,8 @@
-import type { DesktopBridge } from '@yuanpu-agent/protocol';
+import type { DesktopBridge } from '@mindlink-agent/protocol';
 
 declare global {
   interface Window {
-    yuanpu?: DesktopBridge;
+    mindlink?: DesktopBridge;
   }
 }
 

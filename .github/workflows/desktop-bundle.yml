@@ -15,7 +15,7 @@ on:
         description: Prefix for uploaded artifact names
         required: false
         type: string
-        default: yuanpu-agent-desktop
+        default: mindlink-desktop
       retention-days:
         description: Artifact retention in days
         required: false
@@ -32,16 +32,16 @@ on:
         description: Prefix for uploaded artifact names
         required: false
         type: string
-        default: yuanpu-agent-desktop
+        default: mindlink-desktop
       retention-days:
         description: Artifact retention in days
         required: false
         type: number
         default: 7
     secrets:
-      YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64:
+      MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64:
         required: false
-      YUANPU_ARTIFACT_SIGNING_KEY_ID:
+      MINDLINK_ARTIFACT_SIGNING_KEY_ID:
         required: false
 
 permissions:
@@ -91,8 +91,8 @@ jobs:
       - name: Build desktop package
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-          YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64: ${{ secrets.YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64 }}
-          YUANPU_ARTIFACT_SIGNING_KEY_ID: ${{ secrets.YUANPU_ARTIFACT_SIGNING_KEY_ID }}
+          MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64: ${{ secrets.MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64 }}
+          MINDLINK_ARTIFACT_SIGNING_KEY_ID: ${{ secrets.MINDLINK_ARTIFACT_SIGNING_KEY_ID }}
         run: pnpm package:desktop
 
       - name: Verify packaged capability without system Python

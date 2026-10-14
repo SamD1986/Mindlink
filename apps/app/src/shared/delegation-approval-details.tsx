@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CapabilityApprovalSummary } from '@yuanpu-agent/protocol';
+import type { CapabilityApprovalSummary } from '@mindlink-agent/protocol';
 
 export function isVisibleAssistantDelegationApproval(approval: CapabilityApprovalSummary,
   surface: 'assistant' | 'work'): boolean {

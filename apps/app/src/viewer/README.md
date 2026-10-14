@@ -22,6 +22,6 @@
 
 ## 接缝约定
 
-- viewer 组件不直接触碰 `window.yuanpu`、Electron 或存储布局，只消费 `host/` 中的接口。当前 `modules/chat.tsx` 用桌面桥 + 会话 ID 实现 `ViewerFileHost`。
-- 数据契约类型沿用 `@yuanpu-agent/protocol`（`WorkFileEntry` / `WorkDirectoryListing` / `WorkFilePreview`），保持协议单一来源。
-- 后续浏览器视图：界面与控制协议放在 `browser/`，宿主（apps/desktop）提供原生浏览器实例并实现控制接口；浏览器 MCP 复用同一浏览器会话。某模块需要独立复用或发布时，再从目录平移为 `packages/yuanpu-viewer`。
+- viewer 组件不直接触碰 `window.mindlink`、Electron 或存储布局，只消费 `host/` 中的接口。当前 `modules/chat.tsx` 用桌面桥 + 会话 ID 实现 `ViewerFileHost`。
+- 数据契约类型沿用 `@mindlink-agent/protocol`（`WorkFileEntry` / `WorkDirectoryListing` / `WorkFilePreview`），保持协议单一来源。
+- 后续浏览器视图：界面与控制协议放在 `browser/`，宿主（apps/desktop）提供原生浏览器实例并实现控制接口；浏览器 MCP 复用同一浏览器会话。某模块需要独立复用或发布时，再从目录平移为 `packages/mindlink-viewer`。

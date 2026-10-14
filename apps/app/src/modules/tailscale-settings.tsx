@@ -1,14 +1,14 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { SaveTailscaleConnectionInput, TailscaleConnectionSettings } from '@yuanpu-agent/protocol';
+import type { SaveTailscaleConnectionInput, TailscaleConnectionSettings } from '@mindlink-agent/protocol';
 
 function message(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
 export function TailscaleSettingsPanel({ active, configRoot }: { active: boolean; configRoot: string }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const client = useQueryClient();
   const query = useQuery({
     queryKey: ['connections', 'tailscale'],

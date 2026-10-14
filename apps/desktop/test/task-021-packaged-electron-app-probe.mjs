@@ -13,12 +13,12 @@ import { SEA_SENTINEL_FUSE } from '../../runtime/scripts/native/lib.mjs';
 const execFileAsync = promisify(execFile);
 
 const appBundle = resolve(
-  process.env.TASK_021_PACKAGED_APP_PATH || resolve(import.meta.dirname, '../release/mac-arm64/YuanpuAgent.app'),
+  process.env.TASK_021_PACKAGED_APP_PATH || resolve(import.meta.dirname, '../release/mac-arm64/MindLink.app'),
 );
-const executable = join(appBundle, 'Contents', 'MacOS', 'YuanpuAgent');
-const bundledSea = join(appBundle, 'Contents', 'Resources', 'runtime', 'YuanpuAgentRuntime-darwin-arm64');
+const executable = join(appBundle, 'Contents', 'MacOS', 'MindLink');
+const bundledSea = join(appBundle, 'Contents', 'Resources', 'runtime', 'MindLinkRuntime-darwin-arm64');
 const versionedSeaVersion = '0.1.1-test.021';
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-021-packaged-app-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-021-packaged-app-'));
 const home = join(root, 'home');
 const userData = join(root, 'user-data');
 const workspace = join(root, 'workspace');
@@ -118,7 +118,7 @@ function runtimePid(electronPid) {
   const output = execFileSync('ps', ['-axo', 'pid=,ppid=,command='], { encoding: 'utf8' });
   for (const line of output.split('\n')) {
     const match = /^\s*(\d+)\s+(\d+)\s+(.*)$/.exec(line);
-    if (match && Number(match[2]) === electronPid && match[3].includes('YuanpuAgentRuntime-darwin-arm64')) {
+    if (match && Number(match[2]) === electronPid && match[3].includes('MindLinkRuntime-darwin-arm64')) {
       return Number(match[1]);
     }
     if (match && Number(match[2]) === electronPid && match[3].includes(join(userData, 'runtime', 'versions'))) {
@@ -135,7 +135,7 @@ function alive(pid) {
 async function start() {
   const port = await freePort();
   const child = spawn(executable, [`--user-data-dir=${userData}`, `--remote-debugging-port=${port}`], {
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_NOTIFICATIONS_ENABLED: '0', TASK_021_PROVIDER_KEY: 'fixture-only' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_NOTIFICATIONS_ENABLED: '0', TASK_021_PROVIDER_KEY: 'fixture-only' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   const diagnostics = [];
@@ -157,7 +157,7 @@ async function start() {
     const browserInfo = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
     app.browser = await cdpSocket(browserInfo.webSocketDebuggerUrl);
     await eventually(async () => {
-      try { return (await evaluate(app, 'window.yuanpu.runtimeInfo()'))?.protocolVersion; }
+      try { return (await evaluate(app, 'window.mindlink.runtimeInfo()'))?.protocolVersion; }
       catch { return false; }
     }, 'Packaged App preload/Runtime did not become ready.');
     app.runtimePid = await eventually(() => runtimePid(child.pid), 'Packaged Runtime child was not found.');
@@ -208,20 +208,20 @@ try {
     baseUrl: `http://127.0.0.1:${providerPort}/v1`, api: 'openai-completions',
   }));
   const first = await start();
-  assert.equal((await evaluate(first, 'window.yuanpu.runtimeInfo()')).protocolVersion, 7);
-  assert.equal(await evaluate(first, 'window.yuanpu.runtimeRecoveryNotice().then((notice) => notice === undefined)'), true);
+  assert.equal((await evaluate(first, 'window.mindlink.runtimeInfo()')).protocolVersion, 7);
+  assert.equal(await evaluate(first, 'window.mindlink.runtimeRecoveryNotice().then((notice) => notice === undefined)'), true);
   assert.equal(await evaluate(first, "document.querySelector('.runtime-recovery-notice') === null"), true);
   const input = {
     contractVersion: 1, name: 'Packaged UI fixture', prompt: 'synthetic', workspaceId: workspace,
     timing: { kind: 'once', at: '2099-01-01T00:00:00.000Z' }, timeZone: 'UTC', delivery: { kind: 'desktop' },
   };
-  const created = await evaluate(first, `window.yuanpu.createSchedule(${JSON.stringify(input)})`);
-  assert.equal((await evaluate(first, 'window.yuanpu.listSchedules()')).length, 1);
-  const connection = await evaluate(first, `window.yuanpu.saveWecomConnection(${JSON.stringify({
+  const created = await evaluate(first, `window.mindlink.createSchedule(${JSON.stringify(input)})`);
+  assert.equal((await evaluate(first, 'window.mindlink.listSchedules()')).length, 1);
+  const connection = await evaluate(first, `window.mindlink.saveWecomConnection(${JSON.stringify({
     connectionId: 'imc_task021_packaged', botId: 'synthetic-bot', enabled: false,
   })})`);
   assert.equal(connection.status, 'disabled');
-  const chat = await evaluate(first, "window.yuanpu.chat('Synthetic packaged conversation')");
+  const chat = await evaluate(first, "window.mindlink.chat('Synthetic packaged conversation')");
   assert.equal(chat.message.includes('Synthetic packaged reply.'), true);
   assert.equal(workProviderBodies.length, 1);
   const initialDatabase = new DatabaseSync(join(home, 'workflows', 'automation.sqlite'), { readOnly: true });
@@ -245,16 +245,16 @@ try {
     sha256: createHash('sha256').update(await readFile(stagedSea)).digest('hex'),
   }));
   const second = await start();
-  assert.equal(await evaluate(second, 'window.yuanpu.runtimeRecoveryNotice().then((notice) => notice === undefined)'), true);
+  assert.equal(await evaluate(second, 'window.mindlink.runtimeRecoveryNotice().then((notice) => notice === undefined)'), true);
   assert.equal(await evaluate(second, "document.querySelector('.runtime-recovery-notice') === null"), true);
   const active = JSON.parse(await readFile(join(canonicalUserData, 'runtime', 'current.json'), 'utf8'));
   assert.equal(active.version, versionedSeaVersion);
-  assert.equal(active.executable, join(canonicalUserData, 'runtime', 'versions', versionedSeaVersion, 'YuanpuAgentRuntime'));
-  assert.equal((await evaluate(second, 'window.yuanpu.listSchedules()'))[0].scheduleId, created.scheduleId);
-  assert.equal((await evaluate(second, `window.yuanpu.getAgentRun(${JSON.stringify(desktopRun.run_id)})`)).status, 'succeeded');
-  assert.equal((await evaluate(second, 'window.yuanpu.listWecomConnections()')).connections.length, 1);
+  assert.equal(active.executable, join(canonicalUserData, 'runtime', 'versions', versionedSeaVersion, 'MindLinkRuntime'));
+  assert.equal((await evaluate(second, 'window.mindlink.listSchedules()'))[0].scheduleId, created.scheduleId);
+  assert.equal((await evaluate(second, `window.mindlink.getAgentRun(${JSON.stringify(desktopRun.run_id)})`)).status, 'succeeded');
+  assert.equal((await evaluate(second, 'window.mindlink.listWecomConnections()')).connections.length, 1);
   assert.equal(workProviderBodies.length, 1);
-  const continuedChat = await evaluate(second, "window.yuanpu.chat('Synthetic packaged continuation')");
+  const continuedChat = await evaluate(second, "window.mindlink.chat('Synthetic packaged continuation')");
   assert.equal(continuedChat.message.includes('Synthetic packaged reply.'), true);
   assert.equal(workProviderBodies.length, 2);
   const continuedContext = JSON.stringify(workProviderBodies[1].messages);
@@ -286,11 +286,11 @@ try {
   const third = await start();
   const rolledBack = JSON.parse(await readFile(join(canonicalUserData, 'runtime', 'current.json'), 'utf8'));
   assert.deepEqual(rolledBack, active);
-  assert.equal((await evaluate(third, 'window.yuanpu.listSchedules()'))[0].scheduleId, created.scheduleId);
-  assert.equal((await evaluate(third, `window.yuanpu.getAgentRun(${JSON.stringify(desktopRun.run_id)})`)).status, 'succeeded');
+  assert.equal((await evaluate(third, 'window.mindlink.listSchedules()'))[0].scheduleId, created.scheduleId);
+  assert.equal((await evaluate(third, `window.mindlink.getAgentRun(${JSON.stringify(desktopRun.run_id)})`)).status, 'succeeded');
   assert.equal(third.diagnostics.join('').includes('Runtime protocol is incompatible'), true);
   assert.equal(await evaluate(third,
-    "window.yuanpu.runtimeRecoveryNotice().then((notice) => notice?.kind === 'incompatible_protocol')"), true);
+    "window.mindlink.runtimeRecoveryNotice().then((notice) => notice?.kind === 'incompatible_protocol')"), true);
   const visibleIncompatibilityNotice = await eventually(async () => evaluate(third,
     "(() => { const notice = document.querySelector('.runtime-recovery-notice'); return Boolean(notice && notice.innerText.includes('Runtime 协议不兼容') && notice.innerText.includes('已恢复上一版本') && notice.getClientRects().length > 0 && getComputedStyle(notice).visibility === 'visible'); })()"),
   'Recovered incompatible Runtime notice was not visible in packaged UI.');
@@ -315,11 +315,11 @@ try {
   }));
   const fourth = await start();
   assert.deepEqual(JSON.parse(await readFile(join(canonicalUserData, 'runtime', 'current.json'), 'utf8')), active);
-  assert.equal((await evaluate(fourth, 'window.yuanpu.listSchedules()'))[0].scheduleId, created.scheduleId);
-  assert.equal((await evaluate(fourth, `window.yuanpu.getAgentRun(${JSON.stringify(desktopRun.run_id)})`)).status, 'succeeded');
+  assert.equal((await evaluate(fourth, 'window.mindlink.listSchedules()'))[0].scheduleId, created.scheduleId);
+  assert.equal((await evaluate(fourth, `window.mindlink.getAgentRun(${JSON.stringify(desktopRun.run_id)})`)).status, 'succeeded');
   assert.equal(fourth.diagnostics.join('').includes(genericMarker), true);
   assert.equal(await evaluate(fourth,
-    "window.yuanpu.runtimeRecoveryNotice().then((notice) => notice?.kind === 'activation_failed')"), true);
+    "window.mindlink.runtimeRecoveryNotice().then((notice) => notice?.kind === 'activation_failed')"), true);
   await eventually(async () => evaluate(fourth,
     "(() => { const notice = document.querySelector('.runtime-recovery-notice'); return Boolean(notice && notice.innerText.includes('Runtime 更新失败') && notice.innerText.includes('已恢复上一版本') && notice.getClientRects().length > 0); })()"),
   'Generic update failure notice was not visible in packaged UI.');
@@ -328,7 +328,7 @@ try {
   await evaluate(fourth, "document.querySelector('.runtime-recovery-notice button[aria-label=\"关闭 Runtime 更新提示\"]').click()");
   await eventually(async () => evaluate(fourth, "document.querySelector('.runtime-recovery-notice') === null"),
     'Generic Runtime recovery notice could not be dismissed.');
-  const recoveredChat = await evaluate(fourth, "window.yuanpu.chat('Synthetic packaged after rollback')");
+  const recoveredChat = await evaluate(fourth, "window.mindlink.chat('Synthetic packaged after rollback')");
   assert.equal(recoveredChat.message.includes('Synthetic packaged reply.'), true);
   assert.equal(workProviderBodies.length, 3);
   const recoveredContext = JSON.stringify(workProviderBodies[2].messages);

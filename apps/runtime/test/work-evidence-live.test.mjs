@@ -7,9 +7,9 @@ import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
 import { register } from 'tsx/esm/api';
-import { PersistentAgentService, openYuanpuMetadataDatabase,
-  readYuanpuChatTranscript, readYuanpuSavedToolResults } from '@yuanpu-agent/runtime-kit';
-import { AGENT_CONTRACT_VERSION } from '@yuanpu-agent/protocol';
+import { PersistentAgentService, openMindlinkMetadataDatabase,
+  readMindlinkChatTranscript, readMindlinkSavedToolResults } from '@mindlink-agent/runtime-kit';
+import { AGENT_CONTRACT_VERSION } from '@mindlink-agent/protocol';
 
 register();
 const { RuntimeAgentExecutor } = await import('../src/agent-runtime.ts');
@@ -28,7 +28,7 @@ async function eventually(assertion) {
 }
 
 test('real Runtime/Pi Work write settles distinct turn, tool and payload snapshot sources', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-work-evidence-live-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-work-evidence-live-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const workspace = join(root, 'workspace');
   const agentDir = join(root, 'agent');
@@ -61,7 +61,7 @@ test('real Runtime/Pi Work write settles distinct turn, tool and payload snapsho
       contextWindow: 128000, maxTokens: 1024 }],
   } } }));
 
-  const metadata = openYuanpuMetadataDatabase(join(root, 'metadata.sqlite'));
+  const metadata = openMindlinkMetadataDatabase(join(root, 'metadata.sqlite'));
   t.after(() => metadata.close());
   const conversation = metadata.workConversations.create(workspace, workspace);
   const piSessionId = metadata.workConversations.sessionId(workspace, conversation.id);
@@ -92,9 +92,9 @@ test('real Runtime/Pi Work write settles distinct turn, tool and payload snapsho
   assert.equal(await readFile(join(workspace, 'report.md'), 'utf8'), '# report\n');
   assert.equal(settled.output.toolResults?.[0].name, 'write');
   assert.equal(settled.output.artifacts?.[0].relativePath, 'report.md');
-  const transcript = readYuanpuChatTranscript(workspace, piSessionId, sessions, 100_000, true);
+  const transcript = readMindlinkChatTranscript(workspace, piSessionId, sessions, 100_000, true);
   assert.equal(metadata.workConversations.recordSavedTurns(conversation.id, transcript), 1);
-  const results = readYuanpuSavedToolResults(workspace, piSessionId, sessions);
+  const results = readMindlinkSavedToolResults(workspace, piSessionId, sessions);
   assert.equal(metadata.workEvidence.recordToolResults(conversation.id, piSessionId, results), 1);
   assert.equal(metadata.workEvidence.recordArtifacts(conversation.id, piSessionId), 1);
   assert.equal(metadata.workEvidence.recordUnverifiedArtifacts(conversation.id, piSessionId, results), 0);

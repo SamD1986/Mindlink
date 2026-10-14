@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
 
-import { YuanpuMetadataDatabase } from '@yuanpu-agent/runtime-kit';
+import { MindlinkMetadataDatabase } from '@mindlink-agent/runtime-kit';
 import { AssistantHostService } from '../src/assistant-host.ts';
 
 const now = '2026-09-26T00:00:00.000Z';
@@ -14,7 +14,7 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 5));
 function setup() {
   const raw = new DatabaseSync(':memory:');
   raw.exec('PRAGMA foreign_keys = ON');
-  const metadata = new YuanpuMetadataDatabase(raw);
+  const metadata = new MindlinkMetadataDatabase(raw);
   metadata.channels.bindConnection({ provider: 'wecom', connectionId: 'bot-1',
     providerAccountDigest: 'a'.repeat(64), credentialBindingDigest: 'b'.repeat(64), now });
   metadata.channels.pair('wecom', 'bot-1', 'sender-1', now);

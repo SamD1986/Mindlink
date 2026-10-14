@@ -27,7 +27,7 @@ test('management updates preserve pairing and write only strict Keychain referen
     await writeWecomConnectionDocument(appPath, newConnection);
     const persisted = await readWecomConnectionDocument(appPath);
     assert.equal(persisted.connections.length, 2);
-    assert.equal(persisted.connections[1].credentialRefs.botSecret, 'keychain:yuanpu/im/new_fixture/bot-secret');
+    assert.equal(persisted.connections[1].credentialRefs.botSecret, 'keychain:mindlink/im/new_fixture/bot-secret');
     assert.equal(persisted.connections[1].groupEnabled, false);
     assert.equal((await stat(join(appPath, 'connections', 'wecom.json'))).mode & 0o777, 0o600);
     assert.throws(() => configuredWecomDocument(persisted, {
@@ -70,7 +70,7 @@ test('connection summaries expose live readiness without account or credential v
 });
 
 async function withConfig(document, run) {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-wecom-config-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-wecom-config-'));
   try {
     await mkdir(join(root, 'connections'), { recursive: true });
     await writeFile(join(root, 'connections', 'wecom.json'), JSON.stringify(document), { mode: 0o600 });
@@ -106,7 +106,7 @@ function enabledConnection(overrides = {}) {
       provider: 'wecom',
       connectionId: 'imc_fixture',
       providerAccountRef: 'bot-fixture',
-      credentialRefs: { botSecret: 'keychain:yuanpu/im/imc_fixture/bot-secret' },
+      credentialRefs: { botSecret: 'keychain:mindlink/im/imc_fixture/bot-secret' },
       directMessagePolicy: 'paired-only',
       groupPolicy: 'allowlist-paired-sender-and-provider-at-mention',
       groupEnabled: false,
@@ -119,7 +119,7 @@ function enabledConnection(overrides = {}) {
 }
 
 test('missing or disabled local config never resolves a credential or starts transport', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-wecom-missing-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-wecom-missing-'));
   try {
     assert.deepEqual(await readWecomConnectionDocument(root), { schemaVersion: 1, connections: [] });
   } finally {
@@ -188,7 +188,7 @@ test('enabled config resolves only the Keychain reference at runtime and closes 
         return transport;
       },
     });
-    assert.deepEqual(references, ['keychain:yuanpu/im/imc_fixture/bot-secret']);
+    assert.deepEqual(references, ['keychain:mindlink/im/imc_fixture/bot-secret']);
     assert.deepEqual(created, [{
       connectionId: 'imc_fixture',
       botId: 'bot-fixture',
@@ -206,7 +206,7 @@ test('targeted startup leaves unrelated enabled connections untouched', async ()
     ...document.connections[0],
     connectionId: 'imc_other',
     providerAccountRef: 'other-bot-fixture',
-    credentialRefs: { botSecret: 'keychain:yuanpu/im/imc_other/bot-secret' },
+    credentialRefs: { botSecret: 'keychain:mindlink/im/imc_other/bot-secret' },
   });
   await withConfig(document, async (appPath) => {
     const started = [];
@@ -230,7 +230,7 @@ test('rejects plaintext credentials, non-Keychain references, and premature grou
     enabledConnection({ secret: 'plaintext-forbidden' }),
     enabledConnection({
       credentialRefs: {
-        botSecret: 'keychain:yuanpu/im/imc_fixture/bot-secret',
+        botSecret: 'keychain:mindlink/im/imc_fixture/bot-secret',
         secret: 'nested-plaintext-forbidden',
       },
     }),
@@ -238,7 +238,7 @@ test('rejects plaintext credentials, non-Keychain references, and premature grou
     enabledConnection({ groupPolicy: 'allow-all' }),
     enabledConnection({
       connectionId: 'imc_other',
-      credentialRefs: { botSecret: 'keychain:yuanpu/im/imc_fixture/bot-secret' },
+      credentialRefs: { botSecret: 'keychain:mindlink/im/imc_fixture/bot-secret' },
     }),
     enabledConnection({ groupEnabled: true }),
   ]) {
@@ -277,7 +277,7 @@ test('rejects duplicate connection ownership and closes an adapter whose start f
   duplicateAccount.connections.push({
     ...duplicateAccount.connections[0],
     connectionId: 'imc_fixture_second',
-    credentialRefs: { botSecret: 'keychain:yuanpu/im/imc_fixture_second/bot-secret' },
+    credentialRefs: { botSecret: 'keychain:mindlink/im/imc_fixture_second/bot-secret' },
   });
   await withConfig(duplicateAccount, async (appPath) => {
     await assert.rejects(
@@ -319,7 +319,7 @@ test('a later connection failure closes an earlier started adapter', async () =>
     ...document.connections[0],
     connectionId: 'imc_second',
     providerAccountRef: 'bot-second',
-    credentialRefs: { botSecret: 'keychain:yuanpu/im/imc_second/bot-secret' },
+    credentialRefs: { botSecret: 'keychain:mindlink/im/imc_second/bot-secret' },
   });
   await withConfig(document, async (appPath) => {
     let closed = false;

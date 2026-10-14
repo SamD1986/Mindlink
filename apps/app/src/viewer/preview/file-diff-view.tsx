@@ -4,7 +4,7 @@ import { PatchDiff } from '@pierre/diffs/react';
 import { createUnifiedDiff } from './text-diff.js';
 
 function currentAppTheme(): 'light' | 'dark' {
-  return document.documentElement.getAttribute('data-yuanpu-theme') === 'yuanpu-dark' ? 'dark' : 'light';
+  return document.documentElement.getAttribute('data-mindlink-theme') === 'mindlink-dark' ? 'dark' : 'light';
 }
 
 /**

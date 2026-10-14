@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import type { AgentRunRecord, AssistantDelegationRecord, AssistantEvidenceRef, AssistantLinkStatus,
-  AssistantReviewJudgment, AssistantSourceRevocationReceipt, ScheduleRecord } from '@yuanpu-agent/protocol';
+  AssistantReviewJudgment, AssistantSourceRevocationReceipt, ScheduleRecord } from '@mindlink-agent/protocol';
 import { AppIcon } from '../shared/app-icon.js';
 import { MessageContent } from '../shared/message-content.js';
 import { readSavedContent, removeSavedContent, savedContentEvent } from '../shared/saved-content.js';
@@ -41,7 +41,7 @@ export function AssistantHome({ active, link, linkLoading, linkError, retryLink,
   onToggleArchive: () => void;
   onOpenWorkConversation: (conversationId: string) => void;
 }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const navigate = useNavigate();
   const client = useQueryClient();
   const [tab, setTab] = useState<Tab>('今日');

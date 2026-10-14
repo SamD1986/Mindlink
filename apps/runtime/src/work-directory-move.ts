@@ -2,9 +2,9 @@ import { createHash, randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
 import { access, lstat, open, readFile, readdir, realpath, rename, rm } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import type { WorkConversationStore, WorkDirectoryMovePlan } from '@yuanpu-agent/runtime-kit';
+import type { WorkConversationStore, WorkDirectoryMovePlan } from '@mindlink-agent/runtime-kit';
 
-import type { WorkMoveRequest, WorkMoveResult } from '@yuanpu-agent/protocol';
+import type { WorkMoveRequest, WorkMoveResult } from '@mindlink-agent/protocol';
 
 interface DirectoryChange { from: string; to: string; device: number; inode: number }
 interface HeaderChange {

@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-import type { BrowserControlCommand } from '@yuanpu-agent/protocol';
+import type { BrowserControlCommand } from '@mindlink-agent/protocol';
 
 import type { BrowserGuestManager } from './browser-guest-manager.js';
 

@@ -6,8 +6,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { AssistantMemoryRepository, AssistantSuggestionStore, AssistantWorkReviewStore,
-  AssistantWorkOrganization } from '@yuanpu-agent/assistant';
-import { YuanpuMetadataDatabase } from '@yuanpu-agent/runtime-kit';
+  AssistantWorkOrganization } from '@mindlink-agent/assistant';
+import { MindlinkMetadataDatabase } from '@mindlink-agent/runtime-kit';
 import { AssistantHostService } from '../src/assistant-host.ts';
 
 const require = createRequire(import.meta.url);
@@ -69,7 +69,7 @@ test('real Assistant Worker routes one opted-in suggestion through paired host a
 
   const raw = new DatabaseSync(':memory:');
   raw.exec('PRAGMA foreign_keys = ON');
-  const metadata = new YuanpuMetadataDatabase(raw);
+  const metadata = new MindlinkMetadataDatabase(raw);
   t.after(() => metadata.close());
   metadata.channels.bindConnection({ provider: 'wecom', connectionId: 'bot-1',
     providerAccountDigest: 'a'.repeat(64), credentialBindingDigest: 'b'.repeat(64), now: when });

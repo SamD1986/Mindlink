@@ -53,9 +53,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.103.2
         version: 5.103.2(react@19.2.8)
-      '@yuanpu-agent/protocol':
+      '@mindlink-agent/protocol':
         specifier: workspace:*
-        version: link:../../packages/yuanpu-protocol
+        version: link:../../packages/mindlink-protocol
       marked:
         specifier: 18.0.11
         version: 18.0.11
@@ -93,9 +93,9 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@yuanpu-agent/protocol':
+      '@mindlink-agent/protocol':
         specifier: workspace:*
-        version: link:../../packages/yuanpu-protocol
+        version: link:../../packages/mindlink-protocol
       electron-updater:
         specifier: ^6.3.9
         version: 6.8.9(supports-color@7.1.0)
@@ -115,15 +115,15 @@ importers:
       '@earendil-works/pi-coding-agent':
         specifier: 0.86.1
         version: link:../../packages/coding-agent
-      '@yuanpu-agent/assistant':
+      '@mindlink-agent/assistant':
         specifier: workspace:*
-        version: link:../../packages/yuanpu-assistant
-      '@yuanpu-agent/protocol':
+        version: link:../../packages/mindlink-assistant
+      '@mindlink-agent/protocol':
         specifier: workspace:*
-        version: link:../../packages/yuanpu-protocol
-      '@yuanpu-agent/runtime-kit':
+        version: link:../../packages/mindlink-protocol
+      '@mindlink-agent/runtime-kit':
         specifier: workspace:*
-        version: link:../../packages/yuanpu-runtime
+        version: link:../../packages/mindlink-runtime
       typebox:
         specifier: 1.3.27
         version: 1.3.27
@@ -460,7 +460,7 @@ importers:
         specifier: 6.0.0
         version: 6.0.0
 
-  packages/yuanpu-assistant:
+  packages/mindlink-assistant:
     dependencies:
       '@earendil-works/pi-agent-core':
         specifier: 0.86.1
@@ -468,9 +468,9 @@ importers:
       '@earendil-works/pi-ai':
         specifier: 0.86.1
         version: link:../ai
-      '@yuanpu-agent/protocol':
+      '@mindlink-agent/protocol':
         specifier: workspace:*
-        version: link:../yuanpu-protocol
+        version: link:../mindlink-protocol
       typebox:
         specifier: 1.3.27
         version: 1.3.27
@@ -478,9 +478,9 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
 
-  packages/yuanpu-protocol: {}
+  packages/mindlink-protocol: {}
 
-  packages/yuanpu-runtime:
+  packages/mindlink-runtime:
     dependencies:
       '@earendil-works/pi-coding-agent':
         specifier: 0.86.1
@@ -497,9 +497,9 @@ importers:
       '@wecom/aibot-node-sdk':
         specifier: 1.0.7
         version: 1.0.7(debug@4.4.3(supports-color@7.1.0))(supports-color@7.1.0)
-      '@yuanpu-agent/protocol':
+      '@mindlink-agent/protocol':
         specifier: workspace:*
-        version: link:../yuanpu-protocol
+        version: link:../mindlink-protocol
       ajv:
         specifier: 8.17.1
         version: 8.17.1
@@ -526,7 +526,7 @@ importers:
         specifier: 6.3.3
         version: 6.3.3
 
-  packages/yuanpu-sandbox:
+  packages/mindlink-sandbox:
     dependencies:
       '@deepseek-ai/dsh-sandbox-windows-acl':
         specifier: 0.1.0-rc.8
@@ -534,9 +534,9 @@ importers:
 
   server:
     dependencies:
-      '@yuanpu-agent/protocol':
+      '@mindlink-agent/protocol':
         specifier: workspace:*
-        version: link:../packages/yuanpu-protocol
+        version: link:../packages/mindlink-protocol
 
 packages:
 

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { AssistantDelegationCoordinator, createAssistantDelegationTool } from '@yuanpu-agent/assistant';
+import { AssistantDelegationCoordinator, createAssistantDelegationTool } from '@mindlink-agent/assistant';
 
 const require = createRequire(import.meta.url);
 const { AssistantDelegationService } = require('../dist/index.cjs');

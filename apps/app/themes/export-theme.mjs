@@ -4,7 +4,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const themeRoot = dirname(fileURLToPath(import.meta.url));
-const outputRoot = resolve(process.argv[2] ?? join(homedir(), '.yuanpu', 'themes', 'mindlink-test'));
+const outputRoot = resolve(process.argv[2] ?? join(homedir(), '.mindlink', 'themes', 'mindlink-test'));
 await mkdir(outputRoot, { recursive: true });
 await Promise.all([
   copyFile(join(themeRoot, 'tokens.css'), join(outputRoot, 'tokens.css')),
@@ -22,6 +22,6 @@ await writeFile(join(outputRoot, 'theme.json'), `${JSON.stringify({
   stylesheet: 'theme.css',
   logo: 'logo.png',
   paperTexture: 'xuan-paper-tile.jpg',
-  selector: "data-yuanpu-theme='mindlink'",
+  selector: "data-mindlink-theme='mindlink'",
 }, null, 2)}\n`);
 console.log(outputRoot);

@@ -802,7 +802,7 @@ wheels = [
 ]
 
 [[package]]
-name = "yuanpu-echo-mcp"
+name = "mindlink-echo-mcp"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

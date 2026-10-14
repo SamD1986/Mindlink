@@ -39,7 +39,7 @@ function formatError(error: unknown): string {
 }
 
 function AssistantLinkSettings({ active }: { active: boolean }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const query = useQuery({ queryKey: ['assistant', 'link'], queryFn: () => desktop!.getAssistantLink(), enabled: active && Boolean(desktop) });
   const contacts = useQuery({ queryKey: ['assistant', 'contacts'], queryFn: () => desktop!.listSchedulePrivateContacts(), enabled: active && Boolean(desktop) });
   const client = useQueryClient();
@@ -92,7 +92,7 @@ export function SettingsPage({ active, configRoot }: { active: boolean; configRo
     setFont(nextPreference);
   };
   return <section className={`settings-page ${active ? '' : 'view-hidden'}`} aria-hidden={!active}>
-    <aside className="settings-navigation"><span className="eyebrow">YUANPU / SETTINGS</span><h1>设置</h1>
+    <aside className="settings-navigation"><span className="eyebrow">MINDLINK / SETTINGS</span><h1>设置</h1>
       <button type="button" className={section === 'general' ? 'selected' : ''} onClick={() => setSection('general')}>通用</button>
       <button type="button" className={section === 'models' ? 'selected' : ''} onClick={() => setSection('models')}>模型</button>
       <button type="button" className={section === 'hotkeys' ? 'selected' : ''} onClick={() => setSection('hotkeys')}>快捷键</button>
@@ -103,8 +103,8 @@ export function SettingsPage({ active, configRoot }: { active: boolean; configRo
       <div className={`settings-general ${section === 'general' ? '' : 'view-hidden'}`} aria-hidden={section !== 'general'}><h2>通用</h2>
         <div className="theme-setting"><h3>界面主题</h3><p>选择界面配色。MindLink 为临时测试主题。</p>
           <div className="theme-options" role="group" aria-label="界面主题">
-            <button type="button" aria-pressed={theme === 'yuanpu-light'} onClick={() => selectTheme('yuanpu-light')}>浅色</button>
-            <button type="button" aria-pressed={theme === 'yuanpu-dark'} onClick={() => selectTheme('yuanpu-dark')}>深色</button>
+            <button type="button" aria-pressed={theme === 'mindlink-light'} onClick={() => selectTheme('mindlink-light')}>浅色</button>
+            <button type="button" aria-pressed={theme === 'mindlink-dark'} onClick={() => selectTheme('mindlink-dark')}>深色</button>
             <button type="button" aria-pressed={theme === 'mindlink'} onClick={() => selectTheme('mindlink')}>MindLink 测试主题</button>
           </div>
         </div>

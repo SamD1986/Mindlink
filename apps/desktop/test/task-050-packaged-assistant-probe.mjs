@@ -7,7 +7,7 @@ import { dirname, join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
 // A packaged Electron/SEA business probe. All content and model responses are synthetic.
-const executable = resolve(import.meta.dirname, '../release/mac-arm64/YuanpuAgent.app/Contents/MacOS/YuanpuAgent');
+const executable = resolve(import.meta.dirname, '../release/mac-arm64/MindLink.app/Contents/MacOS/MindLink');
 const root = await mkdtemp(join(tmpdir(), 'yp-task-050-packaged-'));
 const home = join(root, 'home');
 const userData = join(root, 'user-data');
@@ -114,8 +114,8 @@ async function evaluate(page, expression) {
 async function startApp() {
   const port = await freePort();
   app = spawn(executable, [`--user-data-dir=${userData}`, `--remote-debugging-port=${port}`], {
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_NOTIFICATIONS_ENABLED: '0',
-      YUANPU_PYTHON_MCP_EXECUTABLE: '', YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_NOTIFICATIONS_ENABLED: '0',
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '', MINDLINK_PYTHON_MCP_ROOT: '' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let diagnostics = '';
@@ -123,7 +123,7 @@ async function startApp() {
     if (diagnostics.length < 1200) diagnostics += chunk.toString().slice(0, 1200 - diagnostics.length);
   });
   runtimePid = await eventually(() => children(app.pid).find((child) =>
-    child.command.includes('YuanpuAgentRuntime-darwin-arm64'))?.pid,
+    child.command.includes('MindLinkRuntime-darwin-arm64'))?.pid,
   `packaged Runtime: ${diagnostics}`);
   workerPid = await eventually(() => children(runtimePid).find((child) =>
     child.command.includes('--assistant-worker'))?.pid, 'Assistant Worker');
@@ -131,7 +131,7 @@ async function startApp() {
     .find((item) => item.type === 'page' && item.webSocketDebuggerUrl), 'packaged page');
   const page = await socket(target.webSocketDebuggerUrl);
   await page.command('Runtime.enable');
-  await eventually(() => evaluate(page, 'window.yuanpu.runtimeInfo().then((info) => info.protocolVersion === 7)'),
+  await eventually(() => evaluate(page, 'window.mindlink.runtimeInfo().then((info) => info.protocolVersion === 7)'),
     'preload/Runtime readiness');
   const browser = await socket((await (await fetch(`http://127.0.0.1:${port}/json/version`)).json())
     .webSocketDebuggerUrl);
@@ -163,30 +163,30 @@ try {
   assert.deepEqual((await readdir(join(home, 'assistant', 'skills'))).sort(),
     ['delegate-and-verify', 'follow-up', 'maintain-memory', 'organize-work',
       'reflect-and-suggest', 'review-work', 'understand-user']);
-  const workA = await evaluate(first.page, 'window.yuanpu.createWorkConversation()');
-  const workB = await evaluate(first.page, 'window.yuanpu.createWorkConversation()');
+  const workA = await evaluate(first.page, 'window.mindlink.createWorkConversation()');
+  const workB = await evaluate(first.page, 'window.mindlink.createWorkConversation()');
   assert.notEqual(workA.id, workB.id);
   for (const [work, marker, clientMessageId] of [[workA, markerA, 'task050-a'],
     [workB, markerB, 'task050-b']]) {
-    const receipt = await evaluate(first.page, `window.yuanpu.submitDesktopMessage(${JSON.stringify(
+    const receipt = await evaluate(first.page, `window.mindlink.submitDesktopMessage(${JSON.stringify(
       `Please consider ${marker} as a separate Work.`)}, 'work', ${JSON.stringify(work.id)},
       ${JSON.stringify(clientMessageId)})`);
     assert.ok(receipt.runId);
     await eventually(async () => (await evaluate(first.page,
-      `window.yuanpu.getAgentRun(${JSON.stringify(receipt.runId)}).then((run) => run.status)`)) === 'succeeded',
+      `window.mindlink.getAgentRun(${JSON.stringify(receipt.runId)}).then((run) => run.status)`)) === 'succeeded',
     `Work run ${clientMessageId}`);
   }
   assert.ok(workPrompts.some((text) => text.includes(markerA) && !text.includes(markerB)));
   assert.ok(workPrompts.some((text) => text.includes(markerB) && !text.includes(markerA)),
     'a fresh Work must not inherit the other Work transcript');
   const reviews = await eventually(async () => {
-    const snapshot = await evaluate(first.page, 'window.yuanpu.getAssistantWorkspace()');
+    const snapshot = await evaluate(first.page, 'window.mindlink.getAssistantWorkspace()');
     return [workA, workB].every((work) => snapshot.reviews.some((review) => review.workId === work.id))
       ? snapshot.reviews : undefined;
   }, 'two independent Work reviews', 40_000);
   assert.equal(new Set(reviews.map((review) => review.workId)).size >= 2, true);
   const imported = await evaluate(first.page,
-    "window.yuanpu.importAssistantSavedMemory('task050-controlled', 'work', 'The user prefers concise reports.', '2026-09-27T00:00:00.000Z')");
+    "window.mindlink.importAssistantSavedMemory('task050-controlled', 'work', 'The user prefers concise reports.', '2026-09-27T00:00:00.000Z')");
   await evaluate(first.page, "Array.from(document.querySelectorAll('.nav-item')).find((item) => item.textContent.includes('助理')).click()");
   await eventually(() => evaluate(first.page,
     "Boolean(document.querySelector('.assistant-home-tabs') && document.body.innerText.includes('先把重要的事'))"),
@@ -206,13 +206,13 @@ try {
   await evaluate(first.page,
     "Array.from(document.querySelectorAll('.assistant-actions button')).find((item) => item.textContent === '保存纠正').click()");
   const corrected = await eventually(async () => (await evaluate(first.page,
-    'window.yuanpu.getAssistantWorkspace()')).memories.find((item) => item.id === imported.id
+    'window.mindlink.getAssistantWorkspace()')).memories.find((item) => item.id === imported.id
       && item.version === imported.version + 1 && item.text === 'The user prefers a concise written report.'),
   'renderer memory correction');
   assert.equal(corrected.version, imported.version + 1);
   await evaluate(first.page,
     "Array.from(document.querySelectorAll('.assistant-section-title button')).find((item) => item.textContent === '返回全部').click()");
-  const source = (await evaluate(first.page, 'window.yuanpu.getAssistantWorkspace()'))
+  const source = (await evaluate(first.page, 'window.mindlink.getAssistantWorkspace()'))
     .sources.find((item) => item.sourceId.startsWith('work-turn:') && item.current);
   assert.ok(source);
   await evaluate(first.page,
@@ -228,13 +228,13 @@ try {
     "Array.from(document.querySelectorAll('.assistant-source-detail button')).find((item) => item.textContent === '撤销助理读取').click()");
   await evaluate(first.page,
     "Array.from(document.querySelectorAll('.assistant-source-detail button')).find((item) => item.textContent === '确认撤销').click()");
-  await eventually(async () => (await evaluate(first.page, 'window.yuanpu.getAssistantWorkspace()'))
+  await eventually(async () => (await evaluate(first.page, 'window.mindlink.getAssistantWorkspace()'))
     .sources.some((item) => item.sourceId === source.sourceId && item.availability === 'deleted'),
   'Worker source withdrawal');
   await eventually(() => evaluate(first.page,
     "document.body.innerText.includes('撤销已由宿主登记')"), 'renderer host revocation receipt');
   const suggestion = await eventually(async () => (await evaluate(first.page,
-    'window.yuanpu.listAssistantSuggestions()')).items.find((item) => item.feedback === 'none'),
+    'window.mindlink.listAssistantSuggestions()')).items.find((item) => item.feedback === 'none'),
   'proactive suggestion', 40_000);
   await evaluate(first.page,
     "Array.from(document.querySelectorAll('.assistant-home-tabs button')).find((item) => item.textContent === '今日').click()");
@@ -249,7 +249,7 @@ try {
   'suggestion detail');
   await evaluate(first.page,
     "Array.from(document.querySelectorAll('.assistant-actions button')).find((item) => item.textContent === '忽略').click()");
-  await eventually(async () => (await evaluate(first.page, 'window.yuanpu.listAssistantSuggestions()')).items
+  await eventually(async () => (await evaluate(first.page, 'window.mindlink.listAssistantSuggestions()')).items
     .find((item) => item.suggestionId === suggestion.suggestionId)?.feedback === 'ignored',
   'ignored suggestion persistence');
   await evaluate(first.page,
@@ -268,11 +268,11 @@ try {
   await writeFile(screenshot, Buffer.from(capture.data, 'base64'));
   await closeApp(first);
   const second = await startApp();
-  const restored = await evaluate(second.page, 'window.yuanpu.getAssistantWorkspace()');
+  const restored = await evaluate(second.page, 'window.mindlink.getAssistantWorkspace()');
   assert.equal(restored.memories.find((item) => item.id === imported.id)?.text,
     'The user prefers a concise written report.');
   assert.equal(restored.sources.find((item) => item.sourceId === source.sourceId)?.availability, 'deleted');
-  assert.equal((await evaluate(second.page, 'window.yuanpu.listAssistantSuggestions()')).items
+  assert.equal((await evaluate(second.page, 'window.mindlink.listAssistantSuggestions()')).items
     .find((item) => item.suggestionId === suggestion.suggestionId)?.feedback, 'ignored');
   const db = new DatabaseSync(join(home, 'workflows', 'automation.sqlite'), { readOnly: true });
   try {

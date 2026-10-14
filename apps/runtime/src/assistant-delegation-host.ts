@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { AssistantDelegationBrief } from '@yuanpu-agent/protocol';
+import type { AssistantDelegationBrief } from '@mindlink-agent/protocol';
 import type { ProfessionalTaskHost } from './assistant-delegation-local.js';
 import type { RuntimeAssistantSourceHost } from './assistant-source-host.js';
 

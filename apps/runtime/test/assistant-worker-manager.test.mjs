@@ -38,7 +38,7 @@ test('Worker host routes a four-field stable delegation follow-up request', asyn
 });
 
 test('headless Runtime host resolves a model and runs, queries, and stops its Worker', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-assistant-host-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-assistant-host-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const appPath = join(root, 'app');
   const agentPath = join(root, 'agent');
@@ -96,7 +96,7 @@ test('headless Runtime host resolves a model and runs, queries, and stops its Wo
 });
 
 test('Runtime does not announce ready when another writer holds Assistant Home', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-assistant-startup-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-assistant-startup-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const writer = spawn(process.execPath, [entry, '--assistant-worker'], {
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
@@ -111,8 +111,8 @@ test('Runtime does not announce ready when another writer holds Assistant Home',
   const keyPair = generateKeyPairSync('ed25519');
   const runtime = spawn(process.execPath, [entry, '--serve', '--port', '0'], {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, YUANPU_HOME: root,
-      YUANPU_PYTHON_MCP_EXECUTABLE: '', YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: root,
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '', MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   t.after(() => { if (runtime.exitCode === null && runtime.signalCode === null) runtime.kill('SIGKILL'); });
   let stdout = '';

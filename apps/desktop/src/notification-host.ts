@@ -5,7 +5,7 @@ import {
   type NotificationNavigationTarget,
   type NotificationReceipt,
   type NotificationTargetValidation,
-} from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
 
 export interface NativeNotification {
   once(event: 'show', listener: () => void): this;

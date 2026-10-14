@@ -36,8 +36,8 @@
   --yp-chat-content-row: 1;
   grid-template-rows: minmax(0, 1fr);
 }
-:root[data-yuanpu-theme='mindlink'] .app-shell > .page-host { padding-top: 0; }
-:root[data-yuanpu-theme='mindlink'] .shell-topbar { background: var(--yp-app-backdrop); }
+:root[data-mindlink-theme='mindlink'] .app-shell > .page-host { padding-top: 0; }
+:root[data-mindlink-theme='mindlink'] .shell-topbar { background: var(--yp-app-backdrop); }
 @media (max-width: 780px) {
   :root .app-shell { grid-template-rows: 50px minmax(0, 1fr) 58px; }
   :root .app-shell > .sidebar { grid-row: 3; }

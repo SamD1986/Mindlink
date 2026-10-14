@@ -21,7 +21,7 @@ for await (const line of lines) {
       id: message.id,
       result: {
         tools: [{
-          name: 'yuanpu_spawn_child',
+          name: 'mindlink_spawn_child',
           description: 'Spawn a lifecycle fixture descendant.',
           inputSchema: { type: 'object', additionalProperties: false },
         }],

@@ -11,7 +11,7 @@ const { saveBrowserScreenshot } = await import('../src/browser-screenshot.ts');
 const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]);
 
 test('browser screenshots are stored as unique files inside the conversation images directory', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-browser-images-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-browser-images-'));
   try {
     const first = await saveBrowserScreenshot(root, png.toString('base64'));
     const second = await saveBrowserScreenshot(root, png.toString('base64'));
@@ -23,8 +23,8 @@ test('browser screenshots are stored as unique files inside the conversation ima
 });
 
 test('browser screenshot rejects invalid data and an images symlink outside the workspace', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-browser-images-'));
-  const outside = await mkdtemp(join(tmpdir(), 'yuanpu-browser-outside-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-browser-images-'));
+  const outside = await mkdtemp(join(tmpdir(), 'mindlink-browser-outside-'));
   try {
     await assert.rejects(saveBrowserScreenshot(root, Buffer.from('not png').toString('base64')), /PNG/);
     await symlink(outside, join(root, 'images'));

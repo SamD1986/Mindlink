@@ -1,7 +1,7 @@
 import { WorkDirectoryMoveCoordinator, WorkMoveConflict } from './work-directory-move.js';
 import { titleFromFirstMessage } from './work-title.js';
 import {
-  verifyYuanpuSessionLocation,
+  verifyMindlinkSessionLocation,
   createDemoCapabilitySource,
   createBuiltinBrowserSource,
   BrowserControlClient,
@@ -11,29 +11,29 @@ import {
   createNotificationCapabilitySource,
   CapabilityApprovalStore,
   ManagedMcpCapabilitySource,
-  createYuanpuMcpServer,
-  createYuanpuCapabilityTools,
+  createMindlinkMcpServer,
+  createMindlinkCapabilityTools,
   CAPABILITY_TOOL_NAMES,
-  ensureYuanpuHome,
+  ensureMindlinkHome,
   greeting,
   getModelCatalog,
   getModelSettings,
   getHotkeySettings,
   saveHotkeySetting,
   saveModelSettings,
-  inspectYuanpuExtensions,
-  inspectYuanpuSkills,
+  inspectMindlinkExtensions,
+  inspectMindlinkSkills,
   PI_UPSTREAM_VERSION,
   PluginManager,
   CapabilityArtifactManager,
   capabilityManifestDigest,
-  openYuanpuMetadataDatabase,
-  readYuanpuChatTranscript,
-  readYuanpuSessionTrajectory,
-  readYuanpuSavedContextUsage,
+  openMindlinkMetadataDatabase,
+  readMindlinkChatTranscript,
+  readMindlinkSessionTrajectory,
+  readMindlinkSavedContextUsage,
   readSavedWorkMessageWindow,
   searchWorkConversations,
-  readYuanpuSavedToolResults,
+  readMindlinkSavedToolResults,
   PersistentAgentService,
   HostNotificationRouter,
   requestRecordedTerminalRunNotification,
@@ -44,7 +44,7 @@ import {
   type ArtifactTrustRoot,
   type AuthenticatedAgentCaller,
   type ChannelRouter,
-} from '@yuanpu-agent/runtime-kit';
+} from '@mindlink-agent/runtime-kit';
 import {
   AGENT_CONTRACT_VERSION,
   SCHEDULE_CONTRACT_VERSION,
@@ -65,7 +65,7 @@ import {
   type SaveModelSettingsInput,
   type SaveHotkeyInput,
   type AgentRunRecord,
-} from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
 import { execFile } from 'node:child_process';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createHash, createPublicKey, randomUUID, verify } from 'node:crypto';
@@ -197,36 +197,36 @@ function createConfiguredPythonSource(
   privateHome: string,
   configFile?: string,
 ): ManagedMcpCapabilitySource | undefined {
-  const pythonExecutable = process.env.YUANPU_PYTHON_MCP_EXECUTABLE;
-  const pythonRoot = process.env.YUANPU_PYTHON_MCP_ROOT;
+  const pythonExecutable = process.env.MINDLINK_PYTHON_MCP_EXECUTABLE;
+  const pythonRoot = process.env.MINDLINK_PYTHON_MCP_ROOT;
   if (!pythonExecutable || !pythonRoot) return undefined;
 
   const executable = resolve(pythonExecutable);
   const root = resolve(pythonRoot);
-  const configuredArgs = process.env.YUANPU_PYTHON_MCP_ARGS;
-  const pythonArgs = configuredArgs ? JSON.parse(configuredArgs) as unknown : ['-m', 'yuanpu_echo_mcp'];
+  const configuredArgs = process.env.MINDLINK_PYTHON_MCP_ARGS;
+  const pythonArgs = configuredArgs ? JSON.parse(configuredArgs) as unknown : ['-m', 'mindlink_echo_mcp'];
   if (!Array.isArray(pythonArgs) || pythonArgs.some((value) => typeof value !== 'string')) {
-    throw new Error('YUANPU_PYTHON_MCP_ARGS must be a JSON string array.');
+    throw new Error('MINDLINK_PYTHON_MCP_ARGS must be a JSON string array.');
   }
   return new ManagedMcpCapabilitySource({
     sourceInstanceId: 'builtin.python.echo',
-    packageVersion: process.env.YUANPU_PYTHON_MCP_VERSION ?? '0.1.0',
+    packageVersion: process.env.MINDLINK_PYTHON_MCP_VERSION ?? '0.1.0',
     command: executable,
     args: pythonArgs,
     cwd: root,
     privateHome,
     riskPolicy: {
-      yuanpu_echo_text: 'R0',
-      yuanpu_approved_echo: 'R2',
-      yuanpu_show_message: 'R2',
-      yuanpu_diagnostic_error: 'R0',
-      yuanpu_wait: 'R0',
+      mindlink_echo_text: 'R0',
+      mindlink_approved_echo: 'R2',
+      mindlink_show_message: 'R2',
+      mindlink_diagnostic_error: 'R0',
+      mindlink_wait: 'R0',
     },
     env: {
       PATH: dirname(executable),
       PYTHONPATH: join(root, 'src'),
       PYTHONUNBUFFERED: '1',
-      ...(configFile ? { YUANPU_CAPABILITY_CONFIG_FILE: configFile } : {}),
+      ...(configFile ? { MINDLINK_CAPABILITY_CONFIG_FILE: configFile } : {}),
       ...(process.platform === 'win32' && process.env.SYSTEMROOT
         ? { SYSTEMROOT: process.env.SYSTEMROOT }
         : {}),
@@ -236,14 +236,14 @@ function createConfiguredPythonSource(
 }
 
 async function capabilitySmoke(): Promise<void> {
-  const privateHome = await mkdtemp(join(tmpdir(), 'yuanpu-mcp-smoke-'));
+  const privateHome = await mkdtemp(join(tmpdir(), 'mindlink-mcp-smoke-'));
   const pythonSource = createConfiguredPythonSource(privateHome);
   if (!pythonSource) {
     await rm(privateHome, { recursive: true, force: true });
-    throw new Error('Python MCP smoke requires YUANPU_PYTHON_MCP_EXECUTABLE and YUANPU_PYTHON_MCP_ROOT.');
+    throw new Error('Python MCP smoke requires MINDLINK_PYTHON_MCP_EXECUTABLE and MINDLINK_PYTHON_MCP_ROOT.');
   }
   try {
-    const mcp = createYuanpuMcpServer([pythonSource], undefined, {
+    const mcp = createMindlinkMcpServer([pythonSource], undefined, {
       discoveryTimeoutMs: PYTHON_CAPABILITY_DISCOVERY_TIMEOUT_MS,
     });
     const search = await mcp.callTool(CAPABILITY_TOOL_NAMES.search, {});
@@ -251,18 +251,18 @@ async function capabilitySmoke(): Promise<void> {
       throw new Error('Capability search returned an invalid result.');
     }
     const matches = search.matches as Array<{ name: string; originalName: string }>;
-    const match = matches.find((item) => item.originalName === 'yuanpu_echo_text');
+    const match = matches.find((item) => item.originalName === 'mindlink_echo_text');
     if (!match) {
       const failures = 'failures' in search && Array.isArray(search.failures)
         ? search.failures.map(({ error, message }) => ({ error, message }))
         : [];
       throw new Error(`Python echo capability was not discovered: ${JSON.stringify(failures)}`);
     }
-    const diagnostic = matches.find((item) => item.originalName === 'yuanpu_diagnostic_error');
+    const diagnostic = matches.find((item) => item.originalName === 'mindlink_diagnostic_error');
     if (!diagnostic) throw new Error('Python diagnostic capability was not discovered.');
     const result = await mcp.callTool(CAPABILITY_TOOL_NAMES.execute, {
       name: match.name,
-      arguments: { text: 'YuanpuAgent SEA' },
+      arguments: { text: 'MindLink SEA' },
     });
     const errorResult = await mcp.callTool(CAPABILITY_TOOL_NAMES.execute, {
       name: diagnostic.name,
@@ -280,7 +280,7 @@ async function capabilitySmoke(): Promise<void> {
 }
 
 async function capabilityLifecycleSmoke(parentPid: number): Promise<void> {
-  const privateHome = await mkdtemp(join(tmpdir(), 'yuanpu-mcp-lifecycle-'));
+  const privateHome = await mkdtemp(join(tmpdir(), 'mindlink-mcp-lifecycle-'));
   const pythonSource = createConfiguredPythonSource(privateHome);
   if (!pythonSource) {
     await rm(privateHome, { recursive: true, force: true });
@@ -302,8 +302,8 @@ async function capabilityLifecycleSmoke(parentPid: number): Promise<void> {
   };
   try {
     const tools = await pythonSource.list({});
-    const spawnTool = tools.find((tool) => tool.name === 'yuanpu_spawn_child');
-    if (!spawnTool) throw new Error('Lifecycle smoke MCP did not expose yuanpu_spawn_child.');
+    const spawnTool = tools.find((tool) => tool.name === 'mindlink_spawn_child');
+    if (!spawnTool) throw new Error('Lifecycle smoke MCP did not expose mindlink_spawn_child.');
     const result = await pythonSource.execute({
       capabilityId: spawnTool.name,
       originalName: spawnTool.name,
@@ -331,13 +331,13 @@ async function capabilityLifecycleSmoke(parentPid: number): Promise<void> {
 
 function sqliteSmoke(path: string | undefined): void {
   if (!path) throw new Error('--sqlite-smoke requires an explicit database path.');
-  const database = openYuanpuMetadataDatabase(resolve(path));
+  const database = openMindlinkMetadataDatabase(resolve(path));
   const count = database.incrementMetadataCounter('native-sea-open-count');
   const schemaVersion = database.schemaVersion;
   const driver = database.driver;
   database.close();
 
-  const reopened = openYuanpuMetadataDatabase(resolve(path));
+  const reopened = openMindlinkMetadataDatabase(resolve(path));
   const persistedCount = Number.parseInt(reopened.getMetadata('native-sea-open-count') ?? '', 10);
   reopened.close();
   if (persistedCount !== count) throw new Error('SQLite value did not survive close and reopen.');
@@ -347,7 +347,7 @@ function sqliteSmoke(path: string | undefined): void {
 async function schedulerSmoke(path: string | undefined): Promise<void> {
   if (!path) throw new Error('--scheduler-smoke requires an explicit database path.');
   const now = new Date('2026-09-22T00:00:00.000Z');
-  const database = openYuanpuMetadataDatabase(resolve(path));
+  const database = openMindlinkMetadataDatabase(resolve(path));
   const caller: AuthenticatedAgentCaller = {
     entryPoint: 'scheduler',
     identity: {
@@ -394,7 +394,7 @@ async function schedulerSmoke(path: string | undefined): Promise<void> {
   await agent.close();
   database.close();
 
-  const reopened = openYuanpuMetadataDatabase(resolve(path));
+  const reopened = openMindlinkMetadataDatabase(resolve(path));
   const history = reopened.schedules.history(schedule.scheduleId, 10);
   const schemaVersion = reopened.schemaVersion;
   reopened.close();
@@ -442,18 +442,18 @@ async function serve(): Promise<void> {
   });
   const usedDecisionNonces = new Set<string>();
 
-  const home = await ensureYuanpuHome(process.env.YUANPU_HOME);
+  const home = await ensureMindlinkHome(process.env.MINDLINK_HOME);
   process.env.PI_CODING_AGENT_DIR = home.agentPath;
   process.env.PI_CODING_AGENT_SESSION_DIR = home.sessionsPath;
   const plugins = new PluginManager(
     home.packagesPath,
     home.agentPath,
-    process.env.YUANPU_PLUGIN_REGISTRY_URL,
+    process.env.MINDLINK_PLUGIN_REGISTRY_URL,
     home.config.workingDirectory,
-    process.env.YUANPU_CATALOG_URL ?? home.config.catalogUrl,
+    process.env.MINDLINK_CATALOG_URL ?? home.config.catalogUrl,
   );
   let artifacts: CapabilityArtifactManager | undefined;
-  const trustRootFile = process.env.YUANPU_CAPABILITY_TRUST_ROOT_FILE;
+  const trustRootFile = process.env.MINDLINK_CAPABILITY_TRUST_ROOT_FILE;
   if (trustRootFile) {
     const trustRoot = JSON.parse(await readFile(resolve(trustRootFile), 'utf8')) as ArtifactTrustRoot;
     artifacts = new CapabilityArtifactManager(home.packagesPath, {
@@ -462,10 +462,10 @@ async function serve(): Promise<void> {
     });
     const active = await artifacts.active('builtin.python.echo');
     if (active) {
-      process.env.YUANPU_PYTHON_MCP_EXECUTABLE = active.entrypoint;
-      process.env.YUANPU_PYTHON_MCP_ROOT = active.installPath;
-      process.env.YUANPU_PYTHON_MCP_ARGS = '[]';
-      process.env.YUANPU_PYTHON_MCP_VERSION = active.version;
+      process.env.MINDLINK_PYTHON_MCP_EXECUTABLE = active.entrypoint;
+      process.env.MINDLINK_PYTHON_MCP_ROOT = active.installPath;
+      process.env.MINDLINK_PYTHON_MCP_ARGS = '[]';
+      process.env.MINDLINK_PYTHON_MCP_VERSION = active.version;
     } else {
       const bundledManifest = JSON.parse(
         await readFile(join(dirname(resolve(trustRootFile)), 'manifest.json'), 'utf8'),
@@ -473,10 +473,10 @@ async function serve(): Promise<void> {
       if (typeof bundledManifest.version !== 'string') {
         throw new Error('Bundled capability manifest version is invalid.');
       }
-      process.env.YUANPU_PYTHON_MCP_VERSION = bundledManifest.version;
+      process.env.MINDLINK_PYTHON_MCP_VERSION = bundledManifest.version;
     }
   }
-  const metadata = openYuanpuMetadataDatabase(join(home.workflowsPath, 'automation.sqlite'));
+  const metadata = openMindlinkMetadataDatabase(join(home.workflowsPath, 'automation.sqlite'));
   const approvals = await CapabilityApprovalStore.open(join(home.appPath, 'approvals.json'), {
     allowUnattended: (input) => Boolean(input.runId && input.sessionId && input.workspaceId
       && metadata.agentRuns.isUnrestrictedCapabilityRun(
@@ -493,7 +493,7 @@ async function serve(): Promise<void> {
       throw new Error('能力 manifest 必须使用 HTTP(S) 地址。');
     }
     const response = await fetch(parsedManifestUrl, {
-      headers: { accept: 'application/json', 'user-agent': `YuanpuAgent/${__APP_VERSION__}` },
+      headers: { accept: 'application/json', 'user-agent': `MindLink/${__APP_VERSION__}` },
       signal: AbortSignal.timeout(15_000),
     });
     if (!response.ok) throw new Error(`能力 manifest 下载失败：HTTP ${response.status}`);
@@ -568,10 +568,10 @@ async function serve(): Promise<void> {
     pythonConfigFile,
   );
   if (pythonSource) capabilitySources.push(pythonSource);
-  let mcp = createYuanpuMcpServer(capabilitySources, approvals, {
+  let mcp = createMindlinkMcpServer(capabilitySources, approvals, {
     discoveryTimeoutMs: PYTHON_CAPABILITY_DISCOVERY_TIMEOUT_MS,
   });
-  const piCapabilityTools = createYuanpuCapabilityTools(mcp);
+  const piCapabilityTools = createMindlinkCapabilityTools(mcp);
   const workConversations = metadata.workConversations;
   const workMoves = new WorkDirectoryMoveCoordinator({
     store: workConversations, workspaceId: home.config.workingDirectory,
@@ -583,7 +583,7 @@ async function serve(): Promise<void> {
       }
     },
     drainSessions: (ids) => agentExecutor.drainSessions(ids),
-    verifySession: (cwd, id, file) => verifyYuanpuSessionLocation(cwd, id, home.sessionsPath, file),
+    verifySession: (cwd, id, file) => verifyMindlinkSessionLocation(cwd, id, home.sessionsPath, file),
   });
   await workMoves.recover();
   for (const intent of workConversations.pendingCreateIntents(home.config.workingDirectory)) {
@@ -594,7 +594,7 @@ async function serve(): Promise<void> {
     for (const sessionId of metadata.assistantLink.legacySessionIds()) {
       try {
         metadata.assistantHost.recordLegacyArchive(sessionId,
-          readYuanpuChatTranscript(home.config.workingDirectory, sessionId, home.sessionsPath,
+          readMindlinkChatTranscript(home.config.workingDirectory, sessionId, home.sessionsPath,
             Number.MAX_SAFE_INTEGER));
       } catch (error) { console.warn('[assistant-source]', error); }
     }
@@ -631,7 +631,7 @@ async function serve(): Promise<void> {
       throw error;
     }
   };
-  let currentWorkPromise: Promise<import('@yuanpu-agent/protocol').WorkConversation> | undefined;
+  let currentWorkPromise: Promise<import('@mindlink-agent/protocol').WorkConversation> | undefined;
   const currentWorkConversation = () => {
     if (!currentWorkPromise) currentWorkPromise = (async () => {
       const existing = workConversations.listExisting(workScope).filter((item) => !item.archived);
@@ -647,8 +647,8 @@ async function serve(): Promise<void> {
       const piSessionId = workConversations.sessionId(home.config.workingDirectory, item.id);
       if (!piSessionId) continue;
       workConversations.recordSavedTurns(item.id,
-        readYuanpuChatTranscript(item.workingDirectory, piSessionId, home.sessionsPath, Number.MAX_SAFE_INTEGER, true));
-      const savedTools = readYuanpuSavedToolResults(item.workingDirectory, piSessionId, home.sessionsPath);
+        readMindlinkChatTranscript(item.workingDirectory, piSessionId, home.sessionsPath, Number.MAX_SAFE_INTEGER, true));
+      const savedTools = readMindlinkSavedToolResults(item.workingDirectory, piSessionId, home.sessionsPath);
       metadata.workEvidence.recordToolResults(item.id, piSessionId, savedTools);
       metadata.workEvidence.recordArtifacts(item.id, piSessionId);
       metadata.workEvidence.recordUnverifiedArtifacts(item.id, piSessionId, savedTools);
@@ -678,8 +678,8 @@ async function serve(): Promise<void> {
       cwd: home.config.workingDirectory,
       provider: home.config.provider,
       model: home.config.model,
-      builtinAgentRoot: process.env.YUANPU_BUILTIN_AGENTS_ROOT
-        ? resolve(process.env.YUANPU_BUILTIN_AGENTS_ROOT) : undefined,
+      builtinAgentRoot: process.env.MINDLINK_BUILTIN_AGENTS_ROOT
+        ? resolve(process.env.MINDLINK_BUILTIN_AGENTS_ROOT) : undefined,
     },
   });
   const assistantSources = new RuntimeAssistantSourceHost(workConversations, metadata.assistantHost,
@@ -857,15 +857,15 @@ async function serve(): Promise<void> {
   });
   const activatePythonArtifact = async (entrypoint: string, installPath: string, version: string) => {
     const previousSource = pythonSource;
-    process.env.YUANPU_PYTHON_MCP_EXECUTABLE = entrypoint;
-    process.env.YUANPU_PYTHON_MCP_ROOT = installPath;
-    process.env.YUANPU_PYTHON_MCP_ARGS = '[]';
-    process.env.YUANPU_PYTHON_MCP_VERSION = version;
+    process.env.MINDLINK_PYTHON_MCP_EXECUTABLE = entrypoint;
+    process.env.MINDLINK_PYTHON_MCP_ROOT = installPath;
+    process.env.MINDLINK_PYTHON_MCP_ARGS = '[]';
+    process.env.MINDLINK_PYTHON_MCP_VERSION = version;
     pythonSource = createConfiguredPythonSource(
       join(home.appPath, 'capabilities', 'builtin.python.echo', 'home'),
       pythonConfigFile,
     );
-    mcp = createYuanpuMcpServer(
+    mcp = createMindlinkMcpServer(
       [createDemoCapabilitySource(), notificationSource, webSource, workflowCheckpointSource, ...(pythonSource ? [pythonSource] : [])],
       approvals,
       { discoveryTimeoutMs: PYTHON_CAPABILITY_DISCOVERY_TIMEOUT_MS },
@@ -874,7 +874,7 @@ async function serve(): Promise<void> {
     await previousSource?.close();
   };
   const inspectPlugin = async (plugin: { installPath: string }) => {
-    const diagnostics = await inspectYuanpuExtensions({
+    const diagnostics = await inspectMindlinkExtensions({
       agentDir: home.agentPath,
       cwd: home.config.workingDirectory,
     });
@@ -977,7 +977,7 @@ async function serve(): Promise<void> {
         const body = await readJsonBody(request);
         if (!isRecord(body)) throw new WorkMoveConflict('Invalid Work move request.');
         const result = await workMoves.move({ requestId: body.requestId, kind: body.kind,
-          id: body.id, targetFolderId: body.targetFolderId } as import('@yuanpu-agent/protocol').WorkMoveRequest);
+          id: body.id, targetFolderId: body.targetFolderId } as import('@mindlink-agent/protocol').WorkMoveRequest);
         response.end(JSON.stringify(result));
         return;
       }
@@ -1565,7 +1565,7 @@ async function serve(): Promise<void> {
         }
         if (surface === 'assistantArchive') {
           response.end(JSON.stringify(metadata.assistantLink.legacySessionIds().flatMap((id) =>
-            readYuanpuChatTranscript(home.config.workingDirectory, id, home.sessionsPath,
+            readMindlinkChatTranscript(home.config.workingDirectory, id, home.sessionsPath,
               Number.MAX_SAFE_INTEGER))));
           return;
         }
@@ -1578,7 +1578,7 @@ async function serve(): Promise<void> {
           return;
         }
         response.end(JSON.stringify(piSessionId
-          ? readYuanpuChatTranscript(workConversation?.working_directory ?? home.config.workingDirectory,
+          ? readMindlinkChatTranscript(workConversation?.working_directory ?? home.config.workingDirectory,
             piSessionId, home.sessionsPath, limit ?? 100, false, beforeId)
           : []));
         return;
@@ -1590,7 +1590,7 @@ async function serve(): Promise<void> {
           response.end(JSON.stringify(searchWorkConversations(workConversations, {
             workspaceId: workScope, sessionsDirectory: home.sessionsPath,
             query: url.searchParams.get('query') ?? '',
-            archive: (url.searchParams.get('archive') ?? undefined) as import('@yuanpu-agent/protocol').WorkSearchQuery['archive'],
+            archive: (url.searchParams.get('archive') ?? undefined) as import('@mindlink-agent/protocol').WorkSearchQuery['archive'],
             limit: limit === null ? undefined : Number(limit),
             cursor: url.searchParams.get('cursor') ?? undefined,
           })));
@@ -1639,12 +1639,12 @@ async function serve(): Promise<void> {
           response.end(JSON.stringify({ error: 'Unknown Work conversation.' }));
           return;
         }
-        const trajectory = readYuanpuSessionTrajectory(row.working_directory, piSessionId,
+        const trajectory = readMindlinkSessionTrajectory(row.working_directory, piSessionId,
           home.sessionsPath, conversationId, home.agentPath, await agentExecutor.subagentRuns(piSessionId));
         const observation = await agentExecutor.observation(piSessionId);
         if (!observation.context) {
           try {
-            observation.context = await readYuanpuSavedContextUsage(row.working_directory,
+            observation.context = await readMindlinkSavedContextUsage(row.working_directory,
               piSessionId, home.sessionsPath, home.appPath, home.agentPath,
               { provider: home.config.provider, model: home.config.model });
           } catch { /* A model setting error must not hide the Pi trajectory. */ }
@@ -1944,7 +1944,7 @@ async function serve(): Promise<void> {
       }
 
       if (url.pathname === RUNTIME_ROUTES.localSkills && request.method === 'GET') {
-        response.end(JSON.stringify(await inspectYuanpuSkills({
+        response.end(JSON.stringify(await inspectMindlinkSkills({
           agentDir: home.agentPath,
           cwd: home.config.workingDirectory,
         })));
@@ -2166,7 +2166,7 @@ async function serve(): Promise<void> {
         const { manifest, digest } = await fetchArtifactManifest(source);
         assertExpectedManifest(digest, expectedDigest);
         response.end(JSON.stringify(await detectMcpOwnershipConflicts({
-          yuanpuConnections: manifest.connections ?? [],
+          mindlinkConnections: manifest.connections ?? [],
           agentRoot: home.agentPath,
           workspaceRoot: home.config.workingDirectory,
         })));

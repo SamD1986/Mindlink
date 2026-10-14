@@ -123,7 +123,7 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
   background: var(--yp-surface-subtle);
   box-shadow: 0 2px 7px rgb(24 32 28 / 3%);
 }
-:root[data-yuanpu-desktop='true'] .chat-header { padding-left: 62px; }
+:root[data-mindlink-desktop='true'] .chat-header { padding-left: 62px; }
 .chat-heading { display: flex; flex: 1 1 auto; min-width: 0; align-items: center; gap: 11px; }
 .chat-title-pill {
   display: inline-flex;
@@ -557,7 +557,7 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
   .nav-item .nav-label { display: block; font-size: 0.625rem; font-weight: 500; white-space: nowrap; }
   .chat-panel, .plugin-panel, .management-panel { grid-row: 1; }
   .chat-header { min-height: 50px; align-items: center; padding: 0 15px; }
-  :root[data-yuanpu-desktop='true'] .chat-header { padding-left: 112px; }
+  :root[data-mindlink-desktop='true'] .chat-header { padding-left: 112px; }
   .chat-title-pill { min-height: 32px; }
   .runtime-state, .runtime-meta > span { display: none; }
   .runtime-meta { flex: 0 0 auto; }
@@ -905,7 +905,7 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
 .message-file-link:hover { color: var(--yp-accent-text); }
 
 .file-code-token { color: var(--file-code-light, inherit); }
-:root[data-yuanpu-theme='yuanpu-dark'] .file-code-token { color: var(--file-code-dark, inherit); }
+:root[data-mindlink-theme='mindlink-dark'] .file-code-token { color: var(--file-code-dark, inherit); }
 
 /* File workspace tab strip (reference: review-tab design). */
 .file-workspace { display: flex; flex-direction: column; min-height: 0; flex: 1; }

@@ -1,8 +1,8 @@
 # 内置 Web、目标与动态工作流
 
-这三个模块与子 Agent 一起编译进 Runtime，不需要安装插件或修改 `~/.yuanpu/agent/plugins`。
-来源版本、commit 和 MIT 许可证位于 `packages/yuanpu-runtime/src/builtin/NOTICE.md`。
-实现是 Yuanpu 原生适配，不是上游扩展的完整副本，参数也并非完全兼容。
+这三个模块与子 Agent 一起编译进 Runtime，不需要安装插件或修改 `~/.mindlink/agent/plugins`。
+来源版本、commit 和 MIT 许可证位于 `packages/mindlink-runtime/src/builtin/NOTICE.md`。
+实现是 MindLink 原生适配，不是上游扩展的完整副本，参数也并非完全兼容。
 
 ## 1. Web Access
 
@@ -20,7 +20,7 @@ Exa 无 Key 时使用公开 MCP 搜索服务；有 Key 时使用官方搜索 API
 服务错误、限流和格式错误会返回失败。未设置自动故障转移，不保证公共免费服务的可用性。
 
 密钥读取环境变量 `BOCHA_API_KEY`、`BRAVE_API_KEY`、`EXA_API_KEY`，或统一的
-`~/.yuanpu/app/auth.json` 中 `web:bocha` / `web:brave` / `web:exa` 项：
+`~/.mindlink/app/auth.json` 中 `web:bocha` / `web:brave` / `web:exa` 项：
 
 ```json
 {"web:bocha":{"type":"api_key","key":"YOUR_KEY"}}
@@ -117,7 +117,7 @@ Worker 有内存和时间限制，但这不是运行敌对代码的安全沙箱�
 
 ## 保存与验证
 
-目标与工作流位于 `~/.yuanpu/workflows/agent-tools/<workspace+session hash>/`：
+目标与工作流位于 `~/.mindlink/workflows/agent-tools/<workspace+session hash>/`：
 `goals.json` 和 `runs/<runId>/run.json`。原子替换写入，目录 0700，状态文件 0600。
 子 Agent 原始会话仍位于 Agent 的 subagent-runs。应用设置和认证文件不被这些运行状态污染。
 

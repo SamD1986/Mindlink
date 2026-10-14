@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { AGENT_CONTRACT_VERSION, SCHEDULE_CONTRACT_VERSION } from '@yuanpu-agent/protocol';
+import { AGENT_CONTRACT_VERSION, SCHEDULE_CONTRACT_VERSION } from '@mindlink-agent/protocol';
 
 async function ready(child) {
   return await new Promise((resolve, reject) => {
@@ -73,7 +73,7 @@ async function readSseEvent(response) {
 }
 
 test('Runtime authenticates host events and canonicalizes notification navigation targets', async (context) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-notification-routing-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-notification-routing-'));
   context.after(() => rm(root, { recursive: true, force: true }));
   const home = join(root, 'home');
   const workspace = join(root, 'workspace');
@@ -124,10 +124,10 @@ test('Runtime authenticates host events and canonicalizes notification navigatio
       stdio: ['pipe', 'pipe', 'pipe'],
       env: {
         ...process.env,
-        YUANPU_HOME: home,
+        MINDLINK_HOME: home,
         NOTIFICATION_FIXTURE_KEY: 'fixture-only',
-        YUANPU_PYTHON_MCP_EXECUTABLE: '',
-        YUANPU_PYTHON_MCP_ROOT: '',
+        MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+        MINDLINK_PYTHON_MCP_ROOT: '',
       },
     });
     childProcess.stdin.end(`${JSON.stringify({

@@ -17,8 +17,8 @@ async function startRuntime(home) {
     .export({ type: 'spki', format: 'der' }).toString('base64');
   const child = spawn(process.execPath, ['dist/index.cjs', '--serve', '--port', '0'], {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   let stderr = '';
   child.stderr.setEncoding('utf8');
@@ -69,7 +69,7 @@ function persistedSession(home, conversation) {
 }
 
 test('TASK-058 real Runtime, SQLite and Pi JSONL retain one Work fact across subtree move and restart', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-task058-stage-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-task058-stage-'));
   let runtime;
   context.after(async () => { await runtime?.close(); await rm(home, { recursive: true, force: true }); });
   runtime = await startRuntime(home);
@@ -151,7 +151,7 @@ test('TASK-058 real Runtime, SQLite and Pi JSONL retain one Work fact across sub
 });
 
 test('TASK-058 real Runtime rejects conflicting and unsafe moves without losing original contents', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-task058-deny-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-task058-deny-'));
   const runtime = await startRuntime(home);
   context.after(async () => { await runtime.close(); await rm(home, { recursive: true, force: true }); });
   const request = (...args) => runtime.request(...args);

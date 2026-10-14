@@ -12,7 +12,7 @@ on:
         description: Prefix for uploaded artifact names
         required: false
         type: string
-        default: yuanpu-agent-native
+        default: mindlink-native
       retention-days:
         description: Artifact retention in days
         required: false
@@ -24,16 +24,16 @@ on:
         description: Prefix for uploaded artifact names
         required: false
         type: string
-        default: yuanpu-agent-native
+        default: mindlink-native
       retention-days:
         description: Artifact retention in days
         required: false
         type: number
         default: 7
     secrets:
-      YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64:
+      MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64:
         required: false
-      YUANPU_ARTIFACT_SIGNING_KEY_ID:
+      MINDLINK_ARTIFACT_SIGNING_KEY_ID:
         required: false
 
 permissions:
@@ -93,12 +93,12 @@ jobs:
         run: |
           pnpm prepare:python-capabilities
           pnpm build
-          pnpm --filter @yuanpu-agent/runtime-kit test
+          pnpm --filter @mindlink-agent/runtime-kit test
 
       - name: Build self-contained Python capability
         env:
-          YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64: ${{ secrets.YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64 }}
-          YUANPU_ARTIFACT_SIGNING_KEY_ID: ${{ secrets.YUANPU_ARTIFACT_SIGNING_KEY_ID }}
+          MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64: ${{ secrets.MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64 }}
+          MINDLINK_ARTIFACT_SIGNING_KEY_ID: ${{ secrets.MINDLINK_ARTIFACT_SIGNING_KEY_ID }}
         run: |
           pnpm build:python-artifact
           pnpm smoke:python-artifact
@@ -111,7 +111,7 @@ jobs:
         # entry here to avoid rebuilding it; the root command stays standalone
         # for local clean-checkout verification.
         run: |
-          pnpm --filter @yuanpu-agent/runtime run smoke:native
+          pnpm --filter @mindlink-agent/runtime run smoke:native
           pnpm smoke:runtime-update
 
       - name: Package native artifact
@@ -124,6 +124,6 @@ jobs:
           retention-days: ${{ inputs.retention-days }}
           if-no-files-found: error
           path: |
-            apps/runtime/dist-native/artifacts/YuanpuAgentRuntime-${{ matrix.target }}*
-            apps/python-capabilities/dist-artifact/YuanpuEchoMcp-${{ matrix.target }}.tar.gz
-            apps/python-capabilities/dist-artifact/YuanpuEchoMcp-${{ matrix.target }}.tar.gz.sha256
+            apps/runtime/dist-native/artifacts/MindLinkRuntime-${{ matrix.target }}*
+            apps/python-capabilities/dist-artifact/MindlinkEchoMcp-${{ matrix.target }}.tar.gz
+            apps/python-capabilities/dist-artifact/MindlinkEchoMcp-${{ matrix.target }}.tar.gz.sha256

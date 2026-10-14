@@ -1,6 +1,6 @@
-# YuanpuAgent 任务入口
+# MindLink 任务入口
 
-YuanpuAgent 面向桌面工作场景：用户在 Electron 中与 Pi 对话，通过统一的“技能”入口安装指令、扩展和外部能力。Pi 上游源码保持原样；Yuanpu 负责配置、能力治理、分发和桌面体验。
+MindLink 面向桌面工作场景：用户在 Electron 中与 Pi 对话，通过统一的“技能”入口安装指令、扩展和外部能力。Pi 上游源码保持原样；MindLink 负责配置、能力治理、分发和桌面体验。
 
 阅读顺序：
 
@@ -17,9 +17,9 @@ YuanpuAgent 面向桌面工作场景：用户在 Electron 中与 Pi 对话，通
 
 文件夹树的实施边界与新开发卡见[工作会话文件夹树设计](../docs/work-conversation-tree.md)及任务注册表；目录移动需同时修正 Pi 会话 cwd 关联，不等同于只调整界面顺序。
 
-2026-09-21 的 Python 能力专项任务及其历史基线见注册表。2026-09-22 总体设计基于现有两个 Yuanpu 包和 Electron 管理 Runtime 的源码边界；新设计不代表功能实现或发布，不覆盖已有任务证据与用户改动。
+2026-09-21 的 Python 能力专项任务及其历史基线见注册表。2026-09-22 总体设计基于现有两个 MindLink 包和 Electron 管理 Runtime 的源码边界；新设计不代表功能实现或发布，不覆盖已有任务证据与用户改动。
 
-当前方向：工作对话保持独立上下文；新增 packages/yuanpu-assistant 承载独立个人助理，自动评估工作内容、整理记忆与台账并委派专业子任务。本地与企业微信连接同一助理身份但默认独立聊天上下文。所有进程跟随 App 生命周期，关闭后停止。Python 保持独立能力包；设计权威在 docs，`.tasks/architecture.md` 只作导航。原“只复用两个 Yuanpu 包”是此前阶段边界，本轮新增助理包取代该限制。
+当前方向：工作对话保持独立上下文；新增 packages/mindlink-assistant 承载独立个人助理，自动评估工作内容、整理记忆与台账并委派专业子任务。本地与企业微信连接同一助理身份但默认独立聊天上下文。所有进程跟随 App 生命周期，关闭后停止。Python 保持独立能力包；设计权威在 docs，`.tasks/architecture.md` 只作导航。原“只复用两个 MindLink 包”是此前阶段边界，本轮新增助理包取代该限制。
 
 2026-09-23 范围调整：当前按个人助手验收，首发企业微信只需一位获授权用户的真实私聊；第二名真人和真实群聊不再是阶段门槛。身份拒绝、跨会话隔离、去重与恢复仍须测试。决策和边界见[总体架构第 7 节](../docs/application-architecture.md)，当前状态与缺口以[任务注册表](tasks.yaml)和[通知渠道与调度阶段验证记录](verification/TASK-019/results.md)为准。
 
@@ -35,7 +35,7 @@ YuanpuAgent 面向桌面工作场景：用户在 Electron 中与 Pi 对话，通
 
 实施者更新受影响文档与 result.evidence；只有集成并在 main 验证后才能标 done。阶段验收必须由非该阶段主要实现者执行，记录版本、环境、命令及 pass/fail/unverified；无环境不得以构建通过替代验收。当前没有授权自动提交或推送。
 
-2026-09-24 UI 方向：按用户选定的 Muse 浅色三栏预览完成聊天 UI，见[按 Muse 参考框架交付 Yuanpu 聊天 UI（TASK-036）](../docs/frontend/tasks/muse-chat-redesign.md)与[验收证据](../docs/frontend/evidence/task-036/results.md)；状态以注册表为准。
+2026-09-24 UI 方向：按用户选定的 Muse 浅色三栏预览完成聊天 UI，见[按 Muse 参考框架交付 MindLink 聊天 UI（TASK-036）](../docs/frontend/tasks/muse-chat-redesign.md)与[验收证据](../docs/frontend/evidence/task-036/results.md)；状态以注册表为准。
 
 ## 独立助理开发（2026-09-26）
 
@@ -49,7 +49,7 @@ YuanpuAgent 面向桌面工作场景：用户在 Electron 中与 Pi 对话，通
 
 ## 助理下一阶段验收（2026-09-27）
 
-用户提供 `ssh jump` 作为 Linux 云端验证环境。只读检查已确认目标机可连接，但当前无 Yuanpu/Node 部署；网络来源同步、云端权威宿主和真实迁移仍未实现。验收分为跨设备来源协议、云端唯一助理与迁移、Linux/Windows 助理打包旅程、长期语义基准和独立纵向验收；场景、环境事实及通过标准见[下一阶段验收计划](verification/assistant-next-stage-acceptance.md)，六张新卡的状态见[注册表](tasks.yaml)。其他 IM 平台仍暂缓。过去的跨平台基础 App 探针与本机助理/企微验收均不等于这些新门槛通过。
+用户提供 `ssh jump` 作为 Linux 云端验证环境。只读检查已确认目标机可连接，但当前无 MindLink/Node 部署；网络来源同步、云端权威宿主和真实迁移仍未实现。验收分为跨设备来源协议、云端唯一助理与迁移、Linux/Windows 助理打包旅程、长期语义基准和独立纵向验收；场景、环境事实及通过标准见[下一阶段验收计划](verification/assistant-next-stage-acceptance.md)，六张新卡的状态见[注册表](tasks.yaml)。其他 IM 平台仍暂缓。过去的跨平台基础 App 探针与本机助理/企微验收均不等于这些新门槛通过。
 
 ## 工作对话文件预览（2026-09-26）
 

@@ -4,7 +4,7 @@ import { chmod, copyFile, lstat, mkdir, readFile, rename, rm, writeFile } from '
 import { dirname, join } from 'node:path';
 import { promisify } from 'node:util';
 
-import { PROTOCOL_VERSION, type RuntimeUpdateState } from '@yuanpu-agent/protocol';
+import { PROTOCOL_VERSION, type RuntimeUpdateState } from '@mindlink-agent/protocol';
 
 const execFileAsync = promisify(execFile);
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
@@ -104,7 +104,7 @@ export class RuntimeUpdater {
   }
 
   private get executableName(): string {
-    return this.platform === 'win32' ? 'YuanpuAgentRuntime.exe' : 'YuanpuAgentRuntime';
+    return this.platform === 'win32' ? 'MindLinkRuntime.exe' : 'MindLinkRuntime';
   }
 
   private get stagedName(): string {

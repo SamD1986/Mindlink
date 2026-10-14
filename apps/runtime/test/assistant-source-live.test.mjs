@@ -6,8 +6,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import test from 'node:test';
-import { AssistantMemoryRepository } from '@yuanpu-agent/assistant';
-import { openYuanpuMetadataDatabase } from '@yuanpu-agent/runtime-kit';
+import { AssistantMemoryRepository } from '@mindlink-agent/assistant';
+import { openMindlinkMetadataDatabase } from '@mindlink-agent/runtime-kit';
 
 const require = createRequire(import.meta.url);
 const { AssistantWorkerManager, RuntimeAssistantSourceHost } = require('../dist/index.cjs');
@@ -15,9 +15,9 @@ const entry = resolve(import.meta.dirname, '../dist/index.cjs');
 const person = { kind: 'personal', id: 'local-user' };
 
 test('explicit source revocation is versioned, personal, durable and keeps original records', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-source-revoke-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-source-revoke-'));
   t.after(() => rm(root, { recursive: true, force: true }));
-  const metadata = openYuanpuMetadataDatabase(join(root, 'automation.sqlite'));
+  const metadata = openMindlinkMetadataDatabase(join(root, 'automation.sqlite'));
   t.after(() => metadata.close());
   const sourceId = 'work-turn:work:fixture:turn-revoke';
   const ref = `work-content:${createHash('sha256').update(sourceId).digest('hex')}`;
@@ -70,8 +70,8 @@ async function eventually(assertion) {
 }
 
 test('real Runtime source adapter pages saved Work and Assistant turns into Worker durable queue', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-source-live-'));
-  const metadata = openYuanpuMetadataDatabase(join(root, 'automation.sqlite'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-source-live-'));
+  const metadata = openMindlinkMetadataDatabase(join(root, 'automation.sqlite'));
   let first;
   let second;
   t.after(async () => {
@@ -153,8 +153,8 @@ test('real Runtime source adapter pages saved Work and Assistant turns into Work
 });
 
 test('revocation while Worker is stopped withdraws only unsupported memory after restart', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-source-revoke-restart-'));
-  const metadata = openYuanpuMetadataDatabase(join(root, 'automation.sqlite'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-source-revoke-restart-'));
+  const metadata = openMindlinkMetadataDatabase(join(root, 'automation.sqlite'));
   const home = join(root, 'assistant');
   let first;
   let second;
@@ -250,12 +250,12 @@ test('revocation while Worker is stopped withdraws only unsupported memory after
 });
 
 test('legacy MEMORY is read through Host once and A→B→A receives unique durable event IDs', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-legacy-memory-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-legacy-memory-'));
   const legacyDir = join(root, 'agent', 'memory');
   await mkdir(legacyDir, { recursive: true });
   const legacyPath = join(legacyDir, 'MEMORY.md');
   await writeFile(legacyPath, '旧版偏好：每周查看项目。');
-  const metadata = openYuanpuMetadataDatabase(join(root, 'automation.sqlite'));
+  const metadata = openMindlinkMetadataDatabase(join(root, 'automation.sqlite'));
   let manager;
   let restarted;
   t.after(async () => {
@@ -309,9 +309,9 @@ test('legacy MEMORY is read through Host once and A→B→A receives unique dura
 });
 
 test('large Work history is read in bounded pages without skipping its durable cursor', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-source-page-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-source-page-'));
   t.after(() => rm(root, { recursive: true, force: true }));
-  const metadata = openYuanpuMetadataDatabase(join(root, 'automation.sqlite'));
+  const metadata = openMindlinkMetadataDatabase(join(root, 'automation.sqlite'));
   t.after(() => metadata.close());
   const insert = metadata.database.prepare(`INSERT INTO yp_work_turn_sources(conversation_id,turn_id,
     run_id,content_ref,source_version,committed_at,user_text,assistant_text)

@@ -1,14 +1,14 @@
 # 工作对话实时过程与 Pi Session 轨迹设计
 
-状态：交互与视觉设计基线，2026-09-27。以 [Yuanpu 现有 1440×900 工作界面](../evidence/task-059/tree-light.png) 为视觉基线；选定图为 [v003 当前 Pi Session 轨迹](../design/chat-live-run/design-v003-session-trajectory.png)与 [v004 上下文按钮及子智能体 Viewer](../design/chat-live-run/design-v004-context-button.png)。先前 [v001](../design/chat-live-run/design-v001-run-trace.png) 把轨迹简化为一次运行的事件列表，[v002](../design/chat-live-run/design-v002-subagent-context.png) 在上下文弹层加入轨迹页签，均已由用户修正，仅作历史草稿。产品实现位于 Yuanpu protocol、runtime、desktop 与 app；图中会话、事件、模型与 token 数字都是安全示例，精确行为以本文为准。
+状态：交互与视觉设计基线，2026-09-27。以 [MindLink 现有 1440×900 工作界面](../evidence/task-059/tree-light.png) 为视觉基线；选定图为 [v003 当前 Pi Session 轨迹](../design/chat-live-run/design-v003-session-trajectory.png)与 [v004 上下文按钮及子智能体 Viewer](../design/chat-live-run/design-v004-context-button.png)。先前 [v001](../design/chat-live-run/design-v001-run-trace.png) 把轨迹简化为一次运行的事件列表，[v002](../design/chat-live-run/design-v002-subagent-context.png) 在上下文弹层加入轨迹页签，均已由用户修正，仅作历史草稿。产品实现位于 MindLink protocol、runtime、desktop 与 app；图中会话、事件、模型与 token 数字都是安全示例，精确行为以本文为准。
 
 ## 目标与现状
 
-用户在工作对话提交任务后，应立即看到 Agent 的文字增量和实际发生的操作。右侧「运行轨迹」要像所给参考图一样，呈现**当前工作对话绑定的整个 Pi Session 活动分支**：多轮用户输入、助手消息、工具调用及结果、模型与上下文事件，包含概览时间轴和可检索的逐行记录；子智能体另有独立过程 Viewer。当前 `ChatPanel.observeRun` 每 900 ms 获取一次运行状态，终态后才追加完整回复与工具摘要；Pi 会话内部已有 `message_update.text_delta`、`tool_execution_start/end` 等实时事件，但 Yuanpu 适配层只在内存累积它们。右侧既有「动态」「运行」表达了两套不完整的运行信息。
+用户在工作对话提交任务后，应立即看到 Agent 的文字增量和实际发生的操作。右侧「运行轨迹」要像所给参考图一样，呈现**当前工作对话绑定的整个 Pi Session 活动分支**：多轮用户输入、助手消息、工具调用及结果、模型与上下文事件，包含概览时间轴和可检索的逐行记录；子智能体另有独立过程 Viewer。当前 `ChatPanel.observeRun` 每 900 ms 获取一次运行状态，终态后才追加完整回复与工具摘要；Pi 会话内部已有 `message_update.text_delta`、`tool_execution_start/end` 等实时事件，但 MindLink 适配层只在内存累积它们。右侧既有「动态」「运行」表达了两套不完整的运行信息。
 
-参考边界：`deepseek-harness` 的 `TurnProcessNodeView`、`ToolRow` 使用紧凑折叠过程与单行工具摘要；`zcode` 的 `ModelSelect`、`contextUsage`、`ModelTrajectoryPane` 和 `SubagentSessionSidePane` 分别提供输入区控件、轨迹与子会话 Viewer 的可借鉴交互。只取交互原则，保留 Yuanpu 现有工作树、消息宽度、输入卡片、浅色/深色 token 和右栏单层标签条。
+参考边界：`deepseek-harness` 的 `TurnProcessNodeView`、`ToolRow` 使用紧凑折叠过程与单行工具摘要；`zcode` 的 `ModelSelect`、`contextUsage`、`ModelTrajectoryPane` 和 `SubagentSessionSidePane` 分别提供输入区控件、轨迹与子会话 Viewer 的可借鉴交互。只取交互原则，保留 MindLink 现有工作树、消息宽度、输入卡片、浅色/深色 token 和右栏单层标签条。
 
-检索：Yuanpu 工作区以 ZG 查询聊天运行事件、右栏及 telemetry 关系，命中 `chat.tsx`、Pi 适配层和 telemetry 文档；再用 scoped `rg` 核对确切接口。两个参考仓库的 ZG 索引均缺失，未创建索引；以 scoped `rg` 和目标组件读取核实上述行为。
+检索：MindLink 工作区以 ZG 查询聊天运行事件、右栏及 telemetry 关系，命中 `chat.tsx`、Pi 适配层和 telemetry 文档；再用 scoped `rg` 核对确切接口。两个参考仓库的 ZG 索引均缺失，未创建索引；以 scoped `rg` 和目标组件读取核实上述行为。
 
 ## 页面结构
 
@@ -29,7 +29,7 @@
 
 轨迹默认右栏可展示压缩的「轮次 / 调用」概览和可读行；沿用现有右栏放大按钮与拖拽宽度。放大后呈现参考图完整的「时长 / 轮次 / 调用」三视图概览带：输入、模型、工具与上下文分层着色，选择一个轮次或色块会定位到下方对应行。概览与逐行记录消费同一会话投影，不能出现不同的计数或顺序。收回窄栏后保留当前会话、视图、筛选与滚动锚点；高密度刻度随宽度简化，不横向压缩文字。
 
-生成图保留了四列关系与 Yuanpu 输入卡片，但图像放大像素不能直接用作 CSS 尺寸。轨迹中所有文字、路径、模型、token 和事件类型组合均为示例，不表示真实调用已经发生。
+生成图保留了四列关系与 MindLink 输入卡片，但图像放大像素不能直接用作 CSS 尺寸。轨迹中所有文字、路径、模型、token 和事件类型组合均为示例，不表示真实调用已经发生。
 
 助理对话与工作对话共用的输入区可复用模型/上下文控件，但运行数据必须按各自会话与宿主隔离。工作对话现有「动态」「运行」替换如上；助理当前的 `AssistantHome` 仍是默认右侧内容，若在助理对话打开运行 Viewer，应作为助理会话自己的标签，不把工作会话或记忆内容混入。
 
@@ -61,11 +61,11 @@
 
 ## 会话轨迹的数据与进程边界
 
-**Pi Session 是轨迹的历史权威。** 工作对话已有不可复用的 Pi session ID。`SessionManager.getBranch()` 返回当前活动分支，包含带 `id`、`parentId`、`timestamp` 的 `message`、`model_change`、`thinking_level_change`、`usage`、`compaction`、`custom_message` 等条目；助手消息中还有工具调用块，工具结果是单独的消息。现有 `readYuanpuChatTranscript` 只投影可见聊天文字，不足以生成参考图式的轨迹。因此在 Yuanpu 适配层新增按工作会话授权的 **SessionTrajectory 投影**，从活动分支读取历史、分页生成概览和详细行；不把整份 Pi Session 复制成第二套业务日志，也不直接把磁盘路径暴露给 renderer。跨多轮的会话顺序取自 Pi 分支，`AgentRunRecord` 只补各次执行状态与归属。
+**Pi Session 是轨迹的历史权威。** 工作对话已有不可复用的 Pi session ID。`SessionManager.getBranch()` 返回当前活动分支，包含带 `id`、`parentId`、`timestamp` 的 `message`、`model_change`、`thinking_level_change`、`usage`、`compaction`、`custom_message` 等条目；助手消息中还有工具调用块，工具结果是单独的消息。现有 `readMindlinkChatTranscript` 只投影可见聊天文字，不足以生成参考图式的轨迹。因此在 MindLink 适配层新增按工作会话授权的 **SessionTrajectory 投影**，从活动分支读取历史、分页生成概览和详细行；不把整份 Pi Session 复制成第二套业务日志，也不直接把磁盘路径暴露给 renderer。跨多轮的会话顺序取自 Pi 分支，`AgentRunRecord` 只补各次执行状态与归属。
 
 ```text
 绑定的 Pi Session 活动分支 ───────────────┐
-Pi 实时事件（增量、工具、entry_appended） ├─> Yuanpu SessionTrajectory 投影
+Pi 实时事件（增量、工具、entry_appended） ├─> MindLink SessionTrajectory 投影
 能力源/Skill/子智能体显式事件 ────────────┤       ├─> 历史快照 + 游标增量 ─> Electron preload ─> 中央对话/右侧 Viewer
 Telemetry span（耗时与父子关系） ──────────┘       └─> 会话概览：时长 / 轮次 / 调用
 ```
@@ -76,7 +76,7 @@ Telemetry span（耗时与父子关系） ──────────┘     
 
 `@earendil-works/pi-telemetry` 只有 callback span 契约和进程内参考实现；它适合补足父子关联、状态和耗时，但没有可直接用于 UI 的持久实时轨迹，也不替代 Pi Session 条目。telemetry 不记录 prompt、完整工具入参/输出、密钥或私有推理；轨迹详情从按会话授权的 Pi 投影读取。无法恢复的历史耗时留空，不用时间戳差值伪装成模型请求时长。Pi 同步包不因本设计直接修改。
 
-当前工作子智能体管理器已有运行 ID、状态、子会话 ID 和进度回调，但子会话 `session.subscribe` 尚未向宿主投影，需从该边界补齐。助理的委派来自独立的 `yuanpu-assistant`，通过同一显示协议做单独适配，不与工作 Agent runtime 混用存储或会话。
+当前工作子智能体管理器已有运行 ID、状态、子会话 ID 和进度回调，但子会话 `session.subscribe` 尚未向宿主投影，需从该边界补齐。助理的委派来自独立的 `mindlink-assistant`，通过同一显示协议做单独适配，不与工作 Agent runtime 混用存储或会话。
 
 ## 状态与验收
 

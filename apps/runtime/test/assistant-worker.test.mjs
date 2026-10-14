@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import test from 'node:test';
-import { AssistantMemoryRepository } from '@yuanpu-agent/assistant';
+import { AssistantMemoryRepository } from '@mindlink-agent/assistant';
 
 const entry = resolve(import.meta.dirname, '../dist/index.cjs');
 const childrenByHome = new Map();
@@ -31,7 +31,7 @@ async function eventually(check, label, timeoutMs = 10_000) {
 }
 
 async function home(t) {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-assistant-worker-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-assistant-worker-'));
   const assistantHome = join(root, 'assistant');
   const children = new Set();
   childrenByHome.set(assistantHome, children);
@@ -94,7 +94,7 @@ async function stopWorker(child) {
 }
 
 test('headless Worker performs local daily and weekly checks, then stops with the host', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-automation-worker-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-automation-worker-'));
   const assistantHome = join(root, 'assistant');
   const worker = startWorker(assistantHome);
   t.after(async () => { await stopWorker(worker.child); await rm(root, { recursive: true, force: true }); });
@@ -209,7 +209,7 @@ test('a full source page triggers another scan to reach the next page deletion',
 });
 
 test('delegation change enters durable queue and restart reconciles the latest host status', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-delegation-automation-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-delegation-automation-'));
   const assistantHome = join(root, 'assistant');
   const taskId = 'delegated-1';
   const assistantSessionId = 'assistant-session-1';

@@ -6,9 +6,9 @@ const [directoryArgument, releaseTag] = process.argv.slice(2);
 if (!directoryArgument || !releaseTag) {
   throw new Error('Usage: produce-release-manifest.mjs <artifact-directory> <release-tag>');
 }
-const keyBase64 = process.env.YUANPU_ARTIFACT_SIGNING_KEY_BASE64;
-const keyId = process.env.YUANPU_ARTIFACT_SIGNING_KEY_ID;
-const baseUrl = process.env.YUANPU_ARTIFACT_BASE_URL;
+const keyBase64 = process.env.MINDLINK_ARTIFACT_SIGNING_KEY_BASE64;
+const keyId = process.env.MINDLINK_ARTIFACT_SIGNING_KEY_ID;
+const baseUrl = process.env.MINDLINK_ARTIFACT_BASE_URL;
 if (!keyBase64 || !keyId || !baseUrl) {
   throw new Error('Production capability signing key, key id, and artifact base URL are required.');
 }
@@ -21,12 +21,12 @@ function canonicalize(value) {
 
 const directory = resolve(directoryArgument);
 const names = (await readdir(directory))
-  .filter((name) => /^YuanpuEchoMcp-(darwin|linux|win32)-(arm64|x64)\.tar\.gz$/.test(name))
+  .filter((name) => /^MindlinkEchoMcp-(darwin|linux|win32)-(arm64|x64)\.tar\.gz$/.test(name))
   .sort();
 if (names.length === 0) throw new Error('No Python capability archives were collected.');
 
 const artifacts = await Promise.all(names.map(async (name) => {
-  const match = /^YuanpuEchoMcp-(darwin|linux|win32)-(arm64|x64)\.tar\.gz$/.exec(name);
+  const match = /^MindlinkEchoMcp-(darwin|linux|win32)-(arm64|x64)\.tar\.gz$/.exec(name);
   const path = join(directory, name);
   const bytes = await readFile(path);
   const metadata = await stat(path);
@@ -37,7 +37,7 @@ const artifacts = await Promise.all(names.map(async (name) => {
     url: new URL(`${encodeURIComponent(releaseTag)}/${basename(path)}`, `${baseUrl.replace(/\/$/, '')}/`).toString(),
     size: metadata.size,
     sha256: createHash('sha256').update(bytes).digest('hex'),
-    entrypoint: `YuanpuEchoMcp/${match[1] === 'win32' ? 'YuanpuEchoMcp.exe' : 'YuanpuEchoMcp'}`,
+    entrypoint: `MindlinkEchoMcp/${match[1] === 'win32' ? 'MindlinkEchoMcp.exe' : 'MindlinkEchoMcp'}`,
   };
 }));
 
@@ -58,7 +58,7 @@ const manifest = {
     default: { responsePrefix: '' },
   },
   permissions: ['notifications', 'background'],
-  connections: ['yuanpu_echo_mcp'],
+  connections: ['mindlink_echo_mcp'],
   issuedAt: new Date().toISOString(),
   signature: { algorithm: 'ed25519', keyId, value: '' },
 };
@@ -69,7 +69,7 @@ manifest.signature.value = sign(
   createPrivateKey(Buffer.from(keyBase64, 'base64').toString('utf8')),
 ).toString('base64');
 await writeFile(
-  join(directory, 'YuanpuEchoMcp-manifest.json'),
+  join(directory, 'MindlinkEchoMcp-manifest.json'),
   `${JSON.stringify(manifest, null, 2)}\n`,
 );
 console.log(`Produced signed capability manifest for ${artifacts.length} targets.`);

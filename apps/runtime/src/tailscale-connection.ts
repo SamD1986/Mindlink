@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { chmod, lstat, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { SaveTailscaleConnectionInput, TailscaleConnectionSettings } from '@yuanpu-agent/protocol';
+import type { SaveTailscaleConnectionInput, TailscaleConnectionSettings } from '@mindlink-agent/protocol';
 
 interface TailscaleConnectionDocument {
   schemaVersion: 1;

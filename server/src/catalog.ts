@@ -1,13 +1,13 @@
-import type { SkillCatalogItem } from '@yuanpu-agent/protocol';
+import type { SkillCatalogItem } from '@mindlink-agent/protocol';
 
 export const catalog: SkillCatalogItem[] = [
   {
     id: 'builtin.python.echo',
-    name: 'yuanpu-echo-mcp',
+    name: 'mindlink-echo-mcp',
     displayName: 'Python 示例能力',
     version: '0.1.0',
     description: '进程外运行的自包含 Python 能力包，用于验证安全安装、调用与更新链路。',
-    publisher: 'yuanpu',
+    publisher: 'mindlink',
     source: 'artifact:/v1/capability-packages/builtin.python.echo/manifest',
     components: ['connector'],
     permissions: ['notifications', 'background'],
@@ -39,7 +39,7 @@ export const catalog: SkillCatalogItem[] = [
     name: 'pi-mcp-adapter',
     displayName: 'MCP 服务连接',
     version: '2.34.0',
-    description: '连接外部 MCP 服务，为 YuanpuAgent 增加工具和数据源。',
+    description: '连接外部 MCP 服务，为 MindLink 增加工具和数据源。',
     publisher: 'community',
     source: 'npm:pi-mcp-adapter@2.34.0',
     components: ['connector', 'extension'],

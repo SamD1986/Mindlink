@@ -7,8 +7,8 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 test('work file routes serve the workspace with containment enforcement', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-file-routes-home-'));
-  const workspace = await mkdtemp(join(tmpdir(), 'yuanpu-file-routes-workspace-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-file-routes-home-'));
+  const workspace = await mkdtemp(join(tmpdir(), 'mindlink-file-routes-workspace-'));
   await mkdir(join(home, 'app'), { recursive: true });
   await writeFile(join(home, 'app', 'config.json'), `${JSON.stringify({
     schemaVersion: 1,
@@ -22,7 +22,7 @@ test('work file routes serve the workspace with containment enforcement', async 
     .export({ type: 'spki', format: 'der' }).toString('base64');
   const child = spawn(process.execPath, ['dist/index.cjs', '--serve', '--port', '0'], {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_PYTHON_MCP_EXECUTABLE: '', YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_PYTHON_MCP_EXECUTABLE: '', MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   child.stdin.end(`${JSON.stringify({ token, approvalPublicKey, parentPid: process.pid })}\n`);
   context.after(async () => {

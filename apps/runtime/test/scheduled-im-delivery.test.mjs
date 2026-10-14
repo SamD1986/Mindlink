@@ -8,10 +8,10 @@ import {
   PersistentAgentService,
   PersistentScheduler,
   digestChannelValue,
-  openYuanpuMetadataDatabase,
+  openMindlinkMetadataDatabase,
   requestRecordedTerminalRunNotification,
-} from '@yuanpu-agent/runtime-kit';
-import { RUNTIME_ROUTES, SCHEDULE_CONTRACT_VERSION } from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/runtime-kit';
+import { RUNTIME_ROUTES, SCHEDULE_CONTRACT_VERSION } from '@mindlink-agent/protocol';
 
 import { createScheduledImDelivery, handleScheduledImHttp } from '../src/scheduled-im-delivery.ts';
 
@@ -24,7 +24,7 @@ async function eventually(check) {
 }
 
 test('authenticated HTTP binds an observed private sender, accepts the schedule, then revokes the route', async (context) => {
-  const metadata = openYuanpuMetadataDatabase(':memory:');
+  const metadata = openMindlinkMetadataDatabase(':memory:');
   let now = new Date('2026-09-23T00:00:00.000Z');
   let executions = 0;
   const notifications = [];

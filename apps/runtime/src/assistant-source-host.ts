@@ -3,11 +3,11 @@ import { constants } from 'node:fs';
 import { lstat, open } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import type { AssistantSourceHost, AssistantSourcePage, AssistantSourceRead,
-  AssistantSourceState } from '@yuanpu-agent/assistant';
+  AssistantSourceState } from '@mindlink-agent/assistant';
 import type { AssistantHostStore, AssistantSourceLifecycleStore,
-  WorkConversationStore, WorkEvidenceStore } from '@yuanpu-agent/runtime-kit';
-import { readYuanpuSavedToolResults } from '@yuanpu-agent/runtime-kit';
-import type { AssistantAudience, AssistantSourceChange } from '@yuanpu-agent/protocol';
+  WorkConversationStore, WorkEvidenceStore } from '@mindlink-agent/runtime-kit';
+import { readMindlinkSavedToolResults } from '@mindlink-agent/runtime-kit';
+import type { AssistantAudience, AssistantSourceChange } from '@mindlink-agent/protocol';
 
 const feeds = ['work', 'work-evidence', 'assistant', 'work-deletions',
   'assistant-deletions', 'legacy-memory'] as const;
@@ -249,7 +249,7 @@ export class RuntimeAssistantSourceHost implements AssistantSourceHost {
       if (source.kind === 'tool_result') {
         if (this.sessionsDirectory) {
           try {
-            const saved = readYuanpuSavedToolResults(workspace, source.piSessionId, this.sessionsDirectory)
+            const saved = readMindlinkSavedToolResults(workspace, source.piSessionId, this.sessionsDirectory)
               .find((item) => item.entryId === source.entryId);
             if (!saved || saved.name !== source.toolName || saved.status !== source.resultStatus
               || saved.text !== source.text) return { status: 'temporarily_unavailable' };

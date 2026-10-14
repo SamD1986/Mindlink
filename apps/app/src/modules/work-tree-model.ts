@@ -1,4 +1,4 @@
-import type { WorkConversation, WorkFolder } from '@yuanpu-agent/protocol';
+import type { WorkConversation, WorkFolder } from '@mindlink-agent/protocol';
 
 export type WorkTreeNode = { kind: 'folder'; item: WorkFolder; depth: number }
   | { kind: 'conversation'; item: WorkConversation; depth: number };

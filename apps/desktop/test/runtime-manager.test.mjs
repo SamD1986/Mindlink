@@ -27,7 +27,7 @@ async function events(path) {
 }
 
 async function createManager(context, mode, overrides = {}) {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-runtime-manager-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-runtime-manager-'));
   context.after(() => rm(root, { recursive: true, force: true }));
   const eventFile = join(root, 'events.jsonl');
   const counterFile = join(root, 'counter.txt');

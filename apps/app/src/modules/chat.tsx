@@ -20,8 +20,8 @@ import type {
   WorkMessageWindowResult,
   SessionTrajectory,
   DesktopTranscriptMessage,
-} from '@yuanpu-agent/protocol';
-import { effectiveHotkeyBinding } from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
+import { effectiveHotkeyBinding } from '@mindlink-agent/protocol';
 import mindlinkSeal from '../../themes/assets/mindlink-seal.png';
 import { emo } from '../emo.js';
 
@@ -237,7 +237,7 @@ export function ChatPanel({
     ? [{ ...initialMessages[0]!, text: assistantGreeting }]
     : initialMessages);
   const [input, setInput] = useState(() => {
-    try { return window.localStorage.getItem(`yuanpu:draft:${surface}`) ?? ''; }
+    try { return window.localStorage.getItem(`mindlink:draft:${surface}`) ?? ''; }
     catch { return ''; }
   });
   const [attachments, setAttachments] = useState<Array<{ name: string; contents: string }>>([]);
@@ -269,7 +269,7 @@ export function ChatPanel({
   const [leftPanelResizing, setLeftPanelResizing] = useState(false);
   const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
     try {
-      const stored = Number(window.localStorage.getItem('yuanpu:left-panel-width'));
+      const stored = Number(window.localStorage.getItem('mindlink:left-panel-width'));
       return stored >= 240 && stored <= 720 ? stored : 300;
     } catch { return 300; }
   });
@@ -327,7 +327,7 @@ export function ChatPanel({
     setMountedWorkspaces((current) => current.includes(workConversationId) ? current : [...current, workConversationId]);
   }, [surface, workConversationId, activityOpen]);
   useEffect(() => {
-    try { window.localStorage.setItem('yuanpu:left-panel-width', String(leftPanelWidth)); } catch { /* best effort */ }
+    try { window.localStorage.setItem('mindlink:left-panel-width', String(leftPanelWidth)); } catch { /* best effort */ }
   }, [leftPanelWidth]);
   useEffect(() => () => leftPanelDragCleanup.current?.(), []);
   const [olderMessages, setOlderMessages] = useState<DesktopTranscriptMessage[]>([]);
@@ -367,14 +367,14 @@ export function ChatPanel({
   const attachmentInput = useRef<HTMLInputElement>(null);
   const composerInput = useRef<HTMLTextAreaElement>(null);
   const [watermarkCount, setWatermarkCount] = useState(1);
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const queryClient = useQueryClient();
   const modelSettingsQuery = useQuery({ queryKey: ['settings', 'model'],
     queryFn: () => desktop!.getModelSettings(), enabled: active && surface === 'work' && Boolean(desktop) });
   useEffect(() => {
     if (surface !== 'work' || !workConversationId) return;
     try {
-      const saved = JSON.parse(window.localStorage.getItem(`yuanpu:model:${workConversationId}`) ?? 'null') as AgentRunRequest['modelSelection'] | null;
+      const saved = JSON.parse(window.localStorage.getItem(`mindlink:model:${workConversationId}`) ?? 'null') as AgentRunRequest['modelSelection'] | null;
       setModelSelection(saved?.provider && saved.model
         ? { ...saved, thinkingLevel: threeStepThinking(saved.thinkingLevel) } : undefined);
     } catch { setModelSelection(undefined); }
@@ -382,7 +382,7 @@ export function ChatPanel({
   useEffect(() => {
     if (surface !== 'work' || !workConversationId) return;
     try {
-      setUnrestrictedConversationId(window.localStorage.getItem(`yuanpu:full-access:${workConversationId}`) === 'true'
+      setUnrestrictedConversationId(window.localStorage.getItem(`mindlink:full-access:${workConversationId}`) === 'true'
         ? workConversationId : undefined);
     } catch { setUnrestrictedConversationId(undefined); }
   }, [surface, workConversationId]);
@@ -551,7 +551,7 @@ export function ChatPanel({
   }, [searchWindow, workConversationId]);
 
   useEffect(() => {
-    try { window.localStorage.setItem(`yuanpu:draft:${surface}`, input); }
+    try { window.localStorage.setItem(`mindlink:draft:${surface}`, input); }
     catch { /* Storage can be unavailable in a restricted preview. */ }
   }, [input, surface]);
 
@@ -947,7 +947,7 @@ export function ChatPanel({
         if (surface === 'assistant') {
           if (!pendingAssistantMessage.current) {
             try {
-              const saved = JSON.parse(window.localStorage.getItem('yuanpu:assistant-pending-message') ?? 'null') as
+              const saved = JSON.parse(window.localStorage.getItem('mindlink:assistant-pending-message') ?? 'null') as
                 { text?: unknown; id?: unknown; createdAt?: unknown } | null;
               if (saved?.text === text && typeof saved.id === 'string'
                 && /^[A-Za-z0-9_-]{1,128}$/.test(saved.id)
@@ -962,7 +962,7 @@ export function ChatPanel({
             pendingAssistantMessage.current = { text, id: crypto.randomUUID(), createdAt: Date.now() };
           }
           clientMessageId = pendingAssistantMessage.current.id;
-          try { window.localStorage.setItem('yuanpu:assistant-pending-message',
+          try { window.localStorage.setItem('mindlink:assistant-pending-message',
             JSON.stringify(pendingAssistantMessage.current)); } catch { /* optional retry cache */ }
         }
         const receipt = await desktop.submitDesktopMessage(text, surface,
@@ -971,7 +971,7 @@ export function ChatPanel({
           surface === 'work' && unrestrictedConversationId === workConversationId ? 'unrestricted' : undefined);
         if (surface === 'assistant') {
           pendingAssistantMessage.current = undefined;
-          try { window.localStorage.removeItem('yuanpu:assistant-pending-message'); } catch { /* optional retry cache */ }
+          try { window.localStorage.removeItem('mindlink:assistant-pending-message'); } catch { /* optional retry cache */ }
         }
         setSubmittedTask({ runId: receipt.runId, text: draft || '请阅读附件' });
         if (surface === 'work') void queryClient.invalidateQueries({ queryKey: ['work', 'conversations'] });
@@ -1183,7 +1183,7 @@ export function ChatPanel({
   function chooseModel(next: NonNullable<AgentRunRequest['modelSelection']>) {
     setModelSelection(next);
     if (workConversationId) {
-      try { window.localStorage.setItem(`yuanpu:model:${workConversationId}`, JSON.stringify(next)); }
+      try { window.localStorage.setItem(`mindlink:model:${workConversationId}`, JSON.stringify(next)); }
       catch { /* The selection still applies to this session. */ }
     }
   }
@@ -1193,8 +1193,8 @@ export function ChatPanel({
     const next = !fullAccessEnabled;
     setUnrestrictedConversationId(next ? workConversationId : undefined);
     try {
-      if (next) window.localStorage.setItem(`yuanpu:full-access:${workConversationId}`, 'true');
-      else window.localStorage.removeItem(`yuanpu:full-access:${workConversationId}`);
+      if (next) window.localStorage.setItem(`mindlink:full-access:${workConversationId}`, 'true');
+      else window.localStorage.removeItem(`mindlink:full-access:${workConversationId}`);
     } catch { /* Current session retains the chosen mode. */ }
   }
   const emptyConversation = !archiveOpen && !busy && !locatedRun && !runRecovery
@@ -1434,7 +1434,7 @@ export function ChatPanel({
               : <article key={message.entryId ?? message.id} data-message-entry-id={message.entryId} className={`message ${message.role}`}>
                 {surface === 'assistant' && message.role === 'assistant' && <span className="assistant-message-avatar" role="img" aria-label="助理标识"><img src={new URL('../assets/assistant/portrait-resting.png', import.meta.url).href} alt="" /></span>}
                 <div className="message-label">
-                  {message.role === 'user' ? '你' : message.role === 'error' ? '运行错误' : 'YuanpuAgent'}
+                  {message.role === 'user' ? '你' : message.role === 'error' ? '运行错误' : 'MindLink'}
                 </div>
                 {surface === 'assistant' && message.channel && <span className="assistant-message-channel">
                   {message.channel === 'wecom' ? '企业微信' : '桌面'}
@@ -1479,7 +1479,7 @@ export function ChatPanel({
             {!archiveOpen && !workArchived && busy && (
               <article className="message assistant pending">
                 {surface === 'assistant' && <span className="assistant-message-avatar" aria-hidden="true"><img src={new URL('../assets/assistant/portrait-resting.png', import.meta.url).href} alt="" /></span>}
-                <div className="message-label">YuanpuAgent</div>
+                <div className="message-label">MindLink</div>
                 {surface === 'work' && activeLive && activeLive.tools.length > 0 &&
                   <ProcessList tools={activeLive.tools.slice(-8)} live onOpen={(tool) => {
                     setActivityOpen(true); setActivityTab(tool.category === '子智能体' ? 'subagents' : 'trajectory');

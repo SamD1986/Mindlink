@@ -13,19 +13,19 @@ function canonicalize(value) {
 }
 
 test('aggregates target archives and signs the production capability manifest', async (context) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-release-manifest-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-release-manifest-'));
   context.after(() => rm(root, { recursive: true, force: true }));
-  await writeFile(join(root, 'YuanpuEchoMcp-linux-x64.tar.gz'), 'linux');
-  await writeFile(join(root, 'YuanpuEchoMcp-win32-x64.tar.gz'), 'windows');
+  await writeFile(join(root, 'MindlinkEchoMcp-linux-x64.tar.gz'), 'linux');
+  await writeFile(join(root, 'MindlinkEchoMcp-win32-x64.tar.gz'), 'windows');
   const { privateKey, publicKey } = generateKeyPairSync('ed25519');
   const keyBase64 = Buffer.from(privateKey.export({ format: 'pem', type: 'pkcs8' })).toString('base64');
   const publicBase64 = Buffer.from(publicKey.export({ format: 'pem', type: 'spki' })).toString('base64');
   const signingEnvironment = {
     ...process.env,
-    YUANPU_ARTIFACT_SIGNING_KEY_BASE64: keyBase64,
-    YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64: publicBase64,
-    YUANPU_ARTIFACT_SIGNING_KEY_ID: 'production-test',
-    YUANPU_ARTIFACT_BASE_URL: 'https://downloads.example.test/',
+    MINDLINK_ARTIFACT_SIGNING_KEY_BASE64: keyBase64,
+    MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64: publicBase64,
+    MINDLINK_ARTIFACT_SIGNING_KEY_ID: 'production-test',
+    MINDLINK_ARTIFACT_BASE_URL: 'https://downloads.example.test/',
   };
 
   assert.doesNotThrow(() => execFileSync(process.execPath, [
@@ -39,7 +39,7 @@ test('aggregates target archives and signs the production capability manifest', 
   ], {
     env: signingEnvironment,
   });
-  const manifest = JSON.parse(await readFile(join(root, 'YuanpuEchoMcp-manifest.json'), 'utf8'));
+  const manifest = JSON.parse(await readFile(join(root, 'MindlinkEchoMcp-manifest.json'), 'utf8'));
   assert.equal(manifest.version, '0.2.0');
   assert.deepEqual(manifest.artifacts.map((artifact) => `${artifact.platform}-${artifact.arch}`), [
     'linux-x64',
@@ -47,7 +47,7 @@ test('aggregates target archives and signs the production capability manifest', 
   ]);
   assert.equal(
     manifest.artifacts[0].url,
-    'https://downloads.example.test/v0.2.0/YuanpuEchoMcp-linux-x64.tar.gz',
+    'https://downloads.example.test/v0.2.0/MindlinkEchoMcp-linux-x64.tar.gz',
   );
   const { signature, ...unsigned } = manifest;
   assert.equal(verify(

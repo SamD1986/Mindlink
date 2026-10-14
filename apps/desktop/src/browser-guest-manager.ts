@@ -1,4 +1,4 @@
-import type { BrowserControlCommand, BrowserControlResult } from '@yuanpu-agent/protocol';
+import type { BrowserControlCommand, BrowserControlResult } from '@mindlink-agent/protocol';
 import { webContents as electronWebContents, type WebContents } from 'electron';
 
 interface ManagedGuest {

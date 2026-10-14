@@ -5,15 +5,15 @@ import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { RUNTIME_ROUTES } from '@yuanpu-agent/protocol';
-import { openYuanpuMetadataDatabase } from '@yuanpu-agent/runtime-kit';
+import { RUNTIME_ROUTES } from '@mindlink-agent/protocol';
+import { openMindlinkMetadataDatabase } from '@mindlink-agent/runtime-kit';
 
 test('authenticated desktop service round-trips Assistant memory and pause through the real Worker', async (t) => {
   const home = await mkdtemp(join(tmpdir(), 'yp-assistant-workspace-http-'));
   await mkdir(join(home, 'workflows'));
   const sourceId = 'work-turn:work:fixture:turn-http';
   const sourceRef = `work-content:${createHash('sha256').update(sourceId).digest('hex')}`;
-  const metadata = openYuanpuMetadataDatabase(join(home, 'workflows', 'automation.sqlite'));
+  const metadata = openMindlinkMetadataDatabase(join(home, 'workflows', 'automation.sqlite'));
   metadata.database.prepare(`INSERT INTO yp_work_turn_sources(conversation_id,turn_id,run_id,
     content_ref,source_version,committed_at,user_text,assistant_text)
     VALUES (?,?,?,?,?,?,?,?)`).run('work:fixture', 'turn-http', 'run-http', sourceRef,
@@ -24,8 +24,8 @@ test('authenticated desktop service round-trips Assistant memory and pause throu
     .export({ type: 'spki', format: 'der' }).toString('base64');
   const child = spawn(process.execPath, [resolve(import.meta.dirname, '../dist/index.cjs'), '--serve', '--port', '0'], {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   let stderr = '';
   child.stderr.setEncoding('utf8');
@@ -86,7 +86,7 @@ test('authenticated desktop service round-trips Assistant memory and pause throu
     if (Date.now() > untilProcessed) throw new Error('Revocation was not processed by Assistant Worker.');
     await new Promise((resolveWait) => setTimeout(resolveWait, 80));
   }
-  const original = openYuanpuMetadataDatabase(join(home, 'workflows', 'automation.sqlite'));
+  const original = openMindlinkMetadataDatabase(join(home, 'workflows', 'automation.sqlite'));
   assert.equal(original.workConversations.sourceById(sourceId).userText, 'Original work remains');
   original.close();
   assert.deepEqual((await read()).memories, []);

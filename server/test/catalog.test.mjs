@@ -24,19 +24,19 @@ test('catalog server searches skills and returns item details', async (context) 
 });
 
 test('catalog server exposes controlled signed metadata and immutable artifacts', async (context) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-catalog-artifact-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-catalog-artifact-'));
   context.after(() => rm(root, { recursive: true, force: true }));
   const body = Buffer.from('signed-fixture');
   await writeFile(join(root, 'manifest.json'), JSON.stringify({
     id: 'builtin.python.echo',
     version: '9.8.7',
     artifacts: [
-      { url: 'artifacts/YuanpuEchoMcp-linux-x64.tar.gz' },
+      { url: 'artifacts/MindlinkEchoMcp-linux-x64.tar.gz' },
       { url: 'artifacts/private.pem' },
     ],
     signature: { value: 'fixture' },
   }));
-  await writeFile(join(root, 'YuanpuEchoMcp-linux-x64.tar.gz'), body);
+  await writeFile(join(root, 'MindlinkEchoMcp-linux-x64.tar.gz'), body);
   await writeFile(join(root, 'private.pem'), 'must-not-leak');
   const server = createCatalogServer(undefined, { artifactRoot: root });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -50,14 +50,14 @@ test('catalog server exposes controlled signed metadata and immutable artifacts'
 
   const manifest = await fetch(`${origin}/v1/capability-packages/builtin.python.echo/manifest`).then((response) => response.json());
   assert.equal(manifest.signature.value, 'fixture');
-  const artifact = await fetch(`${origin}/v1/capability-packages/builtin.python.echo/artifacts/YuanpuEchoMcp-linux-x64.tar.gz`);
+  const artifact = await fetch(`${origin}/v1/capability-packages/builtin.python.echo/artifacts/MindlinkEchoMcp-linux-x64.tar.gz`);
   assert.equal(artifact.headers.get('cache-control'), 'public, max-age=31536000, immutable');
   assert.deepEqual(Buffer.from(await artifact.arrayBuffer()), body);
   assert.equal((await fetch(`${origin}/v1/capability-packages/builtin.python.echo/artifacts/..%2Fsecret`)).status, 400);
   assert.equal((await fetch(`${origin}/v1/capability-packages/builtin.python.echo/artifacts/private.pem`)).status, 404);
   assert.equal((await fetch(`${origin}/v1/capability-packages/%/manifest`)).status, 400);
 
-  const linkName = 'YuanpuEchoMcp-darwin-arm64.tar.gz';
+  const linkName = 'MindlinkEchoMcp-darwin-arm64.tar.gz';
   await symlink(join(root, 'private.pem'), join(root, linkName));
   const currentManifest = JSON.parse(await readFile(join(root, 'manifest.json'), 'utf8'));
   currentManifest.artifacts.push({ url: `artifacts/${linkName}` });

@@ -2,11 +2,11 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { isSea } from 'node:sea';
 import { resolveAssistantModelConfig, type AssistantModelSelection } from './assistant-model.js';
-import type { AssistantSourceHost } from '@yuanpu-agent/assistant';
-import type { AssistantSuggestion } from '@yuanpu-agent/assistant';
-import type { AssistantMemoryView, AssistantWorkspaceSnapshot } from '@yuanpu-agent/protocol';
+import type { AssistantSourceHost } from '@mindlink-agent/assistant';
+import type { AssistantSuggestion } from '@mindlink-agent/assistant';
+import type { AssistantMemoryView, AssistantWorkspaceSnapshot } from '@mindlink-agent/protocol';
 import type { AssistantDelegationBrief, AssistantDelegationRecord,
-  AssistantEvidenceRef } from '@yuanpu-agent/protocol';
+  AssistantEvidenceRef } from '@mindlink-agent/protocol';
 import type { AssistantDelegationService } from './assistant-delegation-service.js';
 
 export interface AssistantTaskRecord {

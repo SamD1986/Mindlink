@@ -1,4 +1,4 @@
-import type { BrowserGuestAttachPayload } from '@yuanpu-agent/protocol';
+import type { BrowserGuestAttachPayload } from '@mindlink-agent/protocol';
 
 /**
  * Host seam for the viewer browser module: how the embedded browser guest

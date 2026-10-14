@@ -78,15 +78,15 @@ URL 模式支持成员单聊和群内 @ 机器人，消息体包含 `msgid`、`a
 
 凭据处理：
 
-- `BotID` 可作为非敏感连接元数据；`Secret` 只保存 Keychain 引用，例如 `keychain:yuanpu/im/<connectionId>/bot-secret`。
+- `BotID` 可作为非敏感连接元数据；`Secret` 只保存 Keychain 引用，例如 `keychain:mindlink/im/<connectionId>/bot-secret`。
 - 不把 Secret、解析后的凭据、原始入站体、临时下载 URL 或 `aeskey` 写入配置、fixture、日志或任务证据。
-- 每次更换机器人或 Secret 创建新的 Yuanpu `connectionId`，避免复用旧配对与会话映射。
+- 每次更换机器人或 Secret 创建新的 MindLink `connectionId`，避免复用旧配对与会话映射。
 
 ### 3.2 连接与 App 生命周期
 
 - 连接地址是 `wss://openws.work.weixin.qq.com`；私有部署企业可能由管理端给出不同地址。
 - 建连后用 `aibot_subscribe` 发送 `BotID + Secret`。官方要求定期 `ping`，建议 30 秒；需要断线检测和重连。
-- 每个智能机器人同一时刻只能有一个有效长连接。新连接订阅成功会踢掉旧连接，并向旧连接发送 `disconnected_event`。Yuanpu 必须保证同一机器人单实例拥有连接，不能用同时多连接做 HA。
+- 每个智能机器人同一时刻只能有一个有效长连接。新连接订阅成功会踢掉旧连接，并向旧连接发送 `disconnected_event`。MindLink 必须保证同一机器人单实例拥有连接，不能用同时多连接做 HA。
 - 桌面 App 启动 Runtime 时连接；App 退出时调用 SDK `disconnect()`，停止心跳、清除重连定时器和待回执队列并关闭 socket。不得启动独立守护进程。该行为由官方 SDK 当前源码实现，但 TASK-018 仍应做进程级验收。
 - 非手动断线可重连；手动退出不得重连。若收到“新连接踢旧连接”，应显示明确冲突，不进入无限抢占。
 
@@ -96,7 +96,7 @@ URL 模式支持成员单聊和群内 @ 机器人，消息体包含 `msgid`、`a
 
 只信任已认证 WSS 连接上的结构化字段，不信任消息正文自报的姓名、手机号或 ID。
 
-| Yuanpu 语义 | 企业微信字段/派生规则 |
+| MindLink 语义 | 企业微信字段/派生规则 |
 | --- | --- |
 | 连接 | 本机生成 `connectionId`；平台机器人是 `body.aibotid`/`BotID` |
 | 入站去重 ID | `body.msgid`。官方称其为“本次回调的唯一性标志，用于事件排重” |
@@ -143,7 +143,7 @@ TASK-018 的默认路径应是保存入站 `req_id` 后以一个最终 `stream` 
 - **未知结果：**帧已写入 socket 后遇到 5 秒无回执、断线或进程退出，消息可能已被平台受理，状态必须是 `unknown`。不重新运行 Agent，不盲目重发。因为协议没有提供幂等键、outbound message ID 或查询接口，首版不能自动把 `unknown` 改为成功/失败。
 - **重试：**SDK 会对连接做指数退避重连，但不会安全地重试结果未知的回复。首版宜一次发送最终 `finish=true` 文本，避免一个流式队列中前一帧未知后 SDK 继续发送后一帧。确定在写 socket 前失败可以重试投递；已写出则不能。
 
-Yuanpu 发送前应持久化本地 `outboundId`、`req_id`、不可变路由、内容摘要和 `pending`。收到 `errcode=0` 记 `accepted`；明确非零错误记 `failed`；上述不确定场景记 `unknown`。
+MindLink 发送前应持久化本地 `outboundId`、`req_id`、不可变路由、内容摘要和 `pending`。收到 `errcode=0` 记 `accepted`；明确非零错误记 `failed`；上述不确定场景记 `unknown`。
 
 来源：[长连接命令响应](https://developer.work.weixin.qq.com/document/path/101463)、[SDK 回执队列源码](https://github.com/WecomTeam/aibot-node-sdk/blob/80615b987ef69c6028ad764924609247c0725955/src/ws.ts)
 
@@ -169,7 +169,7 @@ Yuanpu 发送前应持久化本地 `outboundId`、`req_id`、不可变路由、�
 - `downloadFile` debug 记录完整下载 URL；
 - `DefaultLogger` 将 debug/info/warn/error 全部写到 console。
 
-TASK-018 必须在创建 `WSClient` 时注入 Yuanpu redacting logger，并对**所有级别和所有可变参数**脱敏；仅关闭 debug 不够，因为 warn 也可能包含原始帧。允许记录的字段限于本机 `connectionId`、命令类别、哈希化/截断后的关联 ID、状态码和时间，不记录正文、userid、chatid、Secret、URL、aeskey 或卡片内容。原始 fixture 必须人工脱敏。
+TASK-018 必须在创建 `WSClient` 时注入 MindLink redacting logger，并对**所有级别和所有可变参数**脱敏；仅关闭 debug 不够，因为 warn 也可能包含原始帧。允许记录的字段限于本机 `connectionId`、命令类别、哈希化/截断后的关联 ID、状态码和时间，不记录正文、userid、chatid、Secret、URL、aeskey 或卡片内容。原始 fixture 必须人工脱敏。
 
 版本事实也需要门禁：
 
@@ -187,7 +187,7 @@ TASK-018 必须在创建 `WSClient` 时注入 Yuanpu redacting logger，并对**
 ### 4.1 环境
 
 - 一个隔离的企业微信测试组织；一名能创建/配置智能机器人的管理员。
-- 一个只供 Yuanpu 测试的 API 模式长连接智能机器人，限制到测试范围。
+- 一个只供 MindLink 测试的 API 模式长连接智能机器人，限制到测试范围。
 - `BotID` 非敏感引用和 Keychain 中的 `Secret`；仓库、日志和截图不出现 secret。
 - 两个测试成员 A/B：A 已配对，B 未配对；一条 A 与机器人的单聊；一个含 A/B/机器人的内部测试群。
 - 一台运行项目指定 Node.js 24 的桌面测试机，只开放到企业微信 WSS/API 的出站访问，不开放本机入站端口。
@@ -196,7 +196,7 @@ TASK-018 必须在创建 `WSClient` 时注入 Yuanpu redacting logger，并对**
 ### 4.2 必须在真实客户端验证
 
 1. 用 `BotID + Secret` 鉴权，确认同一机器人只存在一个连接。
-2. A 私聊发文本，Yuanpu 以原 `req_id` 回复，企业微信客户端在同一单聊展示结果。
+2. A 私聊发文本，MindLink 以原 `req_id` 回复，企业微信客户端在同一单聊展示结果。
 3. A 在 allowlist 群内 @ 机器人，回复出现在同一群；不 @ 时不触发。
 4. B 私聊与群 @ 均被拒绝且不启动 Agent；A/B、私聊/群聊不串 Pi session。
 5. 对同一 `msgid` 重放脱敏帧只产生一次 run；真实平台若出现重复投递也只执行一次。

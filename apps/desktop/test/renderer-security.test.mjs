@@ -12,8 +12,8 @@ test('renderer trust is bound to the configured entry document', () => {
 });
 
 test('packaged file trust rejects sibling files and remote origins', () => {
-  const trusted = 'file:///Applications/YuanpuAgent/resources/app/index.html';
+  const trusted = 'file:///Applications/MindLink/resources/app/index.html';
   assert.equal(isTrustedRendererUrl(`${trusted}#chat`, trusted), true);
-  assert.equal(isTrustedRendererUrl('file:///Applications/YuanpuAgent/resources/app/other.html', trusted), false);
+  assert.equal(isTrustedRendererUrl('file:///Applications/MindLink/resources/app/other.html', trusted), false);
   assert.equal(isTrustedRendererUrl('https://example.com/index.html', trusted), false);
 });

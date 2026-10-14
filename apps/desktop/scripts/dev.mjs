@@ -13,9 +13,9 @@ function run(command, args, options = {}) {
 }
 
 const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-const catalogUrl = process.env.YUANPU_CATALOG_URL || 'http://127.0.0.1:8787';
-const catalog = run(pnpm, ['--filter', '@yuanpu-agent/catalog-server', 'dev']);
-const vite = run(pnpm, ['--filter', '@yuanpu-agent/app', 'dev', '--host', '127.0.0.1']);
+const catalogUrl = process.env.MINDLINK_CATALOG_URL || 'http://127.0.0.1:8787';
+const catalog = run(pnpm, ['--filter', '@mindlink-agent/catalog-server', 'dev']);
+const vite = run(pnpm, ['--filter', '@mindlink-agent/app', 'dev', '--host', '127.0.0.1']);
 
 let rendererReady = false;
 let catalogReady = false;
@@ -40,12 +40,12 @@ if (!rendererReady || !catalogReady) {
 
 const electron = run(
   pnpm,
-  ['--filter', '@yuanpu-agent/desktop', 'start'],
+  ['--filter', '@mindlink-agent/desktop', 'start'],
   {
     env: {
       ...process.env,
-      YUANPU_RENDERER_URL: 'http://127.0.0.1:5173',
-      YUANPU_CATALOG_URL: catalogUrl,
+      MINDLINK_RENDERER_URL: 'http://127.0.0.1:5173',
+      MINDLINK_CATALOG_URL: catalogUrl,
     },
   },
 );

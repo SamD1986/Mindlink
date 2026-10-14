@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This pnpm monorepo targets Node.js 24. `apps/app` contains the React/Vite renderer; `apps/desktop` owns Electron main/preload code and Runtime updates; `apps/runtime` builds the Node SEA sidecar; and `apps/python-capabilities` contains the managed Python MCP example. Yuanpu-owned shared code lives in `packages/yuanpu-protocol` and `packages/yuanpu-runtime`. Other `packages/*` directories are synchronized Pi upstream packages—keep them unchanged unless explicitly syncing upstream. The root `server/` is the skill catalog. Architecture notes live in `docs/`; task evidence lives in `.tasks/`.
+This pnpm monorepo targets Node.js 24. `apps/app` contains the React/Vite renderer; `apps/desktop` owns Electron main/preload code and Runtime updates; `apps/runtime` builds the Node SEA sidecar; and `apps/python-capabilities` contains the managed Python MCP example. MindLink-owned shared code lives in `packages/mindlink-protocol` and `packages/mindlink-runtime`. Other `packages/*` directories are synchronized Pi upstream packages—keep them unchanged unless explicitly syncing upstream. The root `server/` is the skill catalog. Architecture notes live in `docs/`; task evidence lives in `.tasks/`.
 
 Keep tests beside their module in `test/` directories. Generated `dist/`, `dist-native/`, `dist-artifact/`, and `release/` directories are build output, not source.
 
@@ -10,7 +10,7 @@ Keep tests beside their module in `test/` directories. Generated `dist/`, `dist-
 
 - `pnpm install --frozen-lockfile --ignore-pnpmfile`: install the pinned workspace dependencies.
 - `pnpm dev`: build Runtime and desktop code, then launch the catalog, Vite renderer, and Electron.
-- `pnpm check`: run the full build, Yuanpu TypeScript checks, and all tests. Use this before submitting changes.
+- `pnpm check`: run the full build, MindLink TypeScript checks, and all tests. Use this before submitting changes.
 - `pnpm build:native && pnpm smoke:native`: build the current-platform SEA and exercise the frozen Python MCP plus staged Runtime update.
 - `pnpm package:desktop`: produce the current-platform Electron installer/archive under `apps/desktop/release/`.
 - `pnpm dev:catalog`: run only the local skill catalog.
@@ -29,4 +29,4 @@ Use concise conventional prefixes seen in history: `feat:`, `fix:`, `test:`, `do
 
 ## Security & Configuration
 
-Never commit API keys, signing keys, or generated user data. Runtime configuration belongs under `~/.yuanpu` (or `%USERPROFILE%\.yuanpu`). Preserve checksum, signature, approval, path-containment, and process-lifecycle checks when changing installers, plugins, MCP sources, or update code.
+Never commit API keys, signing keys, or generated user data. Runtime configuration belongs under `~/.mindlink` (or `%USERPROFILE%\.mindlink`). Preserve checksum, signature, approval, path-containment, and process-lifecycle checks when changing installers, plugins, MCP sources, or update code.

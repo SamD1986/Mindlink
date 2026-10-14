@@ -10,9 +10,9 @@ import { AssistantAutomationEngine, AssistantAutomationStore, AssistantMemoryRep
   AssistantWorkspaceService,
   redactReviewText,
   assertSafeDirectory, createAssistantExecutor, resolveAssistantHome, readAssistantHomeFile,
-  type AssistantDelegationHost, type AssistantSession, type AssistantSourceHost } from '@yuanpu-agent/assistant';
+  type AssistantDelegationHost, type AssistantSession, type AssistantSourceHost } from '@mindlink-agent/assistant';
 import { assistantAutomationHandler } from './assistant-automation-handler.js';
-import type { AssistantDelegationRecord } from '@yuanpu-agent/protocol';
+import type { AssistantDelegationRecord } from '@mindlink-agent/protocol';
 import { assistantModelHost, type AssistantModelConfig } from './assistant-model.js';
 import { bundledAssistantSkillFiles } from './assistant-skill-assets.generated.js';
 import { installParentProcessMonitor, type ParentProcessMonitor } from './process-lifecycle.js';
@@ -224,7 +224,7 @@ export async function runAssistantWorker(): Promise<void> {
     send({ kind: 'delegation-request', id, method, args });
   });
   const requestDelivery = (suggestionId: string, content: string,
-    evidence: import('@yuanpu-agent/protocol').AssistantEvidenceRef[]): Promise<{
+    evidence: import('@mindlink-agent/protocol').AssistantEvidenceRef[]): Promise<{
     status: 'accepted' | 'failed' | 'unknown' | 'deferred'; ref?: string }> => new Promise((resolve, reject) => {
     const id = randomUUID();
     const timeout = setTimeout(() => {
@@ -447,7 +447,7 @@ export async function runAssistantWorker(): Promise<void> {
           if (event.feedId === 'legacy-memory' && event.status === 'processed') {
             const audience = { kind: 'personal' as const, id: 'local-user' };
             const text = memory.sources.sourceText(event.change.sourceId, audience);
-            if (text?.trim() && text.trim() !== '# YuanpuAgent memory\n\nAdd durable preferences and working context here.') {
+            if (text?.trim() && text.trim() !== '# MindLink memory\n\nAdd durable preferences and working context here.') {
               await memory.importLegacyMemory({ id: 'legacy-memory', text,
               source: { sourceId: event.change.sourceId,
                 sourceVersion: event.change.sourceVersion, observedAt: event.change.occurredAt },

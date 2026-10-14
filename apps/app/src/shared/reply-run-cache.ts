@@ -1,4 +1,4 @@
-import type { AgentRunRecord, DesktopReplyRunInfo } from '@yuanpu-agent/protocol';
+import type { AgentRunRecord, DesktopReplyRunInfo } from '@mindlink-agent/protocol';
 
 export type ReplyRunInfo = DesktopReplyRunInfo;
 
@@ -9,7 +9,7 @@ type CachedReplyRun = ReplyRunInfo & {
   transcriptId?: string;
 };
 
-const storageKey = 'yuanpu:reply-runs:v1';
+const storageKey = 'mindlink:reply-runs:v1';
 
 function readCache(): CachedReplyRun[] {
   try {

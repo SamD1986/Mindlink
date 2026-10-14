@@ -8,7 +8,7 @@ export interface FontPreference {
   customFontFamily: string;
 }
 
-export const FONT_STORAGE_KEY = 'yuanpu:font:v1';
+export const FONT_STORAGE_KEY = 'mindlink:font:v1';
 
 /** rem 基准 16px；界面字号档位只缩放文字，不缩放布局尺寸。 */
 export const FONT_UI_SCALE_VALUES: Record<FontUiScale, string> = {

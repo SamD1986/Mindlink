@@ -1,8 +1,8 @@
-# 按 Muse 参考框架交付 Yuanpu 聊天 UI（TASK-036）
+# 按 Muse 参考框架交付 MindLink 聊天 UI（TASK-036）
 
 ## 决定与交付边界
 
-2026-09-24，用户查看当前浏览器预览后要求“先按这个 UI 进行修改，新建开发卡”。沿用已选 Muse 框架：左侧窄导航、中央聊天与底部输入、右侧可收起会话面板；细节使用 Yuanpu 标识并按真实能力打磨。本卡接续既有草稿并完成真实桥接验收。
+2026-09-24，用户查看当前浏览器预览后要求“先按这个 UI 进行修改，新建开发卡”。沿用已选 Muse 框架：左侧窄导航、中央聊天与底部输入、右侧可收起会话面板；细节使用 MindLink 标识并按真实能力打磨。本卡接续既有草稿并完成真实桥接验收。
 
 [已接受实现基线](../evidence/task-036/accepted-ui-baseline.png)是本轮直接参考，[生成设计](../evidence/task-036/reference-design-v001.png)用于视觉方向；原始方案保留于本地 `.tasks/ui/muse-chat-redesign/proposal.md`。本卡已将基线与最终脱敏截图持久保存于 `docs/frontend/evidence/task-036/`，验收记录见 [results.md](../evidence/task-036/results.md)。
 
@@ -10,7 +10,7 @@
 
 - React/Vite 页面由 `apps/app/src/main.tsx` 的 App/ChatPanel 组织，四个视图是聊天、技能、连接、定时任务；无须新增路由系统。
 - 当前未提交实现包含 `muse-theme.css`、聊天右栏及 Electron `hiddenInset`。实施者应先核对差异并接续，保留用户其他改动。
-- 聊天仍使用 DesktopBridge 的提交、轮询、取消和授权接口；协议位于 `packages/yuanpu-protocol/src/index.ts` 与 `agent.ts`。不改变进程、凭据或权限边界。
+- 聊天仍使用 DesktopBridge 的提交、轮询、取消和授权接口；协议位于 `packages/mindlink-protocol/src/index.ts` 与 `agent.ts`。不改变进程、凭据或权限边界。
 - 既有方案记录了多视口、模拟运行与隔离 Electron 启动验证；真实模型中的授权、取消和工具结果时序仍有验收缺口。过去的验证不自动覆盖后续修改。
 
 检索：ZG 查询 ChatPanel/muse-theme/桌面对话及任务关系（fresh）仅命中管理页面设计和协议片段，未充分覆盖新草稿；以 scoped rg 核对 main.tsx、任务注册表、desktop 测试与既有方案，未创建或扩大索引。
@@ -25,11 +25,11 @@
 
 一张卡覆盖同一 UI 结果，单一实施者维护共享页面与样式。依赖已完成的实现连接与定时任务管理界面（TASK-020），不将其他平台业务验收串入本卡。推荐 gpt-6 sol；实际执行时核对宿主可用模型。
 
-具体场景、命令、风险和状态以[任务注册表](../../../.tasks/tasks.yaml)中的按 Muse 参考框架交付 Yuanpu 聊天 UI（TASK-036）为唯一来源。验收必须包含真实 Electron 对话与无副作用授权场景；没有环境的项明确保留未验证。用户本次接受的是 UI 基线，不是最终业务验收。
+具体场景、命令、风险和状态以[任务注册表](../../../.tasks/tasks.yaml)中的按 Muse 参考框架交付 MindLink 聊天 UI（TASK-036）为唯一来源。验收必须包含真实 Electron 对话与无副作用授权场景；没有环境的项明确保留未验证。用户本次接受的是 UI 基线，不是最终业务验收。
 
 ## 验证发现的最小边界修正
 
-受控模型 HTTP 400 经真实 Electron/Runtime 提交后，Pi 适配层曾返回“完成”并使运行误标成功。补充 `packages/yuanpu-runtime/src/pi/index.ts` 对最终 assistant 错误状态的传递，沿用现有 failed 协议与通用脱敏文案；不修改 Pi 上游。对应回归由本卡 Electron 探针覆盖。
+受控模型 HTTP 400 经真实 Electron/Runtime 提交后，Pi 适配层曾返回“完成”并使运行误标成功。补充 `packages/mindlink-runtime/src/pi/index.ts` 对最终 assistant 错误状态的传递，沿用现有 failed 协议与通用脱敏文案；不修改 Pi 上游。对应回归由本卡 Electron 探针覆盖。
 
 ## 输入区后续调整（2026-09-24）
 
@@ -37,4 +37,4 @@
 
 ## 空间密度后续调整（2026-09-24）
 
-用户要求参考本地 DeepSeek Harness 的 UI，减少空会话浪费的空间，并明确保留工作、助理、技能、定时任务、知识库作为左侧图标一级入口。工作页额外的单会话侧栏被移除；空的右侧运行面板默认收起，由页头“运行详情”展开。空会话欢迎语与缩小的输入卡片集中在页面中部，消息出现后聊天记录靠近底部输入区。设置齿轮和 Yuanpu 头像分别显示在左下角。此调整只涉及 renderer 布局，不改变会话、审批或运行协议。设计与 1440/900 宽度的预览证据保存在 `.tasks/ui/deepseek-density/`。
+用户要求参考本地 DeepSeek Harness 的 UI，减少空会话浪费的空间，并明确保留工作、助理、技能、定时任务、知识库作为左侧图标一级入口。工作页额外的单会话侧栏被移除；空的右侧运行面板默认收起，由页头“运行详情”展开。空会话欢迎语与缩小的输入卡片集中在页面中部，消息出现后聊天记录靠近底部输入区。设置齿轮和 MindLink 头像分别显示在左下角。此调整只涉及 renderer 布局，不改变会话、审批或运行协议。设计与 1440/900 宽度的预览证据保存在 `.tasks/ui/deepseek-density/`。

@@ -1,12 +1,12 @@
-"""PyInstaller entrypoint for the bundled Yuanpu MCP capability."""
+"""PyInstaller entrypoint for the bundled MindLink MCP capability."""
 
 import sys
 
-VERSION = "__YUANPU_CAPABILITY_VERSION__"
+VERSION = "__MINDLINK_CAPABILITY_VERSION__"
 
 if "--version" in sys.argv:
     print(VERSION)
 else:
-    from yuanpu_echo_mcp.server import main
+    from mindlink_echo_mcp.server import main
 
     main()

@@ -1,9 +1,9 @@
 import { createPrivateKey, createPublicKey } from 'node:crypto';
 
-const privateBase64 = process.env.YUANPU_ARTIFACT_SIGNING_KEY_BASE64;
-const publicBase64 = process.env.YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64;
-const keyId = process.env.YUANPU_ARTIFACT_SIGNING_KEY_ID;
-const baseUrl = process.env.YUANPU_ARTIFACT_BASE_URL;
+const privateBase64 = process.env.MINDLINK_ARTIFACT_SIGNING_KEY_BASE64;
+const publicBase64 = process.env.MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64;
+const keyId = process.env.MINDLINK_ARTIFACT_SIGNING_KEY_ID;
+const baseUrl = process.env.MINDLINK_ARTIFACT_BASE_URL;
 if (!privateBase64 || !publicBase64 || !keyId || !baseUrl) {
   throw new Error('Production capability private key, public trust root, key id, and base URL are required.');
 }

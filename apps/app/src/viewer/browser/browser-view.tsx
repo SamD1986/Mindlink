@@ -20,7 +20,7 @@ import { BrowserToolbar } from './browser-toolbar.js';
 
 const WebView = 'webview' as unknown as React.FC<Record<string, unknown>>;
 
-const BROWSER_PARTITION = 'persist:yuanpu-embedded-browser';
+const BROWSER_PARTITION = 'persist:mindlink-embedded-browser';
 
 /** Per-conversation last URL, kept in memory for the lifetime of the app. */
 const memory = (() => {

@@ -8,16 +8,16 @@ import { DatabaseSync } from 'node:sqlite';
 
 import { RuntimeManager } from '../dist/runtime-manager.cjs';
 
-const packagedResources = resolve(import.meta.dirname, '../release/mac-arm64/YuanpuAgent.app/Contents/Resources');
-const bundledSea = join(packagedResources, 'runtime', 'YuanpuAgentRuntime-darwin-arm64');
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-021-packaged-update-'));
+const packagedResources = resolve(import.meta.dirname, '../release/mac-arm64/MindLink.app/Contents/Resources');
+const bundledSea = join(packagedResources, 'runtime', 'MindLinkRuntime-darwin-arm64');
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-021-packaged-update-'));
 const userData = join(root, 'user-data');
 const home = join(root, 'home');
 const workspace = join(root, 'workspace');
 const runtimeRoot = join(userData, 'runtime');
 const staging = join(runtimeRoot, '.staging');
 const databasePath = join(home, 'workflows', 'automation.sqlite');
-const previousHome = process.env.YUANPU_HOME;
+const previousHome = process.env.MINDLINK_HOME;
 const managers = [];
 
 function manager(errors) {
@@ -40,7 +40,7 @@ async function staged(executable, version) {
 }
 
 try {
-  process.env.YUANPU_HOME = home;
+  process.env.MINDLINK_HOME = home;
   await mkdir(join(home, 'app'), { recursive: true });
   await mkdir(workspace, { recursive: true });
   await mkdir(userData, { recursive: true });
@@ -65,7 +65,7 @@ try {
   assert.equal((await second.start()).version, '0.1.0');
   const active = JSON.parse(await readFile(join(runtimeRoot, 'current.json'), 'utf8'));
   assert.equal(active.version, '0.1.0');
-  assert.equal(active.executable, join(runtimeRoot, 'versions', '0.1.0', 'YuanpuAgentRuntime'));
+  assert.equal(active.executable, join(runtimeRoot, 'versions', '0.1.0', 'MindLinkRuntime'));
   assert.equal((await second.listSchedules())[0].scheduleId, schedule.scheduleId);
   await new Promise((done) => setTimeout(done, 350));
   await assert.rejects(readFile(join(runtimeRoot, 'activation-pending.json')), { code: 'ENOENT' });
@@ -91,7 +91,7 @@ try {
   }));
 } finally {
   for (const value of managers) await value.stop().catch(() => undefined);
-  if (previousHome === undefined) delete process.env.YUANPU_HOME;
-  else process.env.YUANPU_HOME = previousHome;
+  if (previousHome === undefined) delete process.env.MINDLINK_HOME;
+  else process.env.MINDLINK_HOME = previousHome;
   await rm(root, { recursive: true, force: true });
 }

@@ -124,8 +124,8 @@ test('isolated Electron Assistant displays and signs a professional task grant',
   const debugPort = await listen(debugServer);
   await new Promise((resolveClose) => debugServer.close(resolveClose));
   const child = spawn(electron, [`--remote-debugging-port=${debugPort}`, appRoot], {
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_RENDERER_URL: rendererUrl,
-      YUANPU_NODE_BINARY: process.execPath, YUANPU_NOTIFICATIONS_ENABLED: '0',
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_RENDERER_URL: rendererUrl,
+      MINDLINK_NODE_BINARY: process.execPath, MINDLINK_NOTIFICATIONS_ENABLED: '0',
       TASK_046_PROVIDER_KEY: 'fixture-only' }, stdio: ['ignore', 'pipe', 'pipe'],
   });
   let diagnostics = '';

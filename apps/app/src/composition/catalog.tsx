@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { NotificationNavigationTarget } from '@yuanpu-agent/protocol';
+import type { NotificationNavigationTarget } from '@mindlink-agent/protocol';
 import { ScheduleManagement } from '../management.js';
 import { createUiRegistry, type UiDestination } from '../ui-registry.js';
 import { ChatPanel } from '../modules/chat.js';

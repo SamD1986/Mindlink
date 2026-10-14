@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { WorkFilePreview } from '@yuanpu-agent/protocol';
+import type { WorkFilePreview } from '@mindlink-agent/protocol';
 
 import { AppIcon } from '../../shared/app-icon.js';
 import { ImageLightbox } from '../../shared/image-lightbox.js';

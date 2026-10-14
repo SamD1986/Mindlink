@@ -6,8 +6,8 @@ import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { createRequire } from 'node:module';
 import { SessionManager } from '@earendil-works/pi-coding-agent';
-import { ChannelRouter, digestChannelValue, openYuanpuMetadataDatabase,
-  readYuanpuChatTranscript } from '@yuanpu-agent/runtime-kit';
+import { ChannelRouter, digestChannelValue, openMindlinkMetadataDatabase,
+  readMindlinkChatTranscript } from '@mindlink-agent/runtime-kit';
 import { AssistantHostService } from '../src/assistant-host.ts';
 
 const require = createRequire(import.meta.url);
@@ -15,7 +15,7 @@ const { AssistantWorkerManager } = require('../dist/index.cjs');
 const entry = resolve(import.meta.dirname, '../dist/index.cjs');
 
 async function loopbackFixture(t) {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-042-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-task-042-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const appPath = join(root, 'app');
   const agentPath = join(root, 'agent');
@@ -81,7 +81,7 @@ test('headless host relocates stopped Assistant Home, preserves accepted task, a
 
 test('legacy paired WeCom history stays readable while new ingress deduplicates and uncertain reply stays unsent',
   async (t) => {
-    const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-042-migration-'));
+    const root = await mkdtemp(join(tmpdir(), 'mindlink-task-042-migration-'));
     t.after(() => rm(root, { recursive: true, force: true }));
     const workspace = join(root, 'workspace');
     const sessionsPath = join(root, 'sessions');
@@ -92,11 +92,11 @@ test('legacy paired WeCom history stays readable while new ingress deduplicates 
       api: 'anthropic-messages', provider: 'anthropic', model: 'fixture', stopReason: 'stop',
       usage: { input: 1, output: 1, cacheRead: 0, cacheWrite: 0, totalTokens: 2,
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } }, timestamp: Date.now() });
-    const oldTranscript = readYuanpuChatTranscript(workspace, 'old-desktop-session', sessionsPath, 1000);
+    const oldTranscript = readMindlinkChatTranscript(workspace, 'old-desktop-session', sessionsPath, 1000);
     assert.equal(oldTranscript[0].text, 'legacy private question');
 
     const path = join(root, 'automation.sqlite');
-    const metadata = openYuanpuMetadataDatabase(path);
+    const metadata = openMindlinkMetadataDatabase(path);
     t.after(() => metadata.close());
     const now = new Date().toISOString();
     const senderDigest = digestChannelValue('bot-fixture', 'sender', 'member-fixture');
@@ -165,7 +165,7 @@ test('legacy paired WeCom history stays readable while new ingress deduplicates 
     await service.drain();
     assert.equal(prompts, 1);
     assert.equal(sends, 1, 'unknown delivery must not be blindly resent');
-    assert.equal(readYuanpuChatTranscript(workspace, 'old-desktop-session', sessionsPath, 1000)[0].text,
+    assert.equal(readMindlinkChatTranscript(workspace, 'old-desktop-session', sessionsPath, 1000)[0].text,
       'legacy private question');
 
     metadata.channels.unpair('wecom', 'bot-fixture', senderDigest);

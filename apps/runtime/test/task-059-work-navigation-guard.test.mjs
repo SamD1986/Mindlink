@@ -13,7 +13,7 @@ async function startRuntime(home) {
     .export({ type: 'spki', format: 'der' }).toString('base64');
   const child = spawn(process.execPath, ['dist/index.cjs', '--serve', '--port', '0'], {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_PYTHON_MCP_EXECUTABLE: '', YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_PYTHON_MCP_EXECUTABLE: '', MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   let stderr = '';
   child.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
@@ -90,7 +90,7 @@ function insertAssistantRun(home, workspaceDirectory) {
 }
 
 test('persisted Work run blocks create, switch and archive after a renderer reload', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-task059-guard-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-task059-guard-'));
   const runtime = await startRuntime(home);
   context.after(async () => { await runtime.close(); await rm(home, { recursive: true, force: true }); });
   const first = (await runtime.request('/v1/work/conversations')).body.find((item) => item.current);

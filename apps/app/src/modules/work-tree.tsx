@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type MouseEvent } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
-import type { DesktopBridge, WorkConversation, WorkFolder, WorkSearchItem, WorkTag } from '@yuanpu-agent/protocol';
+import type { DesktopBridge, WorkConversation, WorkFolder, WorkSearchItem, WorkTag } from '@mindlink-agent/protocol';
 import { AppIcon } from '../shared/app-icon.js';
 import { WorkNodeIcon, workIconChoices } from './work-node-icons.js';
 import { folderPath, isFolderDescendant, reorderedVisibleSiblingIds, visibleWorkTree, type WorkTreeNode } from './work-tree-model.js';
@@ -292,7 +292,7 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
     if (disabled || searching || node.id === 'default') { event.preventDefault(); return; }
     setDragging(node);
     event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('application/x-yuanpu-work-node', `${node.kind}:${node.id}`);
+    event.dataTransfer.setData('application/x-mindlink-work-node', `${node.kind}:${node.id}`);
   }
   function onDragOver(event: DragEvent<HTMLElement>, targetId: string | null): void {
     if (!dragging || disabled || searching || !canPlace(dragging, targetId)) return;
@@ -304,7 +304,7 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
     event.preventDefault();
     setDropTarget(undefined);
     if (!dragging || disabled || searching) return;
-    const serialized = event.dataTransfer.getData('application/x-yuanpu-work-node');
+    const serialized = event.dataTransfer.getData('application/x-mindlink-work-node');
     if (serialized !== `${dragging.kind}:${dragging.id}`) return;
     void moveNode(dragging, targetId);
     setDragging(undefined);

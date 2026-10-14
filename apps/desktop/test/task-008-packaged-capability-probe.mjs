@@ -7,20 +7,20 @@ import { join, resolve } from 'node:path';
 const release = resolve(import.meta.dirname, '../release');
 const target = `${process.platform}-${process.arch}`;
 const unpacked = process.platform === 'darwin'
-  ? join(release, `mac-${process.arch}`, 'YuanpuAgent.app', 'Contents', 'Resources')
+  ? join(release, `mac-${process.arch}`, 'MindLink.app', 'Contents', 'Resources')
   : join(release, process.platform === 'win32' ? 'win-unpacked' : 'linux-unpacked', 'resources');
 const runtimeDir = join(unpacked, 'runtime');
 const runtimeNames = (await readdir(runtimeDir)).filter((name) =>
-  name === `YuanpuAgentRuntime-${target}${process.platform === 'win32' ? '.exe' : ''}`);
+  name === `MindLinkRuntime-${target}${process.platform === 'win32' ? '.exe' : ''}`);
 assert.equal(runtimeNames.length, 1, `Expected packaged Runtime for ${target}`);
 const runtime = join(runtimeDir, runtimeNames[0]);
-const capabilityDir = join(unpacked, 'capabilities', 'builtin.python.echo', 'YuanpuEchoMcp');
-const capability = join(capabilityDir, process.platform === 'win32' ? 'YuanpuEchoMcp.exe' : 'YuanpuEchoMcp');
+const capabilityDir = join(unpacked, 'capabilities', 'builtin.python.echo', 'MindlinkEchoMcp');
+const capability = join(capabilityDir, process.platform === 'win32' ? 'MindlinkEchoMcp.exe' : 'MindlinkEchoMcp');
 assert.equal((await stat(capability)).isFile(), true);
 
 // Keep Windows system process-management tools available for MCP cleanup, but
 // exclude all Python/uv toolchain directories and checkout-local executables.
-const emptyPath = await mkdtemp(join(tmpdir(), 'yuanpu-task-008-no-path-'));
+const emptyPath = await mkdtemp(join(tmpdir(), 'mindlink-task-008-no-path-'));
 try {
   const childPath = process.platform === 'win32'
     ? join(process.env.SYSTEMROOT ?? process.env.WINDIR ?? 'C:\\Windows', 'System32')
@@ -32,14 +32,14 @@ try {
       SYSTEMROOT: process.env.SYSTEMROOT,
       WINDIR: process.env.WINDIR,
       PATH: childPath,
-      YUANPU_PYTHON_MCP_EXECUTABLE: capability,
-      YUANPU_PYTHON_MCP_ROOT: capabilityDir,
-      YUANPU_PYTHON_MCP_ARGS: '[]',
+      MINDLINK_PYTHON_MCP_EXECUTABLE: capability,
+      MINDLINK_PYTHON_MCP_ROOT: capabilityDir,
+      MINDLINK_PYTHON_MCP_ARGS: '[]',
     },
   });
   const result = JSON.parse(output.trim());
   assert.deepEqual(result.tools, ['search_capabilities', 'execute_capability']);
-  assert.deepEqual(result.result.structuredContent, { text: 'YuanpuAgent SEA', length: 15 });
+  assert.deepEqual(result.result.structuredContent, { text: 'MindLink SEA', length: 15 });
   assert.equal(result.errorResult.isError, true);
   assert.match(result.errorResult.content[0].text, /diagnostic error/i);
   console.log(JSON.stringify({ status: 'passed', target, source: 'packaged-app-resources', noPythonOnPath: true }));

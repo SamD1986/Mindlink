@@ -19,9 +19,9 @@ type or table declaration alone is still not evidence that a provider exists.
   opens the authenticated `GET /v1/host/events` SSE stream and acknowledges events through
   `POST /v1/host/events/receipts`; only the bootstrap Bearer token authorizes either route. Every
   submission carries the contract version and preserves the rejection/result shapes in
-  `@yuanpu-agent/protocol`. Runtime now also owns the first trusted IM adapter: an optional
+  `@mindlink-agent/protocol`. Runtime now also owns the first trusted IM adapter: an optional
   Enterprise WeChat intelligent-bot WebSocket connection configured under
-  `~/.yuanpu/app/connections/wecom.json`. It is disabled unless explicitly configured and resolves
+  `~/.mindlink/app/connections/wecom.json`. It is disabled unless explicitly configured and resolves
   its Secret only from a system Keychain reference at process start.
 - A future incompatible change increments the affected contract version. Additive optional fields
   may retain the version only when old consumers can safely ignore them. Runtime update manifests
@@ -144,11 +144,11 @@ preload IPC and never receives notification-provided navigation URLs or executab
 
 ## SQLite ownership and migration
 
-Yuanpu workflow metadata lives in `~/.yuanpu/workflows/automation.sqlite`. It is separate from Pi's
-session store: Pi owns conversation content, while Yuanpu owns external conversation bindings, run
+MindLink workflow metadata lives in `~/.mindlink/workflows/automation.sqlite`. It is separate from Pi's
+session store: Pi owns conversation content, while MindLink owns external conversation bindings, run
 metadata, deduplication, and delivery state. The Runtime is the single writer.
 
-Schema version 4 is managed by `packages/yuanpu-runtime/src/persistence/index.ts` using Node 24's
+Schema version 4 is managed by `packages/mindlink-runtime/src/persistence/index.ts` using Node 24's
 built-in `node:sqlite` driver:
 
 | Table | Owner and purpose |
@@ -189,7 +189,7 @@ The run table therefore does not store the complete `AgentRunRequest`, output me
 Pi conversation content. TASK-012 adds one explicit exception for crash-safe admission: the queue
 payload table retains only input text while status is `queued`; claiming or cancelling the run
 deletes it in the same transaction. Once execution starts, Pi owns the persisted conversation and
-Yuanpu retains only digests and status for desktop and IM runs. Scheduled prompts are explicitly
+MindLink retains only digests and status for desktop and IM runs. Scheduled prompts are explicitly
 retained in the schedule definition and its pending trigger outbox; completed Scheduler output is
 retained in `yp_agent_run_outputs` so delivery can resume after restart. These workflow records stay
 in the user-owned `automation.sqlite`; logs and task metadata must not copy prompt/output content.
@@ -217,7 +217,7 @@ acceptance card runs.
 ## Deliberately unresolved product boundaries
 
 - “Full access” has no expanded meaning in this contract. Existing Pi tool availability and current
-  Yuanpu capability approval behavior remain unchanged. In particular, model input and remote
+  MindLink capability approval behavior remain unchanged. In particular, model input and remote
   channel content cannot modify their own permissions or approve pending work.
 - Closing the last window keeps today's platform behavior: non-macOS quits the App; macOS may remain
   active under Electron's current lifecycle. No tray/background promise is added. An explicit App

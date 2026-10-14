@@ -8,8 +8,8 @@ The renderer follows the Shell/Module boundary from the `xingding-one-cli` Web t
 - `src/modules/` owns page behavior and its bridge calls. Work and Assistant share the chat implementation but retain separate Runtime conversations and draft state.
 - `src/shared/` holds presentation code that carries no business or host state.
 - `src/ui-registry.ts` provides ordered registration and reversible withdrawal for local contributions. Registration does not grant backend access; Runtime authorizes every request independently.
-- `window.yuanpu` is the only renderer-to-host seam. Electron and Runtime implementation details stay behind the typed preload bridge.
-- `themes/` owns the renderer's built-in color tokens and the opt-in MindLink test palette. Settings selects a bundled palette through `data-yuanpu-theme`; the app can export a disposable snapshot to `~/.yuanpu/themes/mindlink-test`.
+- `window.mindlink` is the only renderer-to-host seam. Electron and Runtime implementation details stay behind the typed preload bridge.
+- `themes/` owns the renderer's built-in color tokens and the opt-in MindLink test palette. Settings selects a bundled palette through `data-mindlink-theme`; the app can export a disposable snapshot to `~/.mindlink/themes/mindlink-test`.
 
 When adding a built-in page, place its behavior in `modules/`, declare a fixed entry in `composition/catalog.tsx`, and add its route ID and icon. Keep one root Router, QueryClient, and theme. Use module-specific query keys and invalidate them after mutations. Page modules must not import `shell/` or `composition/` or install root providers.
 

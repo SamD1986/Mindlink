@@ -1,4 +1,4 @@
-import type { AgentRunStatus } from '@yuanpu-agent/protocol';
+import type { AgentRunStatus } from '@mindlink-agent/protocol';
 
 export type AssistantAction = 'idle' | 'wave' | 'heart' | 'reading' | 'typing' | 'backtyping' | 'hammer';
 export interface AssistantActivity {

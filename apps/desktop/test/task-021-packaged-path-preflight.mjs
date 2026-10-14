@@ -9,7 +9,7 @@ import { promisify } from 'node:util';
 const require = createRequire(import.meta.url);
 const electron = require('electron');
 const execFileAsync = promisify(execFile);
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-021-path-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-021-path-'));
 const appRoot = join(root, 'app');
 const userData = join(root, 'user-data');
 try {

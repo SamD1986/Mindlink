@@ -10,7 +10,7 @@ import { join, resolve } from 'node:path';
 const desktopRoot = resolve(import.meta.dirname, '..');
 const repositoryRoot = resolve(desktopRoot, '../..');
 const electron = createRequire(import.meta.url)('electron');
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-browser-probe-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-browser-probe-'));
 const appRoot = join(root, 'apps', 'desktop');
 const home = join(root, 'home');
 const workspace = join(home, 'workspace');
@@ -54,7 +54,7 @@ const provider = createServer(async (request, response) => {
   response.writeHead(200, { 'content-type': 'text/event-stream' });
   const chunk = (delta, finishReason = null) => `data: ${JSON.stringify({ id: `fixture-${providerRequests}`,
     object: 'chat.completion.chunk', created: 1, model: 'fixture-model', choices: [{ index: 0, delta, finish_reason: finishReason }] })}\n\n`;
-  if (!messages.some((message) => message.role === 'system' && String(message.content).includes('You are YuanpuAgent'))) {
+  if (!messages.some((message) => message.role === 'system' && String(message.content).includes('You are MindLink'))) {
     response.end(chunk({ role: 'assistant', content: 'Fixture idle.' }, 'stop') + 'data: [DONE]\n\n');
     return;
   }
@@ -181,7 +181,7 @@ try {
   await mkdir(workspace, { recursive: true });
   await mkdir(userData, { recursive: true });
   await symlink(resolve(desktopRoot, '../runtime/dist'), join(root, 'apps', 'runtime', 'dist'), 'dir');
-  await writeFile(join(appRoot, 'package.json'), JSON.stringify({ name: 'yuanpu-browser-probe', version: '1.0.0', main: 'entry.cjs' }));
+  await writeFile(join(appRoot, 'package.json'), JSON.stringify({ name: 'mindlink-browser-probe', version: '1.0.0', main: 'entry.cjs' }));
   await writeFile(join(appRoot, 'entry.cjs'), `
     const { app, shell, webContents } = require('electron');
     shell.openExternal = async (url) => require('node:fs').writeFileSync(${JSON.stringify(externalOpenLog)}, url);
@@ -206,21 +206,21 @@ try {
       input: ['text', 'image'], contextWindow: 1_000_000, maxTokens: 1024 }],
   } } }));
   const vitePort = await freePort();
-  vite = spawn('pnpm', ['--filter', '@yuanpu-agent/app', 'run', 'dev', '--host', '127.0.0.1', '--port', String(vitePort), '--strictPort'], {
+  vite = spawn('pnpm', ['--filter', '@mindlink-agent/app', 'run', 'dev', '--host', '127.0.0.1', '--port', String(vitePort), '--strictPort'], {
     cwd: repositoryRoot, stdio: ['ignore', 'pipe', 'pipe'],
   });
   await eventually(async () => (await fetch(`http://127.0.0.1:${vitePort}/`)).ok, 'Vite did not start');
   const debuggerPort = await freePort();
   app = spawn(electron, [`--remote-debugging-port=${debuggerPort}`, appRoot], {
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_RENDERER_URL: `http://127.0.0.1:${vitePort}/`,
-      YUANPU_NODE_BINARY: process.execPath, YUANPU_NOTIFICATIONS_ENABLED: '0', TASK_063_PROVIDER_KEY: 'fixture-only' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_RENDERER_URL: `http://127.0.0.1:${vitePort}/`,
+      MINDLINK_NODE_BINARY: process.execPath, MINDLINK_NOTIFICATIONS_ENABLED: '0', TASK_063_PROVIDER_KEY: 'fixture-only' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   for (const stream of [app.stdout, app.stderr]) stream.on('data', (chunk) => {
     if (diagnostics.length < 16_384) diagnostics += chunk.toString();
   });
   renderer = await connectRenderer(debuggerPort);
-  await eventually(() => renderer.evaluate('window.yuanpu?.runtimeInfo?.()'), 'Electron preload or Runtime did not start');
+  await eventually(() => renderer.evaluate('window.mindlink?.runtimeInfo?.()'), 'Electron preload or Runtime did not start');
   await renderer.evaluate(`window.location.hash = '#/work'`);
   await eventually(() => renderer.evaluate(`Boolean(document.querySelector('button[aria-label="打开右侧面板"]'))`), 'Work panel did not mount');
   await eventually(() => renderer.evaluate(`document.querySelector('button[aria-label="重命名会话"]')?.disabled === false`),
@@ -253,11 +253,11 @@ try {
   await eventually(() => renderer.evaluate(`document.querySelector('webview')?.getURL() === ${JSON.stringify(firstUrl)}`), 'Browser did not navigate to the local page');
   await eventually(() => renderer.evaluate('document.querySelector("webview")?.getTitle() === "Browser fixture first"'), 'Browser title did not update');
   await eventually(() => renderer.evaluate('!document.querySelector("webview")?.isLoading()'), 'First page did not finish loading');
-  const initialConversation = await renderer.evaluate('window.yuanpu.listWorkConversations().then((items) => items.find((item) => item.current))');
+  const initialConversation = await renderer.evaluate('window.mindlink.listWorkConversations().then((items) => items.find((item) => item.current))');
   const hitsBeforeSwitch = firstPageHits;
   await renderer.evaluate(`document.querySelector('button[aria-label="打开工作列表"]').click()`);
   await renderer.evaluate(`document.querySelector('button[aria-label="新建会话"]').click()`);
-  await eventually(() => renderer.evaluate(`window.yuanpu.listWorkConversations().then((items) =>
+  await eventually(() => renderer.evaluate(`window.mindlink.listWorkConversations().then((items) =>
     items.find((item) => item.current)?.id !== ${JSON.stringify(initialConversation.id)})`), 'New Work conversation did not become current');
   assert.equal(await renderer.evaluate('document.querySelector("webview")?.getWebContentsId()'), guestId,
     'Switching Work conversations destroyed the first browser guest');
@@ -268,7 +268,7 @@ try {
   assert.equal(await renderer.evaluate('document.querySelectorAll(".file-tab-title").length'), 1,
     'The second Work conversation inherited tabs from the first');
   await renderer.evaluate(`document.querySelector('[data-tree-key=${JSON.stringify(`conversation:${initialConversation.id}`)}]').click()`);
-  await eventually(() => renderer.evaluate(`window.yuanpu.listWorkConversations().then((items) =>
+  await eventually(() => renderer.evaluate(`window.mindlink.listWorkConversations().then((items) =>
     items.find((item) => item.current)?.id === ${JSON.stringify(initialConversation.id)})`), 'First Work conversation did not reopen');
   await eventually(() => renderer.evaluate('Boolean(document.querySelector(".file-tab-title"))'), 'First Work sidebar did not reopen');
   assert.equal(await renderer.evaluate('document.querySelector("webview")?.getWebContentsId()'), guestId,
@@ -375,7 +375,7 @@ try {
   'Screenshot request did not reveal the browser tab', 10_000);
   await eventually(() => screenshotHasPng, 'Agent screenshot did not return a real PNG image', 75_000);
   await eventually(() => renderer.evaluate('!document.querySelector(".composer-hint")?.textContent.includes("任务执行中")'), 'Screenshot run did not finish');
-  const activeWork = await renderer.evaluate('window.yuanpu.listWorkConversations().then((items) => items.find((item) => item.current))');
+  const activeWork = await renderer.evaluate('window.mindlink.listWorkConversations().then((items) => items.find((item) => item.current))');
   const screenshotRoot = activeWork?.workingDirectory ?? workspace;
   const screenshotFiles = await readdir(join(screenshotRoot, 'images'));
   assert.equal(screenshotFiles.length, 1, 'Browser screenshot was not saved in this Work conversation');
@@ -395,12 +395,12 @@ try {
     const before = providerRequests;
     await sendBrowserTask(mode, `请使用 ${command} 测试授权，等待我拒绝。`);
     await eventually(() => providerRequests >= before + 2, `${command} discovery did not reach the provider`, 30_000);
-    await eventually(() => renderer.evaluate('window.yuanpu.listCapabilityApprovals().then(items => items.length > 0)'),
+    await eventually(() => renderer.evaluate('window.mindlink.listCapabilityApprovals().then(items => items.length > 0)'),
       `${command} did not request approval`, 30_000);
     await eventually(() => renderer.evaluate('Array.from(document.querySelectorAll(".approval-actions button")).some(button => button.textContent.trim() === "拒绝" && !button.disabled)'),
       `${command} approval card did not render`, 30_000);
     await renderer.evaluate(`Array.from(document.querySelectorAll('.approval-actions button')).find(button => button.textContent.trim() === '拒绝').click()`);
-    await eventually(() => renderer.evaluate('window.yuanpu.listCapabilityApprovals().then(items => items.length === 0)'),
+    await eventually(() => renderer.evaluate('window.mindlink.listCapabilityApprovals().then(items => items.length === 0)'),
       `${command} rejection did not settle`, 30_000);
     await eventually(() => renderer.evaluate('!document.querySelector(".composer-hint")?.textContent.includes("任务执行中")'),
       `${command} run did not settle`, 30_000);
@@ -415,9 +415,9 @@ try {
     'Crashed browser guest was not rebuilt');
   await eventually(() => renderer.evaluate(`document.querySelector('webview')?.getURL() === ${JSON.stringify(firstUrl)}`),
     'Crashed browser guest did not restore its URL');
-  const inactiveConversation = await renderer.evaluate('window.yuanpu.createWorkConversation()');
+  const inactiveConversation = await renderer.evaluate('window.mindlink.createWorkConversation()');
   providerMode = 'no-guest';
-  await renderer.evaluate(`window.yuanpu.submitDesktopMessage('请使用 browser_snapshot 测试未激活会话', 'work', ${JSON.stringify(inactiveConversation.id)})`);
+  await renderer.evaluate(`window.mindlink.submitDesktopMessage('请使用 browser_snapshot 测试未激活会话', 'work', ${JSON.stringify(inactiveConversation.id)})`);
   await eventually(() => noGuestErrorSeen, 'Inactive conversation did not receive a clear missing-browser error', 20_000);
   assert.equal(await renderer.evaluate(`document.querySelector('webview')?.getURL() === ${JSON.stringify(firstUrl)}`), true,
     'Inactive browser command disturbed the active conversation');

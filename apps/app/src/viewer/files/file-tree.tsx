@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FileTree as PierreFileTree, useFileTree } from '@pierre/trees/react';
 
 import { AppIcon } from '../../shared/app-icon.js';
-import type { WorkFileEntry } from '@yuanpu-agent/protocol';
+import type { WorkFileEntry } from '@mindlink-agent/protocol';
 import type { ViewerFileHost } from '../host/file-host.js';
 
 /** Shared recursive-listing query; the tree tab toolbar reuses it for refresh. */

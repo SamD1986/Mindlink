@@ -1,18 +1,18 @@
-export type RendererTheme = 'yuanpu-light' | 'yuanpu-dark' | 'mindlink';
+export type RendererTheme = 'mindlink-light' | 'mindlink-dark' | 'mindlink';
 
-const storageKey = 'yuanpu:theme:v1';
+const storageKey = 'mindlink:theme:v1';
 
 export function readThemePreference(): RendererTheme {
   try {
     const stored = window.localStorage.getItem(storageKey);
-    return stored === 'mindlink' || stored === 'yuanpu-dark' ? stored : 'yuanpu-light';
+    return stored === 'mindlink' || stored === 'mindlink-dark' ? stored : 'mindlink-light';
   } catch {
-    return 'yuanpu-light';
+    return 'mindlink-light';
   }
 }
 
 export function applyThemePreference(theme: RendererTheme): void {
-  document.documentElement.dataset.yuanpuTheme = theme;
+  document.documentElement.dataset.mindlinkTheme = theme;
   try {
     window.localStorage.setItem(storageKey, theme);
   } catch {

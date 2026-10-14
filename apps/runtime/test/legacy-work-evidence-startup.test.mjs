@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { SessionManager } from '@earendil-works/pi-coding-agent';
-import { ensureYuanpuHome, openYuanpuMetadataDatabase } from '@yuanpu-agent/runtime-kit';
+import { ensureMindlinkHome, openMindlinkMetadataDatabase } from '@mindlink-agent/runtime-kit';
 
 const usage = { input: 1, output: 1, cacheRead: 0, cacheWrite: 0, totalTokens: 2,
   cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } };
@@ -18,8 +18,8 @@ async function startRuntime(home) {
     .export({ type: 'spki', format: 'der' }).toString('base64');
   const child = spawn(process.execPath, ['dist/index.cjs', '--serve', '--port', '0'], {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   let stderr = '';
   child.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
@@ -54,12 +54,12 @@ async function startRuntime(home) {
 
 test('Runtime starts with a bound legacy default Pi session and idempotently backfills saved evidence',
   async (context) => {
-    const root = await mkdtemp(join(tmpdir(), 'yuanpu-legacy-work-startup-'));
+    const root = await mkdtemp(join(tmpdir(), 'mindlink-legacy-work-startup-'));
     let runtime;
     context.after(async () => { await runtime?.close(); await rm(root, { recursive: true, force: true }); });
-    const home = await ensureYuanpuHome(root);
+    const home = await ensureMindlinkHome(root);
     const databasePath = join(home.workflowsPath, 'automation.sqlite');
-    openYuanpuMetadataDatabase(databasePath).close();
+    openMindlinkMetadataDatabase(databasePath).close();
     const piSessionId = 'old-default-work-session';
     const pi = SessionManager.create(home.workspacePath, home.sessionsPath, { id: piSessionId });
     pi.appendMessage({ role: 'user', content: 'Show the old note.', timestamp: Date.now() });

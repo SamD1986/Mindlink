@@ -3,7 +3,7 @@ import {
   RUNTIME_ROUTES,
   type HostEvent,
   type HostEventReceipt,
-} from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
 
 export interface HostEventConnection {
   host: string;

@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
 const release = resolve(import.meta.dirname, '../release');
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-021-platform-app-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-021-platform-app-'));
 const home = join(root, 'home');
 const userData = join(root, 'user-data');
 const workspace = join(root, 'workspace');
@@ -17,11 +17,11 @@ let providerRequests = 0;
 
 async function packagedExecutable() {
   if (process.platform === 'darwin') {
-    return join(release, `mac-${process.arch}`, 'YuanpuAgent.app', 'Contents', 'MacOS', 'YuanpuAgent');
+    return join(release, `mac-${process.arch}`, 'MindLink.app', 'Contents', 'MacOS', 'MindLink');
   }
   const unpacked = join(release, process.platform === 'win32' ? 'win-unpacked' : 'linux-unpacked');
   const candidates = (await readdir(unpacked)).filter((name) =>
-    /^yuanpuagent(?:\.exe)?$/i.test(name));
+    /^mindlinkagent(?:\.exe)?$/i.test(name));
   assert.equal(candidates.length, 1, `Expected one packaged executable in ${unpacked}`);
   return join(unpacked, candidates[0]);
 }
@@ -85,8 +85,8 @@ async function start(executable) {
   const child = spawn(executable, [`--user-data-dir=${userData}`, `--remote-debugging-port=${port}`], {
     env: {
       ...process.env,
-      YUANPU_HOME: home,
-      YUANPU_NOTIFICATIONS_ENABLED: '0',
+      MINDLINK_HOME: home,
+      MINDLINK_NOTIFICATIONS_ENABLED: '0',
       TASK_021_PROVIDER_KEY: 'fixture-only',
       ...(process.platform === 'linux' ? { ELECTRON_DISABLE_SANDBOX: '1' } : {}),
     },
@@ -110,7 +110,7 @@ async function start(executable) {
     const browserInfo = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
     app.browser = await cdpSocket(browserInfo.webSocketDebuggerUrl);
     await eventually(async () => {
-      try { return (await evaluate(app, 'window.yuanpu.runtimeInfo()'))?.protocolVersion; }
+      try { return (await evaluate(app, 'window.mindlink.runtimeInfo()'))?.protocolVersion; }
       catch { return false; }
     }, 'Packaged App preload/Runtime did not become ready.');
     return app;
@@ -163,13 +163,13 @@ try {
   }));
 
   const first = await start(executable);
-  assert.equal((await evaluate(first, 'window.yuanpu.runtimeInfo()')).protocolVersion, 7);
-  const created = await evaluate(first, `window.yuanpu.createSchedule(${JSON.stringify({
+  assert.equal((await evaluate(first, 'window.mindlink.runtimeInfo()')).protocolVersion, 7);
+  const created = await evaluate(first, `window.mindlink.createSchedule(${JSON.stringify({
     contractVersion: 1, name: scheduleName, prompt: 'synthetic', workspaceId: workspace,
     timing: { kind: 'once', at: '2099-01-01T00:00:00.000Z' },
     timeZone: 'UTC', delivery: { kind: 'desktop' },
   })})`);
-  const chat = await evaluate(first, "window.yuanpu.chat('Synthetic platform conversation')");
+  const chat = await evaluate(first, "window.mindlink.chat('Synthetic platform conversation')");
   assert.equal(chat.message.includes('Synthetic platform reply.'), true);
   assert.equal(providerRequests, 1);
   await eventually(async () => evaluate(first,
@@ -182,7 +182,7 @@ try {
   await stop(first);
 
   const second = await start(executable);
-  assert.equal((await evaluate(second, 'window.yuanpu.listSchedules()'))[0].scheduleId, created.scheduleId);
+  assert.equal((await evaluate(second, 'window.mindlink.listSchedules()'))[0].scheduleId, created.scheduleId);
   await eventually(async () => evaluate(second,
     "Array.from(document.querySelectorAll('.nav-item')).some((button) => button.textContent.includes('定时任务'))"),
   'Restarted packaged renderer navigation did not mount.');

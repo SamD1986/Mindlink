@@ -1,30 +1,30 @@
 import {
-  createYuanpuChatSession,
+  createMindlinkChatSession,
   type AgentRunExecutionInput,
   type AgentRunExecutionResult,
   type AgentRunExecutor,
   type CapabilityApprovalRecord,
   type CapabilityToolClient,
   type CapturedWorkFileChange,
-  type CreateYuanpuChatOptions,
-  type YuanpuChatSession,
-} from '@yuanpu-agent/runtime-kit';
+  type CreateMindlinkChatOptions,
+  type MindlinkChatSession,
+} from '@mindlink-agent/runtime-kit';
 import { registerWorkWriteArtifact } from './work-artifact.js';
-import type { SessionTrajectory } from '@yuanpu-agent/protocol';
+import type { SessionTrajectory } from '@mindlink-agent/protocol';
 
 interface RuntimeAgentExecutorOptions {
   getCapabilityClient(): CapabilityToolClient;
   approvals: { get(requestId: string): CapabilityApprovalRecord | undefined };
   sessionsPath: string;
   maximumPooledSessions?: number;
-  chat: Omit<CreateYuanpuChatOptions, 'capabilityClient' | 'capabilityContext' | 'piSession'>;
+  chat: Omit<CreateMindlinkChatOptions, 'capabilityClient' | 'capabilityContext' | 'piSession'>;
   /** 桌面工作会话的 edit/write 文件快照出口；持久化失败由实现方兜底，不阻塞会话。 */
   onWorkFileChanges?: (context: { runId: string; conversationId: string; piSessionId: string },
     changes: readonly CapturedWorkFileChange[]) => void;
 }
 
 interface PooledSession {
-  promise: Promise<YuanpuChatSession>;
+  promise: Promise<MindlinkChatSession>;
   active: number;
   retired: boolean;
 }
@@ -77,7 +77,7 @@ export class RuntimeAgentExecutor implements AgentRunExecutor {
       pooled = {
         active: 0,
         retired: false,
-        promise: createYuanpuChatSession({
+        promise: createMindlinkChatSession({
           ...this.#options.chat,
           cwd: input.run.context.workspaceId,
           browserControlAvailable: input.run.context.conversation.conversationId.startsWith('work:'),

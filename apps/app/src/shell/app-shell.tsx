@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import type { NotificationNavigationTarget, RuntimeRecoveryNotice } from '@yuanpu-agent/protocol';
+import type { NotificationNavigationTarget, RuntimeRecoveryNotice } from '@mindlink-agent/protocol';
 import type { UiDestination } from '../ui-registry.js';
 import { AppIcon } from '../shared/app-icon.js';
 import { AvatarMark } from '../shared/avatar-mark.js';
@@ -23,25 +23,25 @@ export function App() {
   const fallbackView = enabledDestinations.find((entry) => entry.id !== 'settings')?.id ?? 'settings';
   const view: AppView = enabledDestinations.some((entry) => entry.id === routeId) ? routeId as AppView : fallbackView;
   const setView = (destination: AppView) => routerNavigate(`/${showNavigation(destination) ? destination : fallbackView}`);
-  const [configRoot, setConfigRoot] = useState('~/.yuanpu');
+  const [configRoot, setConfigRoot] = useState('~/.mindlink');
   const [notificationTarget, setNotificationTarget] = useState<NotificationNavigationTarget>();
   const [selectedScheduleId, setSelectedScheduleId] = useState<string>();
   const [assistantWorkConversationId, setAssistantWorkConversationId] = useState<string>();
   const [runtimeRecoveryNotice, setRuntimeRecoveryNotice] = useState<RuntimeRecoveryNotice>();
 
   useEffect(() => {
-    void window.yuanpu?.runtimeInfo()
+    void window.mindlink?.runtimeInfo()
       .then((info) => setConfigRoot(info.configRoot))
       .catch(() => undefined);
   }, []);
 
   useEffect(() => {
-    void window.yuanpu?.runtimeRecoveryNotice()
+    void window.mindlink?.runtimeRecoveryNotice()
       .then(setRuntimeRecoveryNotice)
       .catch(() => undefined);
   }, []);
 
-  useEffect(() => window.yuanpu?.onNotificationNavigation((target) => {
+  useEffect(() => window.mindlink?.onNotificationNavigation((target) => {
     setNotificationTarget(target);
     setSelectedScheduleId(undefined);
     routerNavigate('/work');
@@ -51,7 +51,7 @@ export function App() {
     <PageToolbarHost.Provider value={toolbarHost}><main className="app-shell">
       <div className="shell-topbar">
         <div className="window-controls-space" aria-hidden="true">
-          {!window.yuanpu && <div className="window-controls-preview"><span /><span /><span /></div>}
+          {!window.mindlink && <div className="window-controls-preview"><span /><span /><span /></div>}
         </div>
         <div className="shell-toolbar-host" ref={setToolbarHost} />
       </div>
@@ -63,7 +63,7 @@ export function App() {
           </button>)}</nav>
 
         <div className="sidebar-bottom">
-          <BrandShowcase variant="yuanpu" name={emo.brand.name} />
+          <BrandShowcase variant="default" name={emo.brand.name} />
           <button className={`sidebar-footer settings-trigger ${view === 'settings' ? 'active' : ''}`} type="button"
             title="设置" aria-label="设置" onClick={() => setView('settings')}><AppIcon name="settings" /></button>
           <div className="profile-avatar" role="img" aria-label={`${emo.brand.name} 头像`}><AvatarMark /></div>

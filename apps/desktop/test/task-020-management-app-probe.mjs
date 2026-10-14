@@ -93,7 +93,7 @@ function exists(pid) {
   try { process.kill(pid, 0); return true; } catch { return false; }
 }
 
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-020-electron-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-020-electron-'));
 const appRoot = join(root, 'apps', 'desktop');
 const home = join(root, 'home');
 const workspace = join(root, 'workspace');
@@ -116,7 +116,7 @@ try {
   await mkdir(dirname(join(root, 'apps', 'runtime', 'dist')), { recursive: true });
   await symlink(runtimeDist, join(root, 'apps', 'runtime', 'dist'), 'dir');
   await writeFile(join(appRoot, 'package.json'), JSON.stringify({
-    name: 'yuanpu-task-020-isolated-app', version: '0.1.0', main: 'entry.cjs',
+    name: 'mindlink-task-020-isolated-app', version: '0.1.0', main: 'entry.cjs',
   }));
   await writeFile(join(appRoot, 'entry.cjs'), `
     const { app } = require('electron');
@@ -138,10 +138,10 @@ try {
   child = spawn(electron, [`--remote-debugging-port=${debuggerPort}`, appRoot], {
     env: {
       ...process.env,
-      YUANPU_HOME: home,
-      YUANPU_RENDERER_URL: rendererUrl,
-      YUANPU_NODE_BINARY: process.execPath,
-      YUANPU_NOTIFICATIONS_ENABLED: '0',
+      MINDLINK_HOME: home,
+      MINDLINK_RENDERER_URL: rendererUrl,
+      MINDLINK_NODE_BINARY: process.execPath,
+      MINDLINK_NOTIFICATIONS_ENABLED: '0',
       TASK_020_PROVIDER_KEY: 'fixture-only',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -153,7 +153,7 @@ try {
   try {
     renderer = await connectRenderer(debuggerPort);
     await eventually(async () => {
-      try { return (await renderer.evaluate('window.yuanpu.runtimeInfo()')).workingDirectory === workspace; }
+      try { return (await renderer.evaluate('window.mindlink.runtimeInfo()')).workingDirectory === workspace; }
       catch { return false; }
     }, 'Isolated Electron bridge did not become ready.');
   } catch (error) {
@@ -161,11 +161,11 @@ try {
   }
   runtimePid = await eventually(() => childRuntimePid(child.pid), 'Runtime child missing.');
   const connectionId = `imc_${randomUUID()}`;
-  const connection = await renderer.evaluate(`window.yuanpu.saveWecomConnection(${JSON.stringify({
+  const connection = await renderer.evaluate(`window.mindlink.saveWecomConnection(${JSON.stringify({
     connectionId, botId: 'fixture-bot', enabled: false,
   })})`);
   assert.equal(connection.status, 'disabled');
-  assert.equal((await renderer.evaluate('window.yuanpu.listWecomConnections()')).connections.length, 1);
+  assert.equal((await renderer.evaluate('window.mindlink.listWecomConnections()')).connections.length, 1);
   const input = {
     contractVersion: 1,
     name: 'Fixture scheduled note',
@@ -175,12 +175,12 @@ try {
     timeZone: 'Asia/Shanghai',
     delivery: { kind: 'desktop' },
   };
-  const preview = await renderer.evaluate(`window.yuanpu.previewSchedule(${JSON.stringify(input)})`);
+  const preview = await renderer.evaluate(`window.mindlink.previewSchedule(${JSON.stringify(input)})`);
   assert.equal(preview.nextTriggerAt, '2099-01-01T00:00:00.000Z');
-  const created = await renderer.evaluate(`window.yuanpu.createSchedule(${JSON.stringify(input)})`);
+  const created = await renderer.evaluate(`window.mindlink.createSchedule(${JSON.stringify(input)})`);
   assert.equal(created.nextTriggerAt, preview.nextTriggerAt);
-  await renderer.evaluate(`window.yuanpu.setScheduleEnabled(${JSON.stringify(created.scheduleId)}, false)`);
-  assert.equal((await renderer.evaluate('window.yuanpu.listSchedules()'))[0].enabled, false);
+  await renderer.evaluate(`window.mindlink.setScheduleEnabled(${JSON.stringify(created.scheduleId)}, false)`);
+  assert.equal((await renderer.evaluate('window.mindlink.listSchedules()'))[0].enabled, false);
   await renderer.evaluate(`Array.from(document.querySelectorAll('.nav-item')).find((button) => button.textContent.includes('定时任务')).click()`);
   await eventually(async () => (await renderer.evaluate('document.body.innerText')).includes('Fixture scheduled note'), 'Real schedule did not appear in the Electron UI.');
   await renderer.evaluate(`Array.from(document.querySelectorAll('.nav-item')).find((button) => button.textContent.includes('连接')).click()`);
@@ -206,7 +206,7 @@ try {
   await eventually(async () => (await renderer.evaluate('document.body.innerText')).includes('取消任务'), 'Chat UI did not expose cancellation.');
   await renderer.evaluate(`window.confirm = () => true; Array.from(document.querySelectorAll('button')).find((button) => button.textContent === '取消任务').click()`);
   const terminal = await eventually(async () => {
-    const run = await renderer.evaluate(`window.yuanpu.getAgentRun(${JSON.stringify(runId)})`);
+    const run = await renderer.evaluate(`window.mindlink.getAgentRun(${JSON.stringify(runId)})`);
     return ['cancelled', 'interrupted', 'result_unknown'].includes(run.status) ? run.status : undefined;
   }, 'Cancelled run did not reach a terminal state.');
   assert.equal(terminal, 'cancelled');

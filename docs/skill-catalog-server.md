@@ -1,6 +1,6 @@
 # 技能目录服务
 
-根目录 `server/` 是 YuanpuAgent 的最小技能目录服务。它负责搜索与技能元数据，不参与本机 Runtime，也不执行安装命令。
+根目录 `server/` 是 MindLink 的最小技能目录服务。它负责搜索与技能元数据，不参与本机 Runtime，也不执行安装命令。
 
 ## 本地运行
 
@@ -8,7 +8,7 @@
 pnpm dev:catalog
 ```
 
-默认监听 `http://127.0.0.1:8787`。桌面开发流程会自动启动该服务，并通过 `YUANPU_CATALOG_URL` 交给 Runtime。
+默认监听 `http://127.0.0.1:8787`。桌面开发流程会自动启动该服务，并通过 `MINDLINK_CATALOG_URL` 交给 Runtime。
 
 ## API
 

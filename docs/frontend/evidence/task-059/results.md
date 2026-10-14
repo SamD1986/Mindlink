@@ -1,6 +1,6 @@
 # TASK-059 工作树界面实施证据
 
-- 环境：macOS、Node 24.15.0、pnpm 11.22.0；隔离 Git worktree `task/task-059-work-tree-ui`，临时 `YUANPU_HOME`，真实 Runtime/SQLite/Pi JSONL。未访问真实用户库。
+- 环境：macOS、Node 24.15.0、pnpm 11.22.0；隔离 Git worktree `task/task-059-work-tree-ui`，临时 `MINDLINK_HOME`，真实 Runtime/SQLite/Pi JSONL。未访问真实用户库。
 - `pnpm check`：早期实现一次通过。最终代码的两次并发全量检查均通过构建/类型检查和本卡测试，但 Runtime 各有一项既有测试在清理临时 Home 的 `assistant/` 时触发 `ENOTEMPTY`（分别为 `workspace-file-routes.test.mjs` 与 `runtime.test.mjs`）。前者单独通过；随后以 `node --test --test-concurrency=1 'test/*.test.mjs'` 重跑 Runtime 全集，117/117 通过。并发清理竞态未在本卡修改。
 - `apps/app/test/work-tree-model.test.mjs`：树深度、祖先路径、循环防护与隐藏归档节点下的可见顺序重排通过。
 - `apps/runtime/test/task-059-work-navigation-guard.test.mjs`：模拟重载后仍持久存在的等待审批 Work run。切换、新建、归档、已归档预览均返回 409；结束后预览不改变当前会话、普通切换恢复。覆盖 DesktopBridge 显式 `previewArchived:false`。

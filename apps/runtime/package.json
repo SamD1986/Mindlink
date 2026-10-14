@@ -1,15 +1,15 @@
 {
-  "name": "@yuanpu-agent/runtime",
+  "name": "@mindlink-agent/runtime",
   "version": "0.1.0",
-  "description": "Yuanpu Agent native runtime sidecar.",
+  "description": "MindLink native runtime sidecar.",
   "type": "module",
   "bin": {
-    "yuanpu-runtime": "dist/index.cjs"
+    "mindlink-runtime": "dist/index.cjs"
   },
   "files": ["dist", "README.md"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/linxinhong/yuanpu-agent.git",
+    "url": "git+https://github.com/linxinhong/mindlink-agent.git",
     "directory": "apps/runtime"
   },
   "publishConfig": {
@@ -29,9 +29,9 @@
   "dependencies": {
     "@earendil-works/pi-ai": "0.86.1",
     "@earendil-works/pi-coding-agent": "0.86.1",
-    "@yuanpu-agent/assistant": "workspace:*",
-    "@yuanpu-agent/runtime-kit": "workspace:*",
-    "@yuanpu-agent/protocol": "workspace:*",
+    "@mindlink-agent/assistant": "workspace:*",
+    "@mindlink-agent/runtime-kit": "workspace:*",
+    "@mindlink-agent/protocol": "workspace:*",
     "typebox": "1.3.27"
   },
   "devDependencies": {

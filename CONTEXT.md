@@ -1,6 +1,6 @@
-# YuanpuAgent
+# MindLink
 
-YuanpuAgent presents installable work capabilities as one simple product concept while preserving the runtime distinctions needed for safe loading and updates.
+MindLink presents installable work capabilities as one simple product concept while preserving the runtime distinctions needed for safe loading and updates.
 
 ## Language
 

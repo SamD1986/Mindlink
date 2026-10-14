@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import test from 'node:test';
 
-import { AGENT_CONTRACT_VERSION } from '@yuanpu-agent/protocol';
+import { AGENT_CONTRACT_VERSION } from '@mindlink-agent/protocol';
 
 async function eventually(check) {
   const deadline = Date.now() + 10_000;
@@ -28,10 +28,10 @@ async function startRuntime(home) {
     stdio: ['pipe', 'pipe', 'pipe'],
     env: {
       ...process.env,
-      YUANPU_HOME: home,
+      MINDLINK_HOME: home,
       TASK_019_PROVIDER_KEY: 'fixture-only',
-      YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '',
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '',
     },
   });
   child.stderr.resume();
@@ -70,7 +70,7 @@ async function stopRuntime(child) {
 }
 
 test('TASK-019 in-flight Runtime shutdown leaves an uncertain run queryable without replay', async (context) => {
-  const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-019-recovery-'));
+  const root = await mkdtemp(join(tmpdir(), 'mindlink-task-019-recovery-'));
   const home = join(root, 'home');
   const workspace = join(root, 'workspace');
   await mkdir(join(home, 'app'), { recursive: true });

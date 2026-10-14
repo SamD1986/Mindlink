@@ -39,7 +39,7 @@ const commit = git(['rev-parse', 'HEAD']);
 const trackedPackages = mirroredPackages.filter((name) =>
   git(['ls-tree', '-d', '--name-only', 'HEAD', `packages/${name}`]) === `packages/${name}`,
 );
-const archiveRoot = await mkdtemp(join(tmpdir(), 'yuanpu-pi-sync-'));
+const archiveRoot = await mkdtemp(join(tmpdir(), 'mindlink-pi-sync-'));
 const archivePath = join(archiveRoot, 'pi.tar');
 
 try {

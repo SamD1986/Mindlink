@@ -5,9 +5,9 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-const bundle = resolve(import.meta.dirname, '../release/mac-arm64/YuanpuAgent.app');
-const executable = join(bundle, 'Contents', 'MacOS', 'YuanpuAgent');
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-042-app-exit-'));
+const bundle = resolve(import.meta.dirname, '../release/mac-arm64/MindLink.app');
+const executable = join(bundle, 'Contents', 'MacOS', 'MindLink');
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-042-app-exit-'));
 const home = join(root, 'home');
 const userData = join(root, 'user-data');
 const workspace = join(root, 'workspace');
@@ -51,11 +51,11 @@ try {
   await writeFile(join(home, 'app', 'config.json'), JSON.stringify({ schemaVersion: 1,
     provider: 'fixture', model: 'fixture-model', workingDirectory: workspace }));
   await assert.rejects(access(join(home, 'app', 'connections', 'wecom.json')));
-  assert.equal(children(process.pid).some((item) => item.command.includes('YuanpuAgentRuntime')), false);
+  assert.equal(children(process.pid).some((item) => item.command.includes('MindLinkRuntime')), false);
   const port = await freePort();
   app = spawn(executable, [`--user-data-dir=${userData}`, `--remote-debugging-port=${port}`], {
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_NOTIFICATIONS_ENABLED: '0',
-      YUANPU_PYTHON_MCP_EXECUTABLE: '', YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_NOTIFICATIONS_ENABLED: '0',
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '', MINDLINK_PYTHON_MCP_ROOT: '' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let diagnostics = '';
@@ -63,12 +63,12 @@ try {
     if (diagnostics.length < 1000) diagnostics += chunk.toString().slice(0, 1000 - diagnostics.length);
   });
   runtimePid = await eventually(() => children(app.pid).find((item) =>
-    item.command.includes('YuanpuAgentRuntime-darwin-arm64'))?.pid,
+    item.command.includes('MindLinkRuntime-darwin-arm64'))?.pid,
   'Packaged App did not start its Runtime').catch((error) => {
     throw new Error(`${error.message}; diagnostic length=${diagnostics.length}`);
   });
   workerPid = await eventually(() => children(runtimePid).find((item) =>
-    item.command.includes('YuanpuAgentRuntime-darwin-arm64')
+    item.command.includes('MindLinkRuntime-darwin-arm64')
       && item.command.includes('--assistant-worker'))?.pid,
   'Packaged Runtime did not start Assistant Worker');
   assert.equal(alive(app.pid) && alive(runtimePid) && alive(workerPid), true);
@@ -110,7 +110,7 @@ try {
   await eventually(async () => {
     try {
       const reply = await command(page, 'Runtime.evaluate', {
-        expression: 'window.yuanpu.runtimeInfo().then((info) => ({ protocolVersion: info.protocolVersion, configRoot: info.configRoot }))',
+        expression: 'window.mindlink.runtimeInfo().then((info) => ({ protocolVersion: info.protocolVersion, configRoot: info.configRoot }))',
         awaitPromise: true, returnByValue: true,
       });
       return reply.result.value?.protocolVersion === 7 && reply.result.value?.configRoot === home;

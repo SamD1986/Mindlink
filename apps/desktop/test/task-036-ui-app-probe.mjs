@@ -96,7 +96,7 @@ function exists(pid) {
   try { process.kill(pid, 0); return true; } catch { return false; }
 }
 
-const root = await mkdtemp(join(tmpdir(), 'yuanpu-task-036-electron-'));
+const root = await mkdtemp(join(tmpdir(), 'mindlink-task-036-electron-'));
 const appRoot = join(root, 'apps', 'desktop');
 const home = join(root, 'home');
 const workspace = join(root, 'workspace');
@@ -146,7 +146,7 @@ const provider = createServer(async (request, response) => {
       response.write(chunk({ role: 'assistant', tool_calls: [{ index: 0, id: `call_${providerRequests}`, type: 'function', function: { name, arguments: JSON.stringify(args) } }] }));
       response.end(chunk({}, 'tool_calls') + 'data: [DONE]\n\n');
     };
-    if (!latestTool) { toolCall('search_capabilities', { query: 'yuanpu_approved_echo' }); return; }
+    if (!latestTool) { toolCall('search_capabilities', { query: 'mindlink_approved_echo' }); return; }
     if (latestToolCall === 'search_capabilities' && capabilityId) {
       toolCall('execute_capability', { name: capabilityId, arguments: { text: `TASK008-${approvalDecision}` } });
       return;
@@ -177,7 +177,7 @@ try {
   await mkdir(dirname(join(root, 'apps', 'runtime', 'dist')), { recursive: true });
   await symlink(runtimeDist, join(root, 'apps', 'runtime', 'dist'), 'dir');
   await writeFile(join(appRoot, 'package.json'), JSON.stringify({
-    name: 'yuanpu-task-036-isolated-app', version: '0.1.0', main: 'entry.cjs',
+    name: 'mindlink-task-036-isolated-app', version: '0.1.0', main: 'entry.cjs',
   }));
   await writeFile(join(appRoot, 'entry.cjs'), `
     const { app } = require('electron');
@@ -188,7 +188,7 @@ try {
   const providerPort = await listen(provider);
   const catalogPort = catalogServer ? await listen(catalogServer) : undefined;
   const config = live
-    ? JSON.parse(await readFile(join(homedir(), '.yuanpu/app/config.json'), 'utf8'))
+    ? JSON.parse(await readFile(join(homedir(), '.mindlink/app/config.json'), 'utf8'))
     : { schemaVersion: 1, provider: 'task-036-fixture', model: 'fixture-model',
       apiKeyEnv: 'TASK_036_PROVIDER_KEY', baseUrl: `http://127.0.0.1:${providerPort}/v1`, api: 'openai-completions' };
   if (live && !process.env[config.apiKeyEnv]) throw new Error('Configured live model credential is unavailable.');
@@ -197,14 +197,14 @@ try {
   child = spawn(electron, [`--remote-debugging-port=${debuggerPort}`, appRoot], {
     env: {
       ...process.env,
-      YUANPU_HOME: home,
-      YUANPU_RENDERER_URL: rendererUrl,
-      YUANPU_NODE_BINARY: process.execPath,
-      YUANPU_NOTIFICATIONS_ENABLED: '0',
+      MINDLINK_HOME: home,
+      MINDLINK_RENDERER_URL: rendererUrl,
+      MINDLINK_NODE_BINARY: process.execPath,
+      MINDLINK_NOTIFICATIONS_ENABLED: '0',
       TASK_036_PROVIDER_KEY: 'fixture-only',
       ...(catalogPort ? {
-        YUANPU_CATALOG_URL: `http://127.0.0.1:${catalogPort}`,
-        YUANPU_CAPABILITY_TRUST_ROOT_FILE: join(fullUiFixture, '0.1.0/bundle/trust-root.json'),
+        MINDLINK_CATALOG_URL: `http://127.0.0.1:${catalogPort}`,
+        MINDLINK_CAPABILITY_TRUST_ROOT_FILE: join(fullUiFixture, '0.1.0/bundle/trust-root.json'),
       } : {}),
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -216,7 +216,7 @@ try {
   try {
     renderer = await connectRenderer(debuggerPort);
     await eventually(async () => {
-      try { return (await renderer.evaluate('window.yuanpu.runtimeInfo()')).workingDirectory === workspace; }
+      try { return (await renderer.evaluate('window.mindlink.runtimeInfo()')).workingDirectory === workspace; }
       catch { return false; }
     }, 'Isolated Electron bridge did not become ready.');
   } catch (error) {
@@ -225,11 +225,11 @@ try {
   await eventually(() => renderer.evaluate('document.querySelectorAll(".nav-item").length >= 4'), 'Renderer UI did not mount.');
   runtimePid = await eventually(() => childRuntimePid(child.pid), 'Runtime child missing.');
   const connectionId = `imc_${randomUUID()}`;
-  const connection = await renderer.evaluate(`window.yuanpu.saveWecomConnection(${JSON.stringify({
+  const connection = await renderer.evaluate(`window.mindlink.saveWecomConnection(${JSON.stringify({
     connectionId, botId: 'fixture-bot', enabled: false,
   })})`);
   assert.equal(connection.status, 'disabled');
-  assert.equal((await renderer.evaluate('window.yuanpu.listWecomConnections()')).connections.length, 1);
+  assert.equal((await renderer.evaluate('window.mindlink.listWecomConnections()')).connections.length, 1);
   const input = {
     contractVersion: 1,
     name: 'Fixture scheduled note',
@@ -239,12 +239,12 @@ try {
     timeZone: 'Asia/Shanghai',
     delivery: { kind: 'desktop' },
   };
-  const preview = await renderer.evaluate(`window.yuanpu.previewSchedule(${JSON.stringify(input)})`);
+  const preview = await renderer.evaluate(`window.mindlink.previewSchedule(${JSON.stringify(input)})`);
   assert.equal(preview.nextTriggerAt, '2099-01-01T00:00:00.000Z');
-  const created = await renderer.evaluate(`window.yuanpu.createSchedule(${JSON.stringify(input)})`);
+  const created = await renderer.evaluate(`window.mindlink.createSchedule(${JSON.stringify(input)})`);
   assert.equal(created.nextTriggerAt, preview.nextTriggerAt);
-  await renderer.evaluate(`window.yuanpu.setScheduleEnabled(${JSON.stringify(created.scheduleId)}, false)`);
-  assert.equal((await renderer.evaluate('window.yuanpu.listSchedules()'))[0].enabled, false);
+  await renderer.evaluate(`window.mindlink.setScheduleEnabled(${JSON.stringify(created.scheduleId)}, false)`);
+  assert.equal((await renderer.evaluate('window.mindlink.listSchedules()'))[0].enabled, false);
   if (approvalFixture) {
     await renderer.evaluate(`document.querySelector('.nav-item[aria-label="工作"]').click()`);
   } else {
@@ -268,7 +268,7 @@ try {
     const database = new DatabaseSync(join(home, 'workflows/automation.sqlite'), { readOnly: true });
     const row = database.prepare("SELECT run_id FROM yp_agent_runs WHERE entry_point = 'desktop' ORDER BY created_at DESC LIMIT 1").get();
     database.close();
-    return row ? renderer.evaluate(`window.yuanpu.getAgentRun(${JSON.stringify(row.run_id)})`) : undefined;
+    return row ? renderer.evaluate(`window.mindlink.getAgentRun(${JSON.stringify(row.run_id)})`) : undefined;
   };
   const runCount = async () => {
     const database = new DatabaseSync(join(home, 'workflows/automation.sqlite'), { readOnly: true });
@@ -323,17 +323,17 @@ try {
     for (const decision of ['approved', 'denied']) {
       approvalDecision = decision;
       if (approvalFixture) mode = 'approval';
-      await send('请查找并调用 yuanpu_approved_echo，参数 text 为 ' + (approvalFixture ? 'TASK008-' : 'UI-036-') + decision + '。这是需要宿主一次授权的无副作用回显工具，请只调用一次，等待用户决定，不改用其他工具。');
-      await eventually(async () => (await renderer.evaluate('window.yuanpu.listCapabilityApprovals()')).length > 0,
+      await send('请查找并调用 mindlink_approved_echo，参数 text 为 ' + (approvalFixture ? 'TASK008-' : 'UI-036-') + decision + '。这是需要宿主一次授权的无副作用回显工具，请只调用一次，等待用户决定，不改用其他工具。');
+      await eventually(async () => (await renderer.evaluate('window.mindlink.listCapabilityApprovals()')).length > 0,
         'Live model did not request the controlled echo approval.', 120_000);
       await eventually(() => renderer.evaluate('Array.from(document.querySelectorAll(".approval-actions button")).some(button => button.textContent.trim() === "允许一次" && !button.disabled)'), 'Approval controls absent.', 120_000).catch(async (error) => {
         await shot('live-approval-failure');
         const run = await latestRun();
-        console.log({ runStatus: run?.status, hasBinding: Boolean(run?.pendingApproval), pendingCount: (await renderer.evaluate('window.yuanpu.listCapabilityApprovals()')).length });
+        console.log({ runStatus: run?.status, hasBinding: Boolean(run?.pendingApproval), pendingCount: (await renderer.evaluate('window.mindlink.listCapabilityApprovals()')).length });
         throw error;
       });
       await renderer.evaluate(`Array.from(document.querySelectorAll('.approval-actions button')).find((button) => button.textContent.trim() === ${JSON.stringify(decision === 'approved' ? '允许一次' : '拒绝')}).click()`);
-      await eventually(async () => (await renderer.evaluate('window.yuanpu.listCapabilityApprovals()')).length === 0, 'Host did not resolve approval.').catch(async (error) => {
+      await eventually(async () => (await renderer.evaluate('window.mindlink.listCapabilityApprovals()')).length === 0, 'Host did not resolve approval.').catch(async (error) => {
         await shot('live-approval-failure');
         console.log(await renderer.evaluate('Array.from(document.querySelectorAll(".message.error p")).map(p => p.textContent)'));
         throw error;
@@ -379,7 +379,7 @@ try {
     const installedCard = () => renderer.evaluate(`Array.from(document.querySelectorAll('.plugin-card.installed')).find(card => card.textContent.includes('builtin.python.echo'))?.textContent`);
     await renderer.evaluate(`document.querySelector('.nav-item[aria-label="技能"]').click()`);
     await eventually(() => renderer.evaluate(`Array.from(document.querySelectorAll('.plugin-card')).some(card => card.textContent.includes('Python 示例能力') && card.querySelector('.install-button'))`), 'Signed Python skill missing from current marketplace.', 30_000).catch(async (error) => {
-      console.log(JSON.stringify({ skillsPage: (await body()).slice(-1800), catalogPort, search: await renderer.evaluate(`window.yuanpu.searchPlugins('Python').then(items => items.map(item => ({ name: item.name, version: item.version }))).catch(error => error.message)`) }));
+      console.log(JSON.stringify({ skillsPage: (await body()).slice(-1800), catalogPort, search: await renderer.evaluate(`window.mindlink.searchPlugins('Python').then(items => items.map(item => ({ name: item.name, version: item.version }))).catch(error => error.message)`) }));
       throw error;
     });
     await renderer.evaluate(`Array.from(document.querySelectorAll('.plugin-card')).find(card => card.textContent.includes('Python 示例能力')).querySelector('.install-button').click()`);

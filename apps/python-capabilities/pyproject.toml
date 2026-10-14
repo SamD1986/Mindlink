@@ -1,7 +1,7 @@
 [project]
-name = "yuanpu-echo-mcp"
+name = "mindlink-echo-mcp"
 version = "0.1.0"
-description = "YuanpuAgent managed Python MCP fixture"
+description = "MindLink managed Python MCP fixture"
 requires-python = ">=3.10,<3.14"
 dependencies = [
   "mcp==1.26.0",
@@ -9,14 +9,14 @@ dependencies = [
 ]
 
 [project.scripts]
-yuanpu-echo-mcp = "yuanpu_echo_mcp.server:main"
+mindlink-echo-mcp = "mindlink_echo_mcp.server:main"
 
 [build-system]
 requires = ["hatchling==1.28.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/yuanpu_echo_mcp"]
+packages = ["src/mindlink_echo_mcp"]
 
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"

@@ -160,8 +160,8 @@ test('TASK-047 real Runtime Work repair changes a partial review only after new 
   const keys = generateKeyPairSync('ed25519');
   const approvalPublicKey = keys.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
   const runtime = spawn(process.execPath, [entry, '--serve', '--port', '0'], {
-    stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, YUANPU_HOME: root,
-      YUANPU_PYTHON_MCP_EXECUTABLE: '', YUANPU_PYTHON_MCP_ROOT: '' },
+    stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, MINDLINK_HOME: root,
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '', MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   let stderr = '';
   runtime.stderr.on('data', (chunk) => { stderr += chunk; });

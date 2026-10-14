@@ -9,8 +9,8 @@ export type SavedContent = {
 };
 type LegacySavedContent = Omit<SavedContent, 'kind'> & { kind: SavedContentKind | 'record' };
 
-const storageKey = 'yuanpu:saved-content:v1';
-export const savedContentEvent = 'yuanpu:saved-content-changed';
+const storageKey = 'mindlink:saved-content:v1';
+export const savedContentEvent = 'mindlink:saved-content-changed';
 
 export function readSavedContent(): SavedContent[] {
   try {

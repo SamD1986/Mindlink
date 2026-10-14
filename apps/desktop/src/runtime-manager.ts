@@ -44,7 +44,7 @@ import {
   type WecomConnectionConfigInput,
   type TailscaleConnectionSettings,
   type SaveTailscaleConnectionInput,
-} from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
 import { execFile, spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { generateKeyPairSync, randomBytes, sign } from 'node:crypto';
 import { homedir } from 'node:os';
@@ -55,7 +55,7 @@ import { RuntimeUpdater, type RuntimeActivation } from './runtime-updater.js';
 import { AuthenticatedHostEventClient } from './host-event-client.js';
 
 const DEFAULT_MANIFEST_URL =
-  'https://github.com/linxinhong/yuanpu-agent/releases/latest/download/manifest.json';
+  'https://github.com/linxinhong/mindlink-agent/releases/latest/download/manifest.json';
 
 interface RuntimeReady extends RuntimeInfo {
   event: 'ready';
@@ -111,11 +111,11 @@ export class RuntimeManager {
     desktopVersion: string,
     options: RuntimeManagerOptions = {},
   ) {
-    const yuanpuHome = resolve(process.env.YUANPU_HOME || join(homedir(), '.yuanpu'));
+    const mindlinkHome = resolve(process.env.MINDLINK_HOME || join(homedir(), '.mindlink'));
     this.updater = new RuntimeUpdater({
       runtimeRoot: this.runtimeRoot,
       desktopVersion,
-      metadataDatabasePath: join(yuanpuHome, 'workflows', 'automation.sqlite'),
+      metadataDatabasePath: join(mindlinkHome, 'workflows', 'automation.sqlite'),
     });
     this.options = {
       command: options.command,
@@ -138,14 +138,14 @@ export class RuntimeManager {
   private packagedExecutable(): string {
     const target = `${process.platform}-${process.arch}`;
     const suffix = process.platform === 'win32' ? '.exe' : '';
-    return join(this.resourcesPath, 'runtime', `YuanpuAgentRuntime-${target}${suffix}`);
+    return join(this.resourcesPath, 'runtime', `MindLinkRuntime-${target}${suffix}`);
   }
 
   private async command(): Promise<RuntimeCommand> {
     if (this.options.command) return { ...this.options.command, pending: false };
     if (!this.packaged) {
       return {
-        executable: process.env.YUANPU_NODE_BINARY || 'node',
+        executable: process.env.MINDLINK_NODE_BINARY || 'node',
         args: [resolve(this.appPath, '../runtime/dist/index.cjs')],
         pending: false,
       };
@@ -155,13 +155,13 @@ export class RuntimeManager {
 
   private capabilityEnvironment(): NodeJS.ProcessEnv {
     if (this.packaged) {
-      const root = join(this.resourcesPath, 'capabilities', 'builtin.python.echo', 'YuanpuEchoMcp');
+      const root = join(this.resourcesPath, 'capabilities', 'builtin.python.echo', 'MindlinkEchoMcp');
       return {
-        YUANPU_BUILTIN_AGENTS_ROOT: join(this.resourcesPath, 'app', 'agents'),
-        YUANPU_PYTHON_MCP_EXECUTABLE: join(root, process.platform === 'win32' ? 'YuanpuEchoMcp.exe' : 'YuanpuEchoMcp'),
-        YUANPU_PYTHON_MCP_ROOT: root,
-        YUANPU_PYTHON_MCP_ARGS: '[]',
-        YUANPU_CAPABILITY_TRUST_ROOT_FILE: join(
+        MINDLINK_BUILTIN_AGENTS_ROOT: join(this.resourcesPath, 'app', 'agents'),
+        MINDLINK_PYTHON_MCP_EXECUTABLE: join(root, process.platform === 'win32' ? 'MindlinkEchoMcp.exe' : 'MindlinkEchoMcp'),
+        MINDLINK_PYTHON_MCP_ROOT: root,
+        MINDLINK_PYTHON_MCP_ARGS: '[]',
+        MINDLINK_CAPABILITY_TRUST_ROOT_FILE: join(
           this.resourcesPath,
           'capabilities',
           'builtin.python.echo',
@@ -171,14 +171,14 @@ export class RuntimeManager {
     }
     const pythonRoot = resolve(this.appPath, '../python-capabilities');
     return {
-      YUANPU_BUILTIN_AGENTS_ROOT: resolve(__dirname, '../../app/agents'),
-      YUANPU_PYTHON_MCP_EXECUTABLE: process.platform === 'win32'
+      MINDLINK_BUILTIN_AGENTS_ROOT: resolve(__dirname, '../../app/agents'),
+      MINDLINK_PYTHON_MCP_EXECUTABLE: process.platform === 'win32'
         ? join(pythonRoot, '.venv', 'Scripts', 'python.exe')
         : join(pythonRoot, '.venv', 'bin', 'python'),
-      YUANPU_PYTHON_MCP_ROOT: pythonRoot,
-      YUANPU_PYTHON_MCP_ARGS: JSON.stringify(['-m', 'yuanpu_echo_mcp']),
-      ...(process.env.YUANPU_CAPABILITY_TRUST_ROOT_FILE
-        ? { YUANPU_CAPABILITY_TRUST_ROOT_FILE: process.env.YUANPU_CAPABILITY_TRUST_ROOT_FILE }
+      MINDLINK_PYTHON_MCP_ROOT: pythonRoot,
+      MINDLINK_PYTHON_MCP_ARGS: JSON.stringify(['-m', 'mindlink_echo_mcp']),
+      ...(process.env.MINDLINK_CAPABILITY_TRUST_ROOT_FILE
+        ? { MINDLINK_CAPABILITY_TRUST_ROOT_FILE: process.env.MINDLINK_CAPABILITY_TRUST_ROOT_FILE }
         : {}),
     };
   }
@@ -686,8 +686,8 @@ export class RuntimeManager {
   }
 
   submitDesktopMessage(message: string, surface: 'work' | 'assistant' = 'work', conversationId?: string,
-    clientMessageId?: string, modelSelection?: import('@yuanpu-agent/protocol').AgentRunRequest['modelSelection'],
-    approvalMode?: import('@yuanpu-agent/protocol').AgentRunRequest['approvalMode']): Promise<AgentRunReceipt> {
+    clientMessageId?: string, modelSelection?: import('@mindlink-agent/protocol').AgentRunRequest['modelSelection'],
+    approvalMode?: import('@mindlink-agent/protocol').AgentRunRequest['approvalMode']): Promise<AgentRunReceipt> {
     if (typeof message !== 'string' || !message.trim()) {
       throw new Error('A non-empty message is required.');
     }
@@ -707,60 +707,60 @@ export class RuntimeManager {
     return this.request(`${RUNTIME_ROUTES.desktopTranscript}?${query}`);
   }
 
-  listWorkConversations(): Promise<import('@yuanpu-agent/protocol').WorkConversation[]> {
+  listWorkConversations(): Promise<import('@mindlink-agent/protocol').WorkConversation[]> {
     return this.request(RUNTIME_ROUTES.workConversations);
   }
 
-  createWorkConversation(folderId?: string, requestId?: string): Promise<import('@yuanpu-agent/protocol').WorkConversation> {
+  createWorkConversation(folderId?: string, requestId?: string): Promise<import('@mindlink-agent/protocol').WorkConversation> {
     return this.request(RUNTIME_ROUTES.workConversations, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ folderId, requestId }),
     });
   }
 
-  selectWorkConversation(conversationId: string, previewArchived?: boolean): Promise<import('@yuanpu-agent/protocol').WorkConversation> {
+  selectWorkConversation(conversationId: string, previewArchived?: boolean): Promise<import('@mindlink-agent/protocol').WorkConversation> {
     return this.request(RUNTIME_ROUTES.workConversations, {
       method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ conversationId, previewArchived }),
     });
   }
 
   updateWorkConversation(conversationId: string, patch: { title?: string; iconId?: string; archived?: boolean; tagIds?: string[] }) {
-    return this.request<import('@yuanpu-agent/protocol').WorkConversation>(RUNTIME_ROUTES.workConversations, {
+    return this.request<import('@mindlink-agent/protocol').WorkConversation>(RUNTIME_ROUTES.workConversations, {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ conversationId, ...patch }),
     });
   }
-  moveWorkNode(request: import('@yuanpu-agent/protocol').WorkMoveRequest): Promise<import('@yuanpu-agent/protocol').WorkMoveResult> {
+  moveWorkNode(request: import('@mindlink-agent/protocol').WorkMoveRequest): Promise<import('@mindlink-agent/protocol').WorkMoveResult> {
     return this.request(RUNTIME_ROUTES.workMove, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) });
   }
-  searchWorkConversations(input: import('@yuanpu-agent/protocol').WorkSearchQuery): Promise<import('@yuanpu-agent/protocol').WorkSearchResult> {
+  searchWorkConversations(input: import('@mindlink-agent/protocol').WorkSearchQuery): Promise<import('@mindlink-agent/protocol').WorkSearchResult> {
     const query = new URLSearchParams({ query: input.query });
     if (input.archive) query.set('archive', input.archive);
     if (input.limit !== undefined) query.set('limit', String(input.limit));
     if (input.cursor) query.set('cursor', input.cursor);
     return this.request(`${RUNTIME_ROUTES.workSearch}?${query}`);
   }
-  getWorkMessageWindow(conversationId: string, entryId: string, radius?: number): Promise<import('@yuanpu-agent/protocol').WorkMessageWindowResult> {
+  getWorkMessageWindow(conversationId: string, entryId: string, radius?: number): Promise<import('@mindlink-agent/protocol').WorkMessageWindowResult> {
     const query = new URLSearchParams({ conversationId, entryId });
     if (radius !== undefined) query.set('radius', String(radius));
     return this.request(`${RUNTIME_ROUTES.workMessageWindow}?${query}`);
   }
-  getWorkTrajectory(conversationId: string): Promise<import('@yuanpu-agent/protocol').SessionTrajectory> {
+  getWorkTrajectory(conversationId: string): Promise<import('@mindlink-agent/protocol').SessionTrajectory> {
     return this.request(`${RUNTIME_ROUTES.workTrajectory}?conversationId=${encodeURIComponent(conversationId)}`);
   }
-  listWorkFolders(): Promise<import('@yuanpu-agent/protocol').WorkFolder[]> { return this.request(RUNTIME_ROUTES.workFolders); }
-  createWorkFolder(parentId: string | null, name: string, iconId?: string, requestId?: string): Promise<import('@yuanpu-agent/protocol').WorkFolder> {
+  listWorkFolders(): Promise<import('@mindlink-agent/protocol').WorkFolder[]> { return this.request(RUNTIME_ROUTES.workFolders); }
+  createWorkFolder(parentId: string | null, name: string, iconId?: string, requestId?: string): Promise<import('@mindlink-agent/protocol').WorkFolder> {
     return this.request(RUNTIME_ROUTES.workFolders, { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ parentId, name, iconId, requestId }) });
   }
-  updateWorkFolder(folderId: string, patch: { name?: string; iconId?: string }): Promise<import('@yuanpu-agent/protocol').WorkFolder> {
+  updateWorkFolder(folderId: string, patch: { name?: string; iconId?: string }): Promise<import('@mindlink-agent/protocol').WorkFolder> {
     return this.request(RUNTIME_ROUTES.workFolders, { method: 'PATCH', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ folderId, ...patch }) });
   }
-  listWorkTags(): Promise<import('@yuanpu-agent/protocol').WorkTag[]> { return this.request(RUNTIME_ROUTES.workTags); }
-  createWorkTag(name: string, color?: string, requestId?: string): Promise<import('@yuanpu-agent/protocol').WorkTag> {
+  listWorkTags(): Promise<import('@mindlink-agent/protocol').WorkTag[]> { return this.request(RUNTIME_ROUTES.workTags); }
+  createWorkTag(name: string, color?: string, requestId?: string): Promise<import('@mindlink-agent/protocol').WorkTag> {
     return this.request(RUNTIME_ROUTES.workTags, { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name, color, requestId }) });
   }
-  updateWorkTag(tagId: string, patch: { name?: string; color?: string }): Promise<import('@yuanpu-agent/protocol').WorkTag> {
+  updateWorkTag(tagId: string, patch: { name?: string; color?: string }): Promise<import('@mindlink-agent/protocol').WorkTag> {
     return this.request(RUNTIME_ROUTES.workTags, { method: 'PATCH', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ tagId, ...patch }) });
   }
@@ -769,14 +769,14 @@ export class RuntimeManager {
       body: JSON.stringify({ kind, parentId, ids }) });
   }
 
-  listWorkFiles(conversationId: string, dirPath?: string, options?: { recursive?: boolean }): Promise<import('@yuanpu-agent/protocol').WorkDirectoryListing> {
+  listWorkFiles(conversationId: string, dirPath?: string, options?: { recursive?: boolean }): Promise<import('@mindlink-agent/protocol').WorkDirectoryListing> {
     const query = new URLSearchParams({ conversationId });
     if (dirPath) query.set('path', dirPath);
     if (options?.recursive) query.set('recursive', '1');
     return this.request(`${RUNTIME_ROUTES.workFiles}?${query}`);
   }
 
-  readWorkFile(conversationId: string, filePath: string): Promise<import('@yuanpu-agent/protocol').WorkFilePreview> {
+  readWorkFile(conversationId: string, filePath: string): Promise<import('@mindlink-agent/protocol').WorkFilePreview> {
     const query = new URLSearchParams({ conversationId, path: filePath });
     return this.request(`${RUNTIME_ROUTES.workFileContent}?${query}`);
   }
@@ -786,7 +786,7 @@ export class RuntimeManager {
     return this.request(`${RUNTIME_ROUTES.workFilePath}?${query}`);
   }
 
-  listWorkFileChanges(query: { conversationId: string; runId?: string }): Promise<import('@yuanpu-agent/protocol').WorkFileChangesSummary> {
+  listWorkFileChanges(query: { conversationId: string; runId?: string }): Promise<import('@mindlink-agent/protocol').WorkFileChangesSummary> {
     const params = new URLSearchParams({ conversationId: query.conversationId });
     if (query.runId) params.set('runId', query.runId);
     return this.request(`${RUNTIME_ROUTES.workFileChanges}?${params}`);
@@ -814,12 +814,12 @@ export class RuntimeManager {
     return this.request(`${RUNTIME_ROUTES.assistantMirrors}/${encodeURIComponent(mirrorId)}/retry`, { method: 'POST' });
   }
 
-  listAssistantSuggestions(): Promise<import('@yuanpu-agent/protocol').AssistantSuggestionInbox> {
+  listAssistantSuggestions(): Promise<import('@mindlink-agent/protocol').AssistantSuggestionInbox> {
     return this.request(RUNTIME_ROUTES.assistantSuggestions);
   }
 
   feedbackAssistantSuggestion(id: string, action: 'ignored' | 'snoozed' | 'accepted',
-    snoozedUntil?: string): Promise<import('@yuanpu-agent/protocol').AssistantSuggestion> {
+    snoozedUntil?: string): Promise<import('@mindlink-agent/protocol').AssistantSuggestion> {
     return this.request(RUNTIME_ROUTES.assistantSuggestions, { method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ action: 'feedback', id, feedback: action, snoozedUntil }) });
@@ -830,24 +830,24 @@ export class RuntimeManager {
       headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'pause', until }) });
   }
 
-  markAssistantSuggestionRead(id: string): Promise<import('@yuanpu-agent/protocol').AssistantSuggestion> {
+  markAssistantSuggestionRead(id: string): Promise<import('@mindlink-agent/protocol').AssistantSuggestion> {
     return this.request(RUNTIME_ROUTES.assistantSuggestions, { method: 'POST',
       headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'read', id }) });
   }
 
-  getAssistantWorkspace(memoryLimit?: number): Promise<import('@yuanpu-agent/protocol').AssistantWorkspaceSnapshot> {
+  getAssistantWorkspace(memoryLimit?: number): Promise<import('@mindlink-agent/protocol').AssistantWorkspaceSnapshot> {
     return this.request(memoryLimit === undefined ? RUNTIME_ROUTES.assistantWorkspace
       : `${RUNTIME_ROUTES.assistantWorkspace}?memoryLimit=${encodeURIComponent(memoryLimit)}`);
   }
 
-  revokeAssistantSource(sourceId: string, expectedVersion: string): Promise<import('@yuanpu-agent/protocol').AssistantSourceRevocationReceipt> {
+  revokeAssistantSource(sourceId: string, expectedVersion: string): Promise<import('@mindlink-agent/protocol').AssistantSourceRevocationReceipt> {
     return this.request(RUNTIME_ROUTES.assistantWorkspace, { method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ action: 'revoke-source', sourceId, expectedVersion }) });
   }
 
   correctAssistantMemory(id: string, expectedVersion: number, text: string,
-    revisionId: string): Promise<import('@yuanpu-agent/protocol').AssistantMemoryView> {
+    revisionId: string): Promise<import('@mindlink-agent/protocol').AssistantMemoryView> {
     return this.request(RUNTIME_ROUTES.assistantWorkspace, { method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ action: 'correct-memory', id, expectedVersion, text, revisionId }) });
@@ -859,7 +859,7 @@ export class RuntimeManager {
   }
 
   importAssistantSavedMemory(savedId: string, surface: 'work' | 'assistant', text: string,
-    savedAt: string): Promise<import('@yuanpu-agent/protocol').AssistantMemoryView> {
+    savedAt: string): Promise<import('@mindlink-agent/protocol').AssistantMemoryView> {
     return this.request(RUNTIME_ROUTES.assistantWorkspace, { method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ action: 'import-saved', savedId, surface, text, savedAt }) });
@@ -871,13 +871,13 @@ export class RuntimeManager {
       body: JSON.stringify({ action: 'pause-organizing', until }) });
   }
 
-  followUpAssistantDelegation(taskId: string, text: string): Promise<import('@yuanpu-agent/protocol').AssistantDelegationRecord> {
+  followUpAssistantDelegation(taskId: string, text: string): Promise<import('@mindlink-agent/protocol').AssistantDelegationRecord> {
     return this.request(RUNTIME_ROUTES.assistantWorkspace, { method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ action: 'follow-up-delegation', id: taskId, text }) });
   }
 
-  cancelAssistantDelegation(taskId: string): Promise<import('@yuanpu-agent/protocol').AssistantDelegationRecord> {
+  cancelAssistantDelegation(taskId: string): Promise<import('@mindlink-agent/protocol').AssistantDelegationRecord> {
     return this.request(RUNTIME_ROUTES.assistantWorkspace, { method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ action: 'cancel-delegation', id: taskId }) });
@@ -970,7 +970,7 @@ export class RuntimeManager {
     const current = await this.info();
     return this.updater.stage(
       current.version,
-      process.env.YUANPU_RUNTIME_MANIFEST_URL || DEFAULT_MANIFEST_URL,
+      process.env.MINDLINK_RUNTIME_MANIFEST_URL || DEFAULT_MANIFEST_URL,
     );
   }
 

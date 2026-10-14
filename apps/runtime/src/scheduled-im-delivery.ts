@@ -5,8 +5,8 @@ import {
   type ChannelStore,
   type PersistentScheduler,
   type ScheduledDeliveryAdapter,
-} from '@yuanpu-agent/runtime-kit';
-import { RUNTIME_ROUTES } from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/runtime-kit';
+import { RUNTIME_ROUTES } from '@mindlink-agent/protocol';
 
 export function createScheduledImDelivery(routers: readonly ChannelRouter[]): ScheduledDeliveryAdapter {
   return {

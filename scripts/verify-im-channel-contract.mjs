@@ -40,7 +40,7 @@ assert.equal(contract.selectedIntegration.mode, 'api-websocket-long-connection')
 assert.equal(contract.selectedIntegration.officialPackage.name, '@wecom/aibot-node-sdk');
 assert.equal(contract.selectedIntegration.officialPackage.license, 'MIT');
 assert.equal(contract.selectedIntegration.officialPackage.node24Compatibility, 'unverified');
-assert.equal(contract.selectedIntegration.adapterStrategy, 'yuanpu-owned-wrapper-around-official-sdk');
+assert.equal(contract.selectedIntegration.adapterStrategy, 'mindlink-owned-wrapper-around-official-sdk');
 
 assert.equal(contract.connection.lifecycleOwner, 'desktop-app-runtime');
 assert.equal(contract.connection.transport, 'websocket');
@@ -51,7 +51,7 @@ assert.equal(contract.connection.publicInboundEndpoint, false);
 assert.equal(contract.verificationEnvironment.publicInboundPortRequired, false);
 
 assert.deepEqual(contract.credentials.secretRefs, [
-  'keychain:yuanpu/im/<connectionId>/bot-secret',
+  'keychain:mindlink/im/<connectionId>/bot-secret',
 ]);
 assert.equal(contract.credentials.secretValuesAllowedInConfig, false);
 assert.equal(contract.credentials.secretValuesAllowedInLogs, false);
@@ -114,7 +114,7 @@ assert.equal(contract.outbound.rerunAgentOnDeliveryFailure, false);
 assert.deepEqual(contract.attachments.initiallyAcceptedTypes, ['text']);
 assert.equal(contract.attachments.autoFetchRemoteResources, false);
 assert.equal(contract.logging.officialDefaultLoggerAllowed, false);
-assert.equal(contract.logging.requiredLogger, 'yuanpu-redacting-logger');
+assert.equal(contract.logging.requiredLogger, 'mindlink-redacting-logger');
 assert.equal(contract.logging.debugRawFramesAllowed, false);
 for (const field of [
   'secret',

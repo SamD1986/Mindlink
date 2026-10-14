@@ -25,7 +25,7 @@ export default defineConfig({
     PI_BUNDLED_NODE: 'true',
   },
   deps: {
-    alwaysBundle: [/^@earendil-works\//, /^@yuanpu-agent\//, /^typebox(?:\/|$)/, 'yaml'],
+    alwaysBundle: [/^@earendil-works\//, /^@mindlink-agent\//, /^typebox(?:\/|$)/, 'yaml'],
     onlyBundle: false,
   },
 });

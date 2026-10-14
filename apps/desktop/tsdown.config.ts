@@ -17,7 +17,7 @@ export default defineConfig({
   platform: 'node',
   sourcemap: true,
   deps: {
-    alwaysBundle: ['@yuanpu-agent/protocol'],
+    alwaysBundle: ['@mindlink-agent/protocol'],
     neverBundle: ['electron', 'electron-updater'],
   },
 });

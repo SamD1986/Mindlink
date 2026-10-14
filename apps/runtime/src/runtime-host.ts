@@ -3,8 +3,8 @@ import type {
   AuthenticatedAgentCaller,
   ChannelInboundRoute,
   ChannelOutboundRecord,
-} from '@yuanpu-agent/runtime-kit';
-import type { AgentRunRecord, PrivateImRunSummary } from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/runtime-kit';
+import type { AgentRunRecord, PrivateImRunSummary } from '@mindlink-agent/protocol';
 
 import type { PersistedWecomDocument } from './wecom-channel.js';
 

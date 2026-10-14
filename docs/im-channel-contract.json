@@ -45,7 +45,7 @@
       "installPolicy": "exact-version-and-integrity-after-node24-spike",
       "sourceUrl": "https://github.com/WecomTeam/aibot-node-sdk"
     },
-    "adapterStrategy": "yuanpu-owned-wrapper-around-official-sdk"
+    "adapterStrategy": "mindlink-owned-wrapper-around-official-sdk"
   },
   "connection": {
     "connectionIdFormat": "imc_<uuid>",
@@ -63,7 +63,7 @@
     "providerAccountField": "botId",
     "providerAccountRef": "connection-metadata:wecom-bot-id",
     "secretRefs": [
-      "keychain:yuanpu/im/<connectionId>/bot-secret"
+      "keychain:mindlink/im/<connectionId>/bot-secret"
     ],
     "secretValuesAllowedInConfig": false,
     "secretValuesAllowedInLogs": false,
@@ -208,7 +208,7 @@
   },
   "logging": {
     "officialDefaultLoggerAllowed": false,
-    "requiredLogger": "yuanpu-redacting-logger",
+    "requiredLogger": "mindlink-redacting-logger",
     "debugRawFramesAllowed": false,
     "allowedFields": [
       "hashed-stable-id",

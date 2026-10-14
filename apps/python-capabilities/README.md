@@ -1,4 +1,4 @@
-# Yuanpu Python capabilities
+# MindLink Python capabilities
 
 Development and frozen artifact commands are documented in
 [`docs/python-artifact-delivery.md`](../../docs/python-artifact-delivery.md).
@@ -9,7 +9,7 @@ and dependencies together; target machines must not run pip.
 
 ```bash
 uv sync --frozen
-uv run python -m yuanpu_echo_mcp
+uv run python -m mindlink_echo_mcp
 ```
 
 The server uses stdio. Standard output is reserved for MCP protocol messages.

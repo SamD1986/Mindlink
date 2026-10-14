@@ -2,7 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
 import { open } from 'node:fs/promises';
 
-import type { AssistantHostBinding, AssistantHostRequest, AssistantHostStore } from '@yuanpu-agent/runtime-kit';
+import type { AssistantHostBinding, AssistantHostRequest, AssistantHostStore } from '@mindlink-agent/runtime-kit';
 import {
   ASSISTANT_CONTRACT_VERSION,
   validateAssistantIngress,
@@ -12,9 +12,9 @@ import {
   type AssistantRequest,
   type AssistantSourceChange,
   type DesktopTranscriptMessage,
-} from '@yuanpu-agent/protocol';
-import type { ChannelTransport, NormalizedChannelMessage } from '@yuanpu-agent/runtime-kit';
-import type { ChannelInboundReceipt } from '@yuanpu-agent/runtime-kit';
+} from '@mindlink-agent/protocol';
+import type { ChannelTransport, NormalizedChannelMessage } from '@mindlink-agent/runtime-kit';
+import type { ChannelInboundReceipt } from '@mindlink-agent/runtime-kit';
 import type { AssistantTaskRecord, AssistantWorkerManager } from './assistant-worker-manager.js';
 
 function mappedStatus(status: AssistantHostRequest['status']): AgentRunRecord['status'] {

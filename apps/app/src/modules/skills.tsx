@@ -10,7 +10,7 @@ import type {
   PluginConfigDocument,
   PluginConfigScope,
   PluginSearchResult,
-} from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
 
 
 type SkillTab = 'marketplace' | 'installed' | 'local' | 'updates';
@@ -53,7 +53,7 @@ const previewInstalled: InstalledPlugin[] = [{
   version: '2.34.0',
   description: '连接外部 MCP 服务，扩展更多工具和数据源。',
   source: 'npm:pi-mcp-adapter@2.34.0',
-  installPath: '~/.yuanpu/packages/installed/pi-mcp-adapter',
+  installPath: '~/.mindlink/packages/installed/pi-mcp-adapter',
   enabled: true,
   installedAt: '2026-09-21T00:00:00.000Z',
   configurable: true,
@@ -67,7 +67,7 @@ function previewConfig(scope: PluginConfigScope): PluginConfigDocument {
     title: 'MCP 服务',
     description: '配置外部 MCP 服务；服务器会在实际使用工具时按需连接。',
     scope,
-    path: scope === 'user' ? '~/.yuanpu/agent/mcp.json' : '<workspace>/.pi/mcp.json',
+    path: scope === 'user' ? '~/.mindlink/agent/mcp.json' : '<workspace>/.pi/mcp.json',
     supportsWorkspace: true,
     secretPolicy: 'environment-only',
     value: {
@@ -112,7 +112,7 @@ function PluginConfigPage({
   onBack: () => void;
   onChanged: () => Promise<void>;
 }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const [scope, setScope] = useState<PluginConfigScope>('user');
   const [document, setDocument] = useState<PluginConfigDocument>();
   const [draft, setDraft] = useState<Record<string, unknown>>({});
@@ -365,7 +365,7 @@ const permissionLabels: Record<NonNullable<PluginSearchResult['permissions']>[nu
 };
 
 export function SkillPage({ active }: { active: boolean }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const [tab, setTab] = useState<SkillTab>('marketplace');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PluginSearchResult[]>(desktop ? [] : previewPlugins);
@@ -432,7 +432,7 @@ export function SkillPage({ active }: { active: boolean }) {
   async function install(candidate: PluginSearchResult) {
     const source = candidate.source;
     if (!desktop) {
-      setError('浏览器预览模式不会执行技能安装。请通过 Electron 启动 YuanpuAgent。');
+      setError('浏览器预览模式不会执行技能安装。请通过 Electron 启动 MindLink。');
       return;
     }
     setTrustCandidate(undefined);
@@ -451,10 +451,10 @@ export function SkillPage({ active }: { active: boolean }) {
         );
         if (conflicts.length > 0) {
           const names = conflicts.map((conflict) => conflict.name).join('、');
-          const useYuanpu = window.confirm(
-            `检测到旧 pi-mcp-adapter 正在托管同名连接：${names}。\n\n选择“确定”将停用旧适配器并由 Yuanpu 托管；旧配置会完整保留，但旧适配器中的其他连接也会暂停。选择“取消”则保持旧适配器且不安装。`,
+          const useMindlink = window.confirm(
+            `检测到旧 pi-mcp-adapter 正在托管同名连接：${names}。\n\n选择“确定”将停用旧适配器并由 MindLink 托管；旧配置会完整保留，但旧适配器中的其他连接也会暂停。选择“取消”则保持旧适配器且不安装。`,
           );
-          if (!useYuanpu) return;
+          if (!useMindlink) return;
           await desktop.setPluginEnabled(legacyAdapter.name, false);
           legacyDisabled = true;
         }
@@ -515,7 +515,7 @@ export function SkillPage({ active }: { active: boolean }) {
   }
 
   async function uninstall(plugin: InstalledPlugin) {
-    if (!desktop || !window.confirm(`卸载 ${plugin.name}？\n\n能力包会被删除，但不会删除 ~/.yuanpu/agent/skills 中的本地技能。`)) return;
+    if (!desktop || !window.confirm(`卸载 ${plugin.name}？\n\n能力包会被删除，但不会删除 ~/.mindlink/agent/skills 中的本地技能。`)) return;
     setPending(plugin.name);
     setError(undefined);
     try {
@@ -565,7 +565,7 @@ export function SkillPage({ active }: { active: boolean }) {
       <header className="plugin-header">
         <div>
           <h1>技能</h1>
-          <p>为 YuanpuAgent 添加工作能力</p>
+          <p>为 MindLink 添加工作能力</p>
         </div>
         <span>已安装 {installed.length}</span>
       </header>
@@ -715,7 +715,7 @@ export function SkillPage({ active }: { active: boolean }) {
           {tab === 'local' && localSkills.length === 0 && localDiagnostics.length === 0 && (
             <div className="plugin-empty skill-directory-empty">
               <strong>还没有本地技能</strong>
-              <code>~/.yuanpu/agent/skills</code>
+              <code>~/.mindlink/agent/skills</code>
               <span>将包含 SKILL.md 的技能目录放到这里，刷新页面或下次启动后自动加载。</span>
             </div>
           )}

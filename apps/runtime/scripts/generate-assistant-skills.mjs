@@ -2,7 +2,7 @@ import { lstat, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 const runtimeRoot = resolve(import.meta.dirname, '..');
-const sourceRoot = resolve(runtimeRoot, '../../packages/yuanpu-assistant/skills');
+const sourceRoot = resolve(runtimeRoot, '../../packages/mindlink-assistant/skills');
 const output = resolve(runtimeRoot, 'src/assistant-skill-assets.generated.ts');
 const files = [];
 

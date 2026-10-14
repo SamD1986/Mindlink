@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { initializeAssistantHome, loadAssistantSkills } from '@yuanpu-agent/assistant';
+import { initializeAssistantHome, loadAssistantSkills } from '@mindlink-agent/assistant';
 import { bundledAssistantSkillFiles } from '../src/assistant-skill-assets.generated.ts';
 
 test('SEA skill asset seeds delegate-and-verify into discoverable Assistant Home skills', async (t) => {

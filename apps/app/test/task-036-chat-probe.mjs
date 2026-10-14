@@ -21,7 +21,7 @@ async function until(source) {
 try {
   browser('open', url);
   evaluate(`window.probe = { count: 0, mode: 'outage', status: 'running', approved: false };
-    window.yuanpu = {
+    window.mindlink = {
       runtimeInfo: async () => ({ piVersion: 'fixture' }),
       listCapabilityApprovals: async () => window.probe.mode === 'approval' && !window.probe.approved ? [{
         requestId: 'approval-fixture', runId: 'approval-run', capabilityId: 'controlled-echo', sourceInstanceId: 'fixture', argumentsDigest: '000000000000000000',
@@ -54,9 +54,9 @@ try {
 
   // New run IDs prevent the terminal cache from obscuring subsequent fixture states.
   evaluate(`window.probe.mode = 'approval'; window.probe.status = 'running';
-    const original = window.yuanpu.getAgentRun;
-    window.yuanpu.getAgentRun = async () => ({ ...await original(), runId: 'approval-run' });
-    window.yuanpu.submitDesktopMessage = async () => { window.probe.count++; return { runId: 'approval-run', status: 'running' }; }; true`);
+    const original = window.mindlink.getAgentRun;
+    window.mindlink.getAgentRun = async () => ({ ...await original(), runId: 'approval-run' });
+    window.mindlink.submitDesktopMessage = async () => { window.probe.count++; return { runId: 'approval-run', status: 'running' }; }; true`);
   browser('click', '[aria-label="发送消息"]');
   await until('document.body.innerText.includes("正在准备授权…")');
   assert.equal(evaluate('document.querySelector(".approval-actions .primary").disabled'), true);

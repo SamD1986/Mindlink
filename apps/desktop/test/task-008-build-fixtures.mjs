@@ -10,7 +10,7 @@ import { join, resolve } from 'node:path';
 const repo = resolve(import.meta.dirname, '../../..');
 const generated = join(repo, 'apps/python-capabilities/dist-artifact');
 const fixtureRoot = process.argv[2]
-  ? resolve(process.argv[2]) : await mkdtemp(join(tmpdir(), 'yuanpu-task008-fixtures-'));
+  ? resolve(process.argv[2]) : await mkdtemp(join(tmpdir(), 'mindlink-task008-fixtures-'));
 // Explicit destinations must be new; never overwrite an existing fixture/user directory.
 if (process.argv[2]) await mkdir(fixtureRoot);
 const backup = join(fixtureRoot, 'previous-generated-artifact');
@@ -35,17 +35,17 @@ try {
   ownsGenerated = true;
   const env = { ...process.env };
   for (const name of [
-    'YUANPU_ARTIFACT_SIGNING_KEY_BASE64', 'YUANPU_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64',
-    'YUANPU_ARTIFACT_BASE_URL',
+    'MINDLINK_ARTIFACT_SIGNING_KEY_BASE64', 'MINDLINK_ARTIFACT_TRUST_ROOT_PUBLIC_KEY_BASE64',
+    'MINDLINK_ARTIFACT_BASE_URL',
   ]) delete env[name];
   Object.assign(env, {
-    YUANPU_ARTIFACT_SIGNING_KEY_FILE: keyFile,
-    YUANPU_ARTIFACT_SIGNING_KEY_ID: keyId,
+    MINDLINK_ARTIFACT_SIGNING_KEY_FILE: keyFile,
+    MINDLINK_ARTIFACT_SIGNING_KEY_ID: keyId,
   });
   const versions = [];
   for (const version of ['0.1.0', '0.2.0']) {
     execFileSync(process.execPath, ['apps/python-capabilities/scripts/build-artifact.mjs'], {
-      cwd: repo, env: { ...env, YUANPU_CAPABILITY_VERSION: version },
+      cwd: repo, env: { ...env, MINDLINK_CAPABILITY_VERSION: version },
       stdio: 'inherit', timeout: 300_000,
     });
     const directory = join(fixtureRoot, version);

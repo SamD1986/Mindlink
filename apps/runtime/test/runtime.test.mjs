@@ -13,7 +13,7 @@ import {
   AGENT_CONTRACT_VERSION,
   SCHEDULE_CONTRACT_VERSION,
   capabilityApprovalSigningPayload,
-} from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
 
 async function stopChild(child) {
   if (child.exitCode !== null || child.signalCode !== null) return;
@@ -23,7 +23,7 @@ async function stopChild(child) {
   });
 }
 
-test('runtime CLI prints the default greeting from the Yuanpu runtime kit', () => {
+test('runtime CLI prints the default greeting from the MindLink runtime kit', () => {
   const output = execFileSync(process.execPath, ['dist/index.cjs'], { encoding: 'utf8' });
   assert.equal(output.trim(), 'Hello, world!');
 });
@@ -54,7 +54,7 @@ test('optional Enterprise WeChat startup failure does not prevent Runtime readin
         provider: 'wecom',
         connectionId: 'imc_fixture',
         providerAccountRef: 'fixture-bot',
-        credentialRefs: { botSecret: 'keychain:yuanpu/im/imc_fixture/bot-secret' },
+        credentialRefs: { botSecret: 'keychain:mindlink/im/imc_fixture/bot-secret' },
         directMessagePolicy: 'paired-only',
         groupPolicy: 'allowlist-paired-sender-and-provider-at-mention',
         acceptedMessageTypes: ['text'],
@@ -62,7 +62,7 @@ test('optional Enterprise WeChat startup failure does not prevent Runtime readin
     }, 'credential_unavailable'],
   ]) {
     await context.test(name, async (scenario) => {
-      const home = await mkdtemp(join(tmpdir(), 'yuanpu-optional-wecom-'));
+      const home = await mkdtemp(join(tmpdir(), 'mindlink-optional-wecom-'));
       await mkdir(join(home, 'app', 'connections'), { recursive: true });
       await writeFile(
         join(home, 'app', 'connections', 'wecom.json'),
@@ -75,9 +75,9 @@ test('optional Enterprise WeChat startup failure does not prevent Runtime readin
         stdio: ['pipe', 'pipe', 'pipe'],
         env: {
           ...process.env,
-          YUANPU_HOME: home,
-          YUANPU_PYTHON_MCP_EXECUTABLE: '',
-          YUANPU_PYTHON_MCP_ROOT: '',
+          MINDLINK_HOME: home,
+          MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+          MINDLINK_PYTHON_MCP_ROOT: '',
         },
       });
       let stderr = '';
@@ -124,14 +124,14 @@ test('optional Enterprise WeChat startup failure does not prevent Runtime readin
 });
 
 test('connection management preserves the previous config when an enabled credential is unavailable', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-connection-management-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-connection-management-'));
   const token = randomBytes(32).toString('hex');
   const connectionId = `imc_${randomUUID()}`;
   const approvalPublicKey = generateKeyPairSync('ed25519').publicKey
     .export({ type: 'spki', format: 'der' }).toString('base64');
   const child = spawn(process.execPath, ['dist/index.cjs', '--serve', '--port', '0'], {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, YUANPU_HOME: home, YUANPU_PYTHON_MCP_EXECUTABLE: '', YUANPU_PYTHON_MCP_ROOT: '' },
+    env: { ...process.env, MINDLINK_HOME: home, MINDLINK_PYTHON_MCP_EXECUTABLE: '', MINDLINK_PYTHON_MCP_ROOT: '' },
   });
   child.stdin.end(`${JSON.stringify({ token, approvalPublicKey, parentPid: process.pid })}\n`);
   context.after(async () => {
@@ -200,7 +200,7 @@ test('connection management preserves the previous config when an enabled creden
 });
 
 test('runtime server exposes its protocol and greeting', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-runtime-test-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-runtime-test-'));
   const pluginsRoot = join(home, 'plugins');
   const installPath = join(pluginsRoot, 'installed', 'fixture', 'node_modules', 'pi-mcp-adapter');
   await mkdir(installPath, { recursive: true });
@@ -253,10 +253,10 @@ test('runtime server exposes its protocol and greeting', async (context) => {
     stdio: ['pipe', 'pipe', 'inherit'],
     env: {
       ...process.env,
-      YUANPU_HOME: home,
-      YUANPU_CAPABILITY_TRUST_ROOT_FILE: capabilityTrustRoot,
-      YUANPU_PYTHON_MCP_EXECUTABLE: '',
-      YUANPU_PYTHON_MCP_ROOT: '',
+      MINDLINK_HOME: home,
+      MINDLINK_CAPABILITY_TRUST_ROOT_FILE: capabilityTrustRoot,
+      MINDLINK_PYTHON_MCP_EXECUTABLE: '',
+      MINDLINK_PYTHON_MCP_ROOT: '',
     },
   });
   child.stdin.end(`${JSON.stringify({ token, approvalPublicKey, parentPid: process.pid })}\n`);

@@ -1,10 +1,10 @@
 import { randomBytes } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
-import { join, resolve, sep } from 'node:path';
+import { cpSync, existsSync, readFileSync } from 'node:fs';
+import { join, resolve, sep, basename } from 'node:path';
 
 import { app, BrowserWindow, dialog, ipcMain, Notification, shell, type IpcMainInvokeEvent } from 'electron';
 import { autoUpdater } from 'electron-updater';
-import type { NotificationNavigationTarget, RuntimeRecoveryNotice } from '@yuanpu-agent/protocol';
+import type { NotificationNavigationTarget, RuntimeRecoveryNotice } from '@mindlink-agent/protocol';
 
 import { BrowserGuestManager } from './browser-guest-manager.js';
 import { startBrowserControlService } from './browser-control-service.js';
@@ -30,15 +30,52 @@ function readEmoBrand(): { name: string; icon: string } {
       brand?: { name?: unknown; icon?: unknown };
     };
     const name = typeof config.brand?.name === 'string' && config.brand.name.trim()
-      ? config.brand.name : 'Yuanpu Agent';
+      ? config.brand.name : 'MindLink';
     const icon = typeof config.brand?.icon === 'string' ? resolve(iconRoot, config.brand.icon) : '';
     return { name, icon: icon.startsWith(`${iconRoot}${sep}`) && existsSync(icon) ? icon : '' };
   } catch {
-    return { name: 'Yuanpu Agent', icon: '' };
+    return { name: 'MindLink', icon: '' };
   }
 }
 
 const emoBrand = readEmoBrand();
+
+/**
+ * 旧版 Electron userData 目录（相对 appData）。全仓库唯一的旧名清单，只服务于一次性迁移：
+ * 复制到当前 userData，旧目录保留作备份。开发态用包名派生（@…-agent/desktop），
+ * 打包态用 productName 派生（Yuanpu Agent）。
+ */
+const LEGACY_USER_DATA_DIRS = ['@yuanpu-agent/desktop', 'Yuanpu Agent'];
+
+/**
+ * Electron 会在我们的代码之前就创建 userData 目录（至少一个 lockfile），
+ * 所以不能用“目录是否存在”判断是否已初始化，要看 Chromium 真正写下的状态文件。
+ */
+function looksInitialized(userDataDir: string): boolean {
+  return existsSync(join(userDataDir, 'Local State')) || existsSync(join(userDataDir, 'Preferences'));
+}
+
+function migrateLegacyUserData(): void {
+  const current = app.getPath('userData');
+  if (looksInitialized(current)) return;
+  for (const relative of LEGACY_USER_DATA_DIRS) {
+    const legacy = join(app.getPath('appData'), relative);
+    if (!looksInitialized(legacy)) continue;
+    try {
+      // lockfile 由当前进程持有，复制它会失败；其余内容整体搬到新目录，旧目录保留。
+      cpSync(legacy, current, {
+        recursive: true,
+        filter: (source) => basename(source) !== 'lockfile',
+      });
+    } catch (error) {
+      console.error('Legacy user data migration failed:',
+        error instanceof Error ? error.message : String(error));
+    }
+    return;
+  }
+}
+
+migrateLegacyUserData();
 
 function flushNotificationNavigation(): void {
   if (!mainWindow || mainWindow.webContents.isLoadingMainFrame() || !pendingNotificationTarget) return;
@@ -121,8 +158,8 @@ function createWindow(): void {
     if (!isTrustedRendererUrl(targetUrl, trustedRendererEntry)) event.preventDefault();
   });
 
-  if (!app.isPackaged && process.env.YUANPU_RENDERER_URL) {
-    trustedRendererEntry = process.env.YUANPU_RENDERER_URL;
+  if (!app.isPackaged && process.env.MINDLINK_RENDERER_URL) {
+    trustedRendererEntry = process.env.MINDLINK_RENDERER_URL;
     void window.loadURL(trustedRendererEntry);
   } else {
     const rendererFile = join(process.resourcesPath, 'app', 'index.html');
@@ -181,8 +218,8 @@ if (hasSingleInstanceLock) void app.whenReady().then(async () => {
   ipcMain.handle('runtime:greeting', trustedHandler((name: string) => runtime.greeting(name)));
   ipcMain.handle('runtime:chat', trustedHandler((message: string) => runtime.chat(message)));
   ipcMain.handle('runtime:chat:submit', trustedHandler((message: string, surface?: 'work' | 'assistant', conversationId?: string,
-    clientMessageId?: string, modelSelection?: import('@yuanpu-agent/protocol').AgentRunRequest['modelSelection'],
-    approvalMode?: import('@yuanpu-agent/protocol').AgentRunRequest['approvalMode']) =>
+    clientMessageId?: string, modelSelection?: import('@mindlink-agent/protocol').AgentRunRequest['modelSelection'],
+    approvalMode?: import('@mindlink-agent/protocol').AgentRunRequest['approvalMode']) =>
     runtime.submitDesktopMessage(message, surface, conversationId, clientMessageId, modelSelection, approvalMode)));
   ipcMain.handle('desktop:transcript', trustedHandler((surface: 'work' | 'assistant' | 'assistantArchive', conversationId?: string,
     beforeId?: string, limit?: number) => runtime.getDesktopTranscript(surface, conversationId, beforeId, limit)));
@@ -190,8 +227,8 @@ if (hasSingleInstanceLock) void app.whenReady().then(async () => {
   ipcMain.handle('work:conversations:create', trustedHandler((folderId?: string, requestId?: string) => runtime.createWorkConversation(folderId, requestId)));
   ipcMain.handle('work:conversations:select', trustedHandler((conversationId: string, previewArchived?: boolean) => runtime.selectWorkConversation(conversationId, previewArchived)));
   ipcMain.handle('work:conversations:update', trustedHandler((conversationId: string, patch: { title?: string; iconId?: string; archived?: boolean; tagIds?: string[] }) => runtime.updateWorkConversation(conversationId, patch)));
-  ipcMain.handle('work:move', trustedHandler((request: import('@yuanpu-agent/protocol').WorkMoveRequest) => runtime.moveWorkNode(request)));
-  ipcMain.handle('work:search', trustedHandler((input: import('@yuanpu-agent/protocol').WorkSearchQuery) => runtime.searchWorkConversations(input)));
+  ipcMain.handle('work:move', trustedHandler((request: import('@mindlink-agent/protocol').WorkMoveRequest) => runtime.moveWorkNode(request)));
+  ipcMain.handle('work:search', trustedHandler((input: import('@mindlink-agent/protocol').WorkSearchQuery) => runtime.searchWorkConversations(input)));
   ipcMain.handle('work:message-window', trustedHandler((conversationId: string, entryId: string, radius?: number) =>
     runtime.getWorkMessageWindow(conversationId, entryId, radius)));
   ipcMain.handle('work:trajectory', trustedHandler((conversationId: string) => runtime.getWorkTrajectory(conversationId)));
@@ -331,7 +368,7 @@ if (hasSingleInstanceLock) void app.whenReady().then(async () => {
       permissionState: () => 'unknown',
       create: (options) => new Notification(options) as unknown as NativeNotification,
     },
-    enabled: () => notificationsEnabled && process.env.YUANPU_NOTIFICATIONS_ENABLED !== '0',
+    enabled: () => notificationsEnabled && process.env.MINDLINK_NOTIFICATIONS_ENABLED !== '0',
     validateTarget: (target) => runtime.validateNotificationTarget(target),
     focus: focusMainWindow,
     navigate: (target) => {
@@ -349,8 +386,8 @@ if (hasSingleInstanceLock) void app.whenReady().then(async () => {
   });
 }).catch((error) => {
   const message = error instanceof Error ? error.message : String(error);
-  console.error('Yuanpu Runtime startup failed:', message);
-  dialog.showErrorBox('Yuanpu Runtime 无法启动', message);
+  console.error('MindLink Runtime startup failed:', message);
+  dialog.showErrorBox('MindLink Runtime 无法启动', message);
   app.quit();
 });
 

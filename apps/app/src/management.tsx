@@ -6,8 +6,8 @@ import type {
   ScheduleRecord,
   WecomConnectionList,
   WecomConnectionSummary,
-} from '@yuanpu-agent/protocol';
-import { SCHEDULE_CONTRACT_VERSION } from '@yuanpu-agent/protocol';
+} from '@mindlink-agent/protocol';
+import { SCHEDULE_CONTRACT_VERSION } from '@mindlink-agent/protocol';
 
 import './management.css';
 
@@ -122,7 +122,7 @@ export function ScheduleManagement({
   requestedScheduleId?: string;
   onOpenRun: (runId: string, conversationId: string, scheduleId: string) => void;
 }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const [schedules, setSchedules] = useState<ScheduleRecord[]>(desktop ? [] : [previewSchedule]);
   const [contacts, setContacts] = useState<SchedulePrivateContact[]>([]);
   const [workspaceId, setWorkspaceId] = useState('/work');
@@ -323,7 +323,7 @@ export function ScheduleManagement({
   return (
     <section className={`management-panel ${active ? '' : 'view-hidden'}`} aria-hidden={!active}>
       <header className="management-header">
-        <div><h1>定时任务</h1><p>让 YuanpuAgent 按计划执行任务，并分别查看执行与投递结果。</p></div>
+        <div><h1>定时任务</h1><p>让 MindLink 按计划执行任务，并分别查看执行与投递结果。</p></div>
         <div className="management-header-actions">
           <ManagementStatus kind={desktop ? 'good' : 'muted'}>{desktop ? 'Runtime 数据' : '浏览器演示数据'}</ManagementStatus>
           <button type="button" className="management-primary" onClick={beginCreate}>＋ 新建任务</button>
@@ -410,7 +410,7 @@ export function ScheduleManagement({
 }
 
 export function ConnectionManagement({ active }: { active: boolean }) {
-  const desktop = window.yuanpu;
+  const desktop = window.mindlink;
   const [data, setData] = useState<WecomConnectionList>(desktop
     ? { status: 'ok', connections: [] }
     : { status: 'ok', connections: [{ connectionId: 'preview-connection', enabled: true, pairedSenderCount: 1, groupEnabled: false, status: 'connected' }] });

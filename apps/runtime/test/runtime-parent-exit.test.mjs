@@ -18,7 +18,7 @@ async function waitForExit(pid, timeoutMs = 5_000) {
 }
 
 test('Runtime exits after its Electron parent is force-killed', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-parent-exit-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-parent-exit-'));
   context.after(() => rm(home, { recursive: true, force: true }));
   const parent = spawn(process.execPath, [harness, runtimeEntry, home], {
     stdio: ['ignore', 'pipe', 'inherit'],
@@ -47,7 +47,7 @@ test('Runtime exits after its Electron parent is force-killed', async (context) 
 });
 
 test('Runtime cannot become orphaned when its parent exits before readiness', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-parent-exit-before-ready-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-parent-exit-before-ready-'));
   context.after(() => rm(home, { recursive: true, force: true }));
   const parent = spawn(process.execPath, [harness, runtimeEntry, home, 'before-ready'], {
     stdio: ['ignore', 'pipe', 'inherit'],
@@ -66,16 +66,16 @@ test('Runtime cannot become orphaned when its parent exits before readiness', as
 });
 
 test('force-killing the Electron parent cleans Runtime, MCP root, and MCP descendant', async (context) => {
-  const home = await mkdtemp(join(tmpdir(), 'yuanpu-parent-exit-mcp-'));
+  const home = await mkdtemp(join(tmpdir(), 'mindlink-parent-exit-mcp-'));
   context.after(() => rm(home, { recursive: true, force: true }));
   const fixtureRoot = resolve(import.meta.dirname, 'fixtures');
   const parent = spawn(process.execPath, [harness, runtimeEntry, home, 'mcp'], {
     stdio: ['ignore', 'pipe', 'inherit'],
     env: {
       ...process.env,
-      YUANPU_PYTHON_MCP_EXECUTABLE: process.execPath,
-      YUANPU_PYTHON_MCP_ROOT: fixtureRoot,
-      YUANPU_PYTHON_MCP_ARGS: JSON.stringify([join(fixtureRoot, 'lifecycle-mcp.mjs')]),
+      MINDLINK_PYTHON_MCP_EXECUTABLE: process.execPath,
+      MINDLINK_PYTHON_MCP_ROOT: fixtureRoot,
+      MINDLINK_PYTHON_MCP_ARGS: JSON.stringify([join(fixtureRoot, 'lifecycle-mcp.mjs')]),
     },
   });
   context.after(() => parent.kill('SIGKILL'));

@@ -2,12 +2,12 @@ import { createServer } from 'node:http';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  ChannelRouter, PersistentAgentService, digestChannelValue, openYuanpuMetadataDatabase,
-} from '../../../packages/yuanpu-runtime/dist/index.mjs';
+  ChannelRouter, PersistentAgentService, digestChannelValue, openMindlinkMetadataDatabase,
+} from '../../../packages/mindlink-runtime/dist/index.mjs';
 import { getDesktopPrivateImRunSummary } from '../../runtime/src/runtime-host.ts';
 
 // This is a test-only Runtime replacement. It never resolves Keychain or starts the WeCom SDK.
-const home = process.env.YUANPU_HOME;
+const home = process.env.MINDLINK_HOME;
 const metricsPath = join(home, 'fixture-metrics.json');
 const portPath = join(home, 'fixture-port.json');
 const incoming = {
@@ -19,7 +19,7 @@ const incoming = {
 let bootstrap = '';
 for await (const chunk of process.stdin) bootstrap += chunk.toString();
 const { token } = JSON.parse(bootstrap.trim());
-const metadata = openYuanpuMetadataDatabase(join(home, 'workflows', 'automation.sqlite'));
+const metadata = openMindlinkMetadataDatabase(join(home, 'workflows', 'automation.sqlite'));
 let metrics;
 try { metrics = JSON.parse(readFileSync(metricsPath, 'utf8')); }
 catch { metrics = { executions: 0, sends: 0 }; }

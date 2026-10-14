@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { lstat, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { isAbsolute, join, resolve } from 'node:path';
-import type { AssistantDelegationBrief, AssistantDelegationRecord, AssistantDelegationResult } from '@yuanpu-agent/protocol';
+import type { AssistantDelegationBrief, AssistantDelegationRecord, AssistantDelegationResult } from '@mindlink-agent/protocol';
 import { assertNoSymlinkAncestors, canonicalRealDirectory } from './assistant-delegation-paths.js';
 
 export type DelegationBrief = AssistantDelegationBrief;
