@@ -3,10 +3,15 @@
  *
  * 窗口是无边框的：空白处必须 -webkit-app-region: drag 才能拖动窗口，
  * 而所有可点元素必须显式 no-drag，否则点击会被拖拽吃掉。
- * macOS 不渲染窗口按钮（用系统红绿灯），所以这里的按钮样式只在 win/linux 生效。
+ *
+ * 左侧让位：macOS 保留系统红绿灯（hiddenInset），它们压在窗口内容上，
+ * 所以标签条必须右移；Windows/Linux 没有系统按钮，只需一点内边距。
+ * 让位多少只在这里定义一次，主进程的 trafficLightPosition 要与它对齐
+ * （机核 window-controls.test.mjs 会交叉校验两者）。
  */
 
 .top-bar {
+  --top-bar-leading-inset: 8px;
   display: flex;
   align-items: stretch;
   min-height: 40px;
@@ -16,6 +21,11 @@
   user-select: none;
 }
 
+:root[data-os='mac'] .top-bar {
+  /* 红绿灯约 13–65px；留到 112px 与其后内容之间还有余量 */
+  --top-bar-leading-inset: 112px;
+}
+
 .top-bar-tabs {
   display: flex;
   align-items: stretch;
@@ -23,7 +33,7 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  padding: 4px 8px 0;
+  padding: 4px 8px 0 var(--top-bar-leading-inset);
 }
 
 .top-bar-tab {

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { detectOs } from '../shared/platform.js';
 
 /**
  * 窗口按钮（最小化/最大化/关闭）。
  *
  * - Windows/Linux：系统标题栏已被隐藏（`frame: false`），这里就是唯一的窗口按钮。
- * - macOS：系统红绿灯由 Electron 保留（`hiddenInset`），整块不渲染，避免两套控件。
+ * - macOS：系统红绿灯由 Electron 保留（`hiddenInset`），整块不渲染，避免两套控件；
+ *   顶栏左侧要按 `[data-os='mac']` 让位给红绿灯（见 styles.css）。
  * - 在普通浏览器里打开（vite 直开、没有 `window.mindlink`）时按钮可用但不做事，
  *   不抛错——渲染层的验收常常在浏览器里做。
  */
@@ -20,7 +22,7 @@ export function WindowControls() {
     return () => { disposed = true; unsubscribe?.(); };
   }, []);
 
-  if (isMacPlatform()) return null;
+  if (detectOs() === 'mac') return null;
 
   const invoke = (run: () => Promise<unknown> | undefined) => () => { void run(); };
 
@@ -60,8 +62,4 @@ export function WindowControls() {
       </button>
     </div>
   );
-}
-
-function isMacPlatform(): boolean {
-  return typeof navigator !== 'undefined' && /Mac/i.test(navigator.userAgent);
 }

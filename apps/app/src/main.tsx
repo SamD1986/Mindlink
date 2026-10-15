@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Shell } from './shell/index.js';
 import { applyFontPreference, readFontPreference } from './shared/font-preference.js';
+import { applyPlatformAttribute } from './shared/platform.js';
 import { applyThemePreference, readThemePreference } from './shared/theme-preference.js';
 import '../themes/tokens.css';
 
@@ -12,6 +13,8 @@ import '../themes/tokens.css';
 applyThemePreference(readThemePreference());
 applyFontPreference(readFontPreference());
 document.documentElement.dataset.mindlinkDesktop = window.mindlink ? 'true' : 'false';
+// 平台要让 CSS 知道：macOS 要为系统红绿灯让位，Windows 用自绘按钮。必须在首屏前设好。
+applyPlatformAttribute();
 
 // 根 Provider 只在这里挂一次，任何层都不得再装根 Provider。
 const queryClient = new QueryClient({

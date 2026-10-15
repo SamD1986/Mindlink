@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; font-family: var(--font-family, system-ui); color: var(--foreground); font-size: 13px; }
+  h3 { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
+  .hint { color: var(--muted-foreground); font-size: 12px; margin: 0 0 10px; }
+  .stack { display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+  .panel { width: 620px; max-width: 100%; }
+  .win { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--card); }
+  .bar { position: relative; height: 40px; display: flex; align-items: stretch; border-bottom: 1px solid var(--border); background: var(--card); }
+  .lights { position: absolute; left: 13px; top: 13px; display: flex; gap: 8px; }
+  .light { width: 12px; height: 12px; border-radius: 50%; }
+  .red { background: #ff5f57; } .yellow { background: #febc2e; } .green { background: #28c840; }
+  .tabs { display: flex; align-items: stretch; gap: 2px; padding: 4px 8px 0; }
+  .tabs.inset { padding-left: 112px; }
+  .tab { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; color: var(--muted-foreground); }
+  .tab.active { border-color: var(--border); background: var(--card); color: var(--foreground); }
+  .tab .x { opacity: .5; font-size: 11px; }
+  .btns { margin-left: auto; display: flex; align-items: stretch; }
+  .btn { width: 46px; display: grid; place-items: center; color: var(--muted-foreground); }
+  .body { height: 74px; background: var(--card); }
+  .bad { outline: 1px dashed #e5484d; outline-offset: -3px; }
+  .tag { font-size: 11px; color: var(--muted-foreground); margin-top: 6px; }
+  .ok { color: #30a46c; }
+  .warn { color: #e5484d; }
+  table { border-collapse: collapse; font-size: 12px; }
+  td { padding: 3px 10px 3px 0; vertical-align: top; }
+</style>
+</head>
+<body>
+<div class="stack">
+
+  <div class="panel">
+    <h3>① 现状：macOS 上红绿灯会压在第一个标签上 <span class="warn">（我这次重构丢了旧壳的让位）</span></h3>
+    <div class="win">
+      <div class="bar">
+        <span class="lights"><span class="light red"></span><span class="light yellow"></span><span class="light green"></span></span>
+        <span class="tabs bad">
+          <span class="tab active">Wiki <span class="x">✕</span></span>
+          <span class="tab">Skills &amp; tools <span class="x">✕</span></span>
+        </span>
+      </div>
+      <div class="body"></div>
+    </div>
+    <p class="tag">红黄绿占据 x≈13–65；标签条从 x≈8 开始 → 第一个标签被盖住，「Wiki」点不到、关闭叉也点不到。</p>
+  </div>
+
+  <div class="panel">
+    <h3>② 补上左内缩（还原旧壳口径）后</h3>
+    <div class="win">
+      <div class="bar">
+        <span class="lights"><span class="light red"></span><span class="light yellow"></span><span class="light green"></span></span>
+        <span class="tabs inset">
+          <span class="tab active">Wiki <span class="x">✕</span></span>
+          <span class="tab">Skills &amp; tools <span class="x">✕</span></span>
+        </span>
+      </div>
+      <div class="body"></div>
+    </div>
+    <p class="tag"><span class="ok">✓</span> 交通灯与标签条各占其位，右上没有重复的按钮（mac 上整块不渲染窗口按钮）。</p>
+  </div>
+
+  <div class="panel">
+    <h3>③ 对照：Windows 上同一个上栏</h3>
+    <div class="win">
+      <div class="bar">
+        <span class="tabs">
+          <span class="tab active">Wiki <span class="x">✕</span></span>
+          <span class="tab">Skills &amp; tools <span class="x">✕</span></span>
+        </span>
+        <span class="btns">
+          <span class="btn">–</span><span class="btn">▢</span><span class="btn">✕</span>
+        </span>
+      </div>
+      <div class="body"></div>
+    </div>
+    <p class="tag">无边框窗口（frame: false），没有系统按钮，三个按钮由我们自己画在最右；没有左侧让位需求。</p>
+  </div>
+
+  <div>
+    <table>
+      <tr><td>窗口形态</td><td>mac：<code>titleBarStyle: 'hiddenInset'</code>（标题栏隐藏、交通灯保留、圆角与阴影都在）<br>win：<code>frame: false</code>（完全无边框、按钮自绘）</td></tr>
+      <tr><td>拖拽</td><td>两边都靠 <code>-webkit-app-region: drag</code>（上栏空白处），标签与按钮已声明 no-drag</td></tr>
+      <tr><td>本机能否验证</td><td>不能：交通灯实际位置、绿点全屏、双击缩放、Dock 图标、首次打开的 Gatekeeper 拦截</td></tr>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

@@ -146,7 +146,12 @@ tasks:
         - "标签状态目前由 top-bar 自持；UI-05/UI-09 接入后提到 shell 统一持有（跨栏协作不许栏之间互相 import）"
         - "标签文案是占位常量（Work/Assistant），字段已按 labelKey 设计，UI-15 抽语言包时机械替换"
         - "窗口按钮用自绘 SVG（AppIcon 里没有最小化/最大化/关闭字形），不扩展共享图标资产"
-      note: "未并入 main"
+        - "macOS 让位（2026-10-15 补）：平台判定统一在 shared/platform.ts，首屏前写 <html data-os>；CSS 在 [data-os='mac'] 下把标签条左内缩设为 112px（win/linux 为 8px）；主进程 hiddenInset 配 trafficLightPosition { x: 16, y: 14 } 与之对齐。旧壳原本有同样处理（.window-controls-space 100px + chat-header 左内缩 112px），重构时一度丢掉，已补回"
+      pitfalls:
+        - "跨层常量必须机核：'主进程放灯的位置'与'渲染层预留的让位宽度'分处两个文件，靠人眼对不上 —— 本次就是靠交叉校验发现旧让位被丢掉的，现在每次测试都会断言 x+52 <= 让位宽度且灯在上栏里垂直居中"
+      design_notes:
+        - ".tasks/ui-rebuild/design/mac-topbar.html：mac 让位前后的上栏示意图（含 Windows 对照），用于讲解而非真机截图"
+      note: "未并入 main；macOS 红绿灯实际位置与全屏/双击缩放/Dock 图标仍无法在 Windows 本机验证"
 
   - id: UI-05
     title: "左栏内容：Wiki / 技能与工具 / 设置 + pin 区"

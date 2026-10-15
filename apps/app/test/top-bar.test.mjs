@@ -25,7 +25,7 @@ test('window controls call the bridge and stay hidden on macOS', async () => {
   for (const method of ['minimizeWindow', 'toggleMaximizeWindow', 'closeWindow', 'isWindowMaximized', 'onWindowMaximizeChanged']) {
     assert.ok(source.includes(method), `window controls never call ${method}`);
   }
-  assert.ok(source.includes('if (isMacPlatform()) return null;'), 'macOS would render a duplicate control set');
+  assert.ok(source.includes("if (detectOs() === 'mac') return null;"), 'macOS would render a duplicate control set');
   for (const action of ['minimize', 'toggle-maximize', 'close']) {
     assert.ok(source.includes(`data-window-action="${action}"`), `${action} is not addressable for probes`);
   }

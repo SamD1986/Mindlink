@@ -54,3 +54,23 @@ test('the main process forwards maximize state changes to the renderer', async (
   assert.ok(main.includes("window.on('unmaximize'"), 'unmaximize is not observed');
   assert.ok(main.includes("webContents.send('window:maximize-changed'"), 'the renderer is never told');
 });
+
+test('the macOS traffic lights stay inside the inset the renderer reserves for them', async () => {
+  // 跨层不变量：主进程放灯的位置必须落在渲染层预留的让位宽度内，
+  // 否则红绿灯会压住上栏的标签条（本次就是靠这条发现旧让位被重构丢掉了）。
+  const main = (await read('../src/main.ts')).replace(/\s+/g, ' ');
+  const position = main.match(/titleBarStyle: 'hiddenInset' as const, trafficLightPosition: \{ x: (\d+), y: (\d+) \}/);
+  assert.ok(position, 'macOS 红绿灯没有设定位置（trafficLightPosition）');
+  const [, x, y] = position.map(Number);
+
+  const css = await read('../../app/src/top-bar/styles.css');
+  const insetMatch = css.match(/\[data-os='mac'\] \.top-bar \{([^}]*)\}/);
+  assert.ok(insetMatch, '渲染层缺少 macOS 让位规则');
+  const inset = Number(insetMatch[1].match(/--top-bar-leading-inset:\s*(\d+)px/)[1]);
+  const barHeight = Number(css.match(/\.top-bar \{([^}]*)\}/)[1].match(/min-height:\s*(\d+)px/)[1]);
+
+  // 三个灯各 12px、间距 8px：总宽约 52px
+  assert.ok(x + 52 <= inset, `红绿灯占 ${x}–${x + 52}px，超出渲染层预留的 ${inset}px`);
+  // 灯垂直居中于上栏（容差 2px）
+  assert.ok(Math.abs(y + 6 - barHeight / 2) <= 2, `${barHeight}px 高的上栏里红绿灯没有垂直居中（y=${y}）`);
+});

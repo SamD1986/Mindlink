@@ -125,8 +125,10 @@ function createWindow(): void {
     backgroundColor: '#ffffff',
     // 无边框窗口：Windows/Linux 隐藏系统标题栏，由上栏自绘标签页与窗口按钮；
     // macOS 保留系统红绿灯（hiddenInset），避免出现两套控件。
+    // trafficLightPosition 让三点在 40px 高、内容左内缩 112px 的上栏里垂直居中：
+    // 渲染层按 [data-os='mac'] 预留同样的让位宽度（top-bar/styles.css）。
     ...(process.platform === 'darwin'
-      ? { titleBarStyle: 'hiddenInset' as const }
+      ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 16, y: 14 } }
       : { frame: false }),
     title: emoBrand.name,
     ...(emoBrand.icon ? { icon: emoBrand.icon } : {}),

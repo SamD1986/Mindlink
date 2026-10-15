@@ -13,7 +13,7 @@
 - ✔ 网格线 — 单元格 10.52x12.85px = 画布 1010x694 ÷ 96x54，随画布等比缩放
 - ✔ 画布截图 — D:\MindLink\.tasks\ui-rebuild\evidence\shell-and-workbench\workbench-layout.png
 - ✔ 右栏会话按钮 — aria-pressed 随开合切换
-- ✔ 常驻 LOGO 与下栏槽位 — logo=http://127.0.0.1:64092/assets/mindlink-seal-DFD5AeNR.png，naturalWidth>0
+- ✔ 常驻 LOGO 与下栏槽位 — logo=http://127.0.0.1:59619/assets/mindlink-seal-DFD5AeNR.png，naturalWidth>0
 - ✔ pin 持久化 — localStorage=["wiki"]，重载后 pin 数=1
 - ✔ 最大化 — 3072x1680 = 屏幕可用区，按钮 aria-label=Restore window
 - ✔ 还原 — 回到 1136px 宽，isWindowMaximized=false
