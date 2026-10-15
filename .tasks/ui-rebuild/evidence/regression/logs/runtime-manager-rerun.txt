@@ -1,0 +1,111 @@
+===== RUN 1 =====
+✖ deduplicates concurrent starts and performs a bounded graceful stop (109.9612ms)
+✔ loads a validated notification run target through the authenticated Runtime bridge (83.4221ms)
+✔ management bridge uses authenticated schedule routes and handles empty revoke responses (93.066ms)
+✔ stop cancels a start that has not spawned its Runtime yet (1.2403ms)
+✔ restarts a crashed Runtime once without overlapping instances (235.3378ms)
+✔ stops restarting after the bounded crash budget is exhausted (949.1782ms)
+✔ force terminates a Runtime that ignores the graceful shutdown deadline (89.1101ms)
+✔ rejects an incompatible Runtime protocol with an explicit error and no restart loop (189.3547ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1812.4708
+
+✖ failing tests:
+
+test at apps\desktop\test\runtime-manager.test.mjs:47:1
+✖ deduplicates concurrent starts and performs a bounded graceful stop (109.9612ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///D:/MindLink/apps/desktop/test/runtime-manager.test.mjs:55:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+RUN1_EXIT=1
+===== RUN 2 =====
+✖ deduplicates concurrent starts and performs a bounded graceful stop (121.475ms)
+✔ loads a validated notification run target through the authenticated Runtime bridge (102.8633ms)
+✔ management bridge uses authenticated schedule routes and handles empty revoke responses (122.1508ms)
+✔ stop cancels a start that has not spawned its Runtime yet (1.2804ms)
+✔ restarts a crashed Runtime once without overlapping instances (260.0857ms)
+✔ stops restarting after the bounded crash budget is exhausted (940.7874ms)
+✔ force terminates a Runtime that ignores the graceful shutdown deadline (85.2071ms)
+✔ rejects an incompatible Runtime protocol with an explicit error and no restart loop (191.6143ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1886.2057
+
+✖ failing tests:
+
+test at apps\desktop\test\runtime-manager.test.mjs:47:1
+✖ deduplicates concurrent starts and performs a bounded graceful stop (121.475ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///D:/MindLink/apps/desktop/test/runtime-manager.test.mjs:55:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+RUN2_EXIT=1
+===== RUN 3 =====
+✖ deduplicates concurrent starts and performs a bounded graceful stop (113.085ms)
+✔ loads a validated notification run target through the authenticated Runtime bridge (90.3685ms)
+✔ management bridge uses authenticated schedule routes and handles empty revoke responses (89.8578ms)
+✔ stop cancels a start that has not spawned its Runtime yet (1.1723ms)
+✔ restarts a crashed Runtime once without overlapping instances (247.63ms)
+✔ stops restarting after the bounded crash budget is exhausted (946.8592ms)
+✔ force terminates a Runtime that ignores the graceful shutdown deadline (85.9064ms)
+✔ rejects an incompatible Runtime protocol with an explicit error and no restart loop (208.0394ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1841.6054
+
+✖ failing tests:
+
+test at apps\desktop\test\runtime-manager.test.mjs:47:1
+✖ deduplicates concurrent starts and performs a bounded graceful stop (113.085ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///D:/MindLink/apps/desktop/test/runtime-manager.test.mjs:55:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+RUN3_EXIT=1

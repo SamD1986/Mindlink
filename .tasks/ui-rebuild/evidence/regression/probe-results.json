@@ -1,0 +1,203 @@
+{
+  "head": "322f1e46d11cd70b92053db4e9d0282ec55e4b14",
+  "results": [
+    {
+      "id": "A1",
+      "name": "四栏外壳与画布在 1280x800 下不破版",
+      "status": "pass",
+      "detail": "vw=1280 vh=800 左46 右46 上36 下36 画布1188x728，无滚动条"
+    },
+    {
+      "id": "A2",
+      "name": "四栏外壳与画布在 1920x1080 下不破版",
+      "status": "pass",
+      "detail": "vw=1920 vh=1080 左46 右46 上36 下36 画布1828x1008，无滚动条"
+    },
+    {
+      "id": "A3",
+      "name": "尺寸往复回 1280x800 仍稳定",
+      "status": "pass",
+      "detail": "vw=1280 vh=800 左46 右46 上36 下36 画布1188x728，无滚动条"
+    },
+    {
+      "id": "B1",
+      "name": "空画布显示品牌字标（空态欢迎区）+ 背景层/纹理",
+      "status": "pass",
+      "detail": "背景层+宣纸纹理+空态品牌字标均在（text=\"元朴思联元朴思联\"）"
+    },
+    {
+      "id": "B2",
+      "name": "右栏常驻印章图片真的加载",
+      "status": "pass",
+      "detail": "印章 http://127.0.0.1:50186/assets/yuanpu-seal-DFD5AeNR.png naturalWidth>0"
+    },
+    {
+      "id": "B3",
+      "name": "下栏不吞事件（栏 pointer-events:none + 槽位 auto）",
+      "status": "pass",
+      "detail": "栏=none 槽位=auto"
+    },
+    {
+      "id": "C1",
+      "name": "左栏四个固定入口齐（home/wiki/skills/settings）",
+      "status": "pass",
+      "detail": "入口=home/wiki/skills/settings；另有创作台入口"
+    },
+    {
+      "id": "C2",
+      "name": "点 wiki 布局渲染 widget；点 home 回空态",
+      "status": "pass",
+      "detail": "wiki 渲染 4 个 widget:[work.tree, note.text, viewer.files, note.text]；home 回空态"
+    },
+    {
+      "id": "C3",
+      "name": "布局切换 wiki→skills→settings 都渲染出 widget",
+      "status": "pass",
+      "detail": "wiki:4 / skills:2 / settings:1"
+    },
+    {
+      "id": "D1",
+      "name": "左栏「技能」入口打开的是真技能页（技能列表/管理）",
+      "status": "fail",
+      "detail": "左栏 skills 打开的是占位布局而非技能页：widgets=[\"note.text\",\"viewer.files\"] 文本=\"Notes\n0,0 · 56×54\nFiles\n56,0 · 40×54\""
+    },
+    {
+      "id": "D2",
+      "name": "左栏「设置」入口打开的是真设置页（字体/主题/快捷键）",
+      "status": "fail",
+      "detail": "左栏 settings 打开的是占位布局而非设置页：widgets=[\"note.text\"] 文本=\"Notes\n12,8 · 72×38\""
+    },
+    {
+      "id": "D3",
+      "name": "定时任务页在界面上可达",
+      "status": "fail",
+      "detail": "界面找不到任何定时任务入口/页面"
+    },
+    {
+      "id": "D4",
+      "name": "企微连接 / Tailscale 设置项在活代码里可达",
+      "status": "pass",
+      "detail": "企微/Tailscale 实现文件在；界面上当前未出现相关文本（页面未挂载，见 D1-D3 同类问题）"
+    },
+    {
+      "id": "E1",
+      "name": "chatbox 能开能关，浮层在画布之上（z-index≥1000）",
+      "status": "pass",
+      "detail": "开(z-index=1000)→关→移除"
+    },
+    {
+      "id": "E2",
+      "name": "工作面关键件在：消息列表/输入区/附件区/空态欢迎/发送键",
+      "status": "pass",
+      "detail": "消息列表/输入区/附件区/发送键/空态欢迎全在"
+    },
+    {
+      "id": "E3",
+      "name": "滚动区存在且可滚动（.conversation overflow 可滚）",
+      "status": "fail",
+      "detail": "会话区 overflowY=visible"
+    },
+    {
+      "id": "G1",
+      "name": "创作台能开（左栏 → 我的 Widget），画布 mode=widget-studio",
+      "status": "pass",
+      "detail": "创作台打开，mode=widget-studio"
+    },
+    {
+      "id": "G2",
+      "name": "校验拒非法 DSL（未知原子整份拒掉 + 列出错误）",
+      "status": "pass",
+      "detail": "拒收并列出 1 条错误：\"未知原子：EvilAtom\""
+    },
+    {
+      "id": "G3",
+      "name": "合法 DSL → 预览；命名保存 → 进库；固定到左栏 → pin 出现",
+      "status": "pass",
+      "detail": "预览在；保存进库(id=regression-widget)；pin 到左栏 1 项；localStorage 键=[\"mindlink.user-widgets\"]"
+    },
+    {
+      "id": "G4",
+      "name": "自建 widget 可打开（画布 mode=user-widget，渲染用户 DSL 文本）",
+      "status": "pass",
+      "detail": "mode=user-widget，用户 DSL 文本已渲染"
+    },
+    {
+      "id": "G5",
+      "name": "导入/导出区在（创作台 IO 段）",
+      "status": "pass",
+      "detail": "导入文件/粘贴区/导入钮/导出钮全在"
+    },
+    {
+      "id": "H1",
+      "name": "语言包是恒等映射（value===key，t() 取值即原字）",
+      "status": "pass",
+      "detail": "884 条全部 value===key"
+    },
+    {
+      "id": "H2",
+      "name": "界面真实渲染的中文与 zh-CN.json 的键逐字相等（无变字/丢字）",
+      "status": "fail",
+      "detail": "界面串与语言包不一致：stop(DOM 缺失)；workList(DOM 缺失)；copy(DOM 缺失)\n+ actual - expected\n\n+ [\n+   'stop(DOM 缺失)',\n+   'workList(DOM 缺失)',\n+   'copy(DOM 缺失)'\n+ ]\n- []\n"
+    },
+    {
+      "id": "H3",
+      "name": "语言包无孤儿键（抽样键在活代码里都有 t() 调用点）",
+      "status": "pass",
+      "detail": "抽样 8 个键都有 t() 引用点"
+    },
+    {
+      "id": "I1",
+      "name": "界面找不到助理入口/面板/专业任务授权卡片",
+      "status": "pass",
+      "detail": "界面无「专业任务授权/保存到记忆/保存到知识库/绑定助理会话/助理会话」"
+    },
+    {
+      "id": "I2",
+      "name": "助理组件/模块已从活代码移除",
+      "status": "pass",
+      "detail": "6 个助理件均已不存在"
+    },
+    {
+      "id": "K1",
+      "name": "夹具：发送消息 → 提交被调用一次且消息进列表",
+      "status": "fail",
+      "detail": "桥夹具安装失败：fail:Cannot redefine property: mindlink（contextBridge 对象冻结且不可替换）\n+ actual - expected\n\n+ 'fail:Cannot redefine property: mindlink'\n- 'ok'\n"
+    },
+    {
+      "id": "K2",
+      "name": "夹具：能力审批卡片出现 → 点「允许这次操作」→ 决定回传 approved",
+      "status": "fail",
+      "detail": "桥夹具安装失败：fail:Cannot redefine property: mindlink（contextBridge 对象冻结且不可替换）\n+ actual - expected\n\n+ 'fail:Cannot redefine property: mindlink'\n- 'ok'\n"
+    },
+    {
+      "id": "K3",
+      "name": "夹具：运行中停止键 → cancelAgentRun 被调用",
+      "status": "fail",
+      "detail": "桥夹具安装失败：fail:Cannot redefine property: mindlink（contextBridge 对象冻结且不可替换）\n+ actual - expected\n\n+ 'fail:Cannot redefine property: mindlink'\n- 'ok'\n"
+    },
+    {
+      "id": "K4",
+      "name": "夹具：轮询故障 → 运行恢复卡出现 → 点「重新获取状态」恢复",
+      "status": "fail",
+      "detail": "桥夹具安装失败：fail:Cannot redefine property: mindlink（contextBridge 对象冻结且不可替换）\n+ actual - expected\n\n+ 'fail:Cannot redefine property: mindlink'\n- 'ok'\n"
+    },
+    {
+      "id": "K5",
+      "name": "夹具：加载更早消息按钮出现且点击后消息数增加",
+      "status": "fail",
+      "detail": "桥夹具安装失败：fail:Cannot redefine property: mindlink（contextBridge 对象冻结且不可替换）\n+ actual - expected\n\n+ 'fail:Cannot redefine property: mindlink'\n- 'ok'\n"
+    },
+    {
+      "id": "K6",
+      "name": "夹具：工作会话树/归档面板可开",
+      "status": "fail",
+      "detail": "找不到工作列表开合按钮"
+    },
+    {
+      "id": "K7",
+      "name": "夹具：消息复制按钮与运行详情容器在（消息渲染）",
+      "status": "fail",
+      "detail": "消息区没有渲染任何消息"
+    }
+  ]
+}

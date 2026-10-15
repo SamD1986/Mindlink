@@ -1,0 +1,22 @@
+### grep: 活代码是否挂载技能/设置/定时页（应为空=未挂载）
+apps/app/src/legacy-pages/management.tsx:117:export function ScheduleManagement({
+apps/app/src/legacy-pages/modules/settings.tsx:41:export function SettingsPage({ active, configRoot }: { active: boolean; configRoot: string }) {
+apps/app/src/legacy-pages/modules/skills.tsx:368:export function SkillPage({ active }: { active: boolean }) {
+--- exit=0 (1=无匹配)
+
+### grep: surface === 'assistant' / !== 'work' 残留（应为空）
+--- exit=1
+
+### grep: 活代码 助理/助手
+apps/app/src/chatbox/chat.tsx:909:          text: t("这是浏览器预览回复。通过桌面应用启动后，消息会交给本地助理处理。") }]);
+apps/app/src/components/content-viewers/session-trajectory.tsx:6:  user: t("用户"), assistant: t("助手"), tool: t("工具"), model: t("模型"), context: t("上下文"), subagent: t("子智能体"),
+apps/app/src/components/content-viewers/session-trajectory.tsx:113:          <span className="session-row-kind">{trajectory.live.text ? t("助手") : t("思考")}</span>
+apps/app/src/legacy-pages/management.tsx:549:            <div className="management-detail-heading"><div><h2>{mode === 'create' ? t("添加企业微信连接") : t("连接配置")}</h2><p>{t("个人助手默认仅允许已配对私聊，群聊保持关闭。")}</p></div><button type="button" onClick={() => setMode('detail')}>{t("取消编辑")}</button></div>
+
+### grep: 动态 import/eval/new Function（workbench+widgets+chatbox 应为空）
+apps/app/src/components/widgets/user-widget-format.ts:6: *      永不 new Function、永不动态求值，也不引入任意模块路径。JSON 文本里就算写着
+--- exit=0
+
+### node --test widgets
+widget-dsl.test.mjs
+widget-store.test.mjs

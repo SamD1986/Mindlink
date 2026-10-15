@@ -1,0 +1,23 @@
+[WARN] Unsupported engine: wanted: {"node":">=24.15.0 <25"} (current: {"node":"v24.14.0","pnpm":"11.22.0"})
+$ pnpm -r --filter "@mindlink-agent/*" --filter "!@mindlink-agent/monorepo" run typecheck
+.                                        | [WARN] Unsupported engine: wanted: {"node":">=24.15.0 <25"} (current: {"node":"v24.14.0","pnpm":"11.22.0"})
+apps/runtime                             | [WARN] Unsupported engine: wanted: {"node":">=24.15.0 <25"} (current: {"node":"v24.14.0","pnpm":"11.22.0"})
+packages/mindlink-assistant              | [WARN] Unsupported engine: wanted: {"node":">=24.15.0 <25"} (current: {"node":"v24.14.0","pnpm":"11.22.0"})
+Scope: 8 of 21 workspace projects
+packages/mindlink-protocol typecheck$ tsc -p tsconfig.json --noEmit
+packages/mindlink-sandbox typecheck$ tsc -p tsconfig.json --noEmit
+packages/mindlink-sandbox typecheck: Done
+packages/mindlink-protocol typecheck: Done
+packages/mindlink-assistant typecheck$ tsc -p tsconfig.json --noEmit
+apps/app typecheck$ tsc -p tsconfig.json --noEmit
+apps/desktop typecheck$ tsc -p tsconfig.json --noEmit
+packages/mindlink-runtime typecheck$ tsc -p tsconfig.json --noEmit
+apps/desktop typecheck: Done
+server typecheck$ tsc -p tsconfig.json --noEmit
+server typecheck: Done
+packages/mindlink-assistant typecheck: Done
+apps/app typecheck: Done
+packages/mindlink-runtime typecheck: Done
+apps/runtime typecheck$ node scripts/generate-assistant-skills.mjs && tsc -p tsconfig.json --noEmit
+apps/runtime typecheck: Done
+TYPECHECK_EXIT=0

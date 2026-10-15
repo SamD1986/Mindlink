@@ -1,0 +1,8 @@
+{
+  "platform": "win32",
+  "sigtermHandlerRan": false,
+  "eventsBeforeKill": "\"\"",
+  "eventsAfterKill": "\"\"",
+  "childExitCode": null,
+  "childSignalCode": "SIGTERM"
+}
