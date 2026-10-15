@@ -1,4 +1,5 @@
 import { normalizeHotkeyBinding } from '@mindlink-agent/protocol';
+import { t } from '../../languages/index.js';
 
 export interface HotkeyKeyEvent {
   code: string;
@@ -24,10 +25,10 @@ export function bindingFromKeyEvent(event: HotkeyKeyEvent, mac = isMacHotkeyPlat
 }
 
 export function hotkeyLabel(binding: string | null, mac = isMacHotkeyPlatform()): string {
-  if (binding === null) return '未设置';
+  if (binding === null) return t("未设置");
   const labels: Record<string, string> = {
     Mod: mac ? '⌘' : 'Ctrl', Ctrl: mac ? '⌃' : 'Meta', Alt: mac ? '⌥' : 'Alt', Shift: '⇧',
-    Escape: 'Esc', Space: '空格', Enter: '↵', Tab: 'Tab', Backspace: '⌫', Delete: 'Delete',
+    Escape: 'Esc', Space: t("空格"), Enter: '↵', Tab: 'Tab', Backspace: '⌫', Delete: 'Delete',
     ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→',
   };
   return binding.split('+').map((part) => labels[part] ?? part.replace(/^Key/, '').replace(/^Digit/, '')).join(mac ? '' : ' + ');

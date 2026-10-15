@@ -1,3 +1,4 @@
+import { t } from '../../languages/index.js';
 export type SavedContentKind = 'memory' | 'knowledge';
 
 export type SavedContent = {
@@ -30,7 +31,7 @@ export function isSavedContent(kind: SavedContentKind, surface: SavedContent['su
 }
 
 export function saveContent(kind: SavedContentKind, surface: SavedContent['surface'], text: string): void {
-  if (!text.trim()) throw new Error('空回复不能保存。');
+  if (!text.trim()) throw new Error(t("空回复不能保存。"));
   const current = readSavedContent();
   if (current.some((item) => item.kind === kind && item.surface === surface && item.text === text)) return;
   const next: SavedContent[] = [{ id: crypto.randomUUID(), kind, surface, text, savedAt: new Date().toISOString() }, ...current];

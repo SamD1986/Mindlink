@@ -8,6 +8,7 @@ import {
   type WorkbenchTab,
   type WorkspaceState,
 } from './workspace-model.js';
+import { t } from '../languages/index.js';
 
 export type Workspace = {
   state: WorkspaceState;
@@ -51,6 +52,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
 export function useWorkspace(): Workspace {
   const value = useContext(WorkspaceContext);
-  if (!value) throw new Error('useWorkspace 必须在 shell 的 WorkspaceProvider 内使用');
+  if (!value) throw new Error(t("useWorkspace 必须在 shell 的 WorkspaceProvider 内使用"));
   return value;
 }

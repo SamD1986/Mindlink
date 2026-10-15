@@ -23,7 +23,8 @@ import type {
 } from '@mindlink-agent/protocol';
 import { effectiveHotkeyBinding } from '@mindlink-agent/protocol';
 import mindlinkSeal from '../../themes/assets/mindlink-seal.png';
-import { emo } from '../_legacy-ui/emo.js';
+import { PROJECT_SLOGAN, PROJECT_SLOGAN_EN, PROJECT_SLOGAN_ZH } from '../shared/brand.js';
+import { emo } from '../legacy-pages/emo.js';
 
 import { AppIcon } from '../components/composites/app-icon.js';
 import { bindingFromKeyEvent } from '../components/composites/hotkeys.js';
@@ -34,8 +35,8 @@ import { elapsedLabel, ReplyRunDetails } from '../components/composites/reply-ru
 import { AvatarMark } from '../components/composites/avatar-mark.js';
 import { resizePanel } from '../components/composites/panel-resize.js';
 import { PageToolbar } from '../components/composites/page-toolbar.js';
-import { AssistantHome } from '../_legacy-ui/modules/assistant-home.js';
-import { WorkTree } from '../_legacy-ui/modules/work-tree.js';
+import { AssistantHome } from '../legacy-pages/modules/assistant-home.js';
+import { WorkTree } from '../legacy-pages/modules/work-tree.js';
 import { folderPath } from '../components/widgets/work-tree/work-tree-model.js';
 import { cacheReplyRun, findReplyRun, type ReplyRunInfo } from '../components/composites/reply-run-cache.js';
 import { normalizeWorkspacePath } from '../components/composites/work-file-links.js';
@@ -43,6 +44,7 @@ import { FileWorkspace, ImagePreviewPanel, type ImagePreviewRequest } from '../c
 import { ReviewPanel } from '../components/content-viewers/review/review-panel.js';
 import { SessionTrajectoryViewer, SubagentViewer } from '../components/content-viewers/session-trajectory.js';import type { ViewerBrowserHost } from '../components/content-viewers/host/browser-host.js';
 import type { ViewerFileHost } from '../components/content-viewers/host/file-host.js';
+import { t } from '../languages/index.js';
 
 type ToolState = { name: string; status: 'started' | 'completed' | 'failed' };
 type LiveTool = NonNullable<SessionTrajectory['live']>['tools'][number];
@@ -67,9 +69,9 @@ type ActivityEvent = {
 };
 
 const thinkingLevels = [
-  { value: 'low', label: '低' },
-  { value: 'medium', label: '中' },
-  { value: 'high', label: '高' },
+  { value: 'low', label: t("低") },
+  { value: 'medium', label: t("中") },
+  { value: 'high', label: t("高") },
 ] as const;
 
 function threeStepThinking(level?: string): 'low' | 'medium' | 'high' {
@@ -80,83 +82,83 @@ function threeStepThinking(level?: string): 'low' | 'medium' | 'high' {
 
 function runStatusLabel(status: AgentRunRecord['status']): string {
   return {
-    queued: '等待执行',
-    running: '正在执行',
-    waiting_approval: '等待授权',
-    succeeded: '已完成',
-    failed: '执行失败',
-    cancelled: '已取消',
-    interrupted: '执行中断',
-    result_unknown: '结果未知',
+    queued: t("等待执行"),
+    running: t("正在执行"),
+    waiting_approval: t("等待授权"),
+    succeeded: t("已完成"),
+    failed: t("执行失败"),
+    cancelled: t("已取消"),
+    interrupted: t("执行中断"),
+    result_unknown: t("结果未知"),
   }[status];
 }
 
 function toolLabel(name: string): string {
-  if (/subagent/i.test(name)) return '子智能体';
-  if (/search|fetch|web/i.test(name)) return 'Web 搜索';
-  if (/read|write|edit|patch/i.test(name)) return '文件';
+  if (/subagent/i.test(name)) return t("子智能体");
+  if (/search|fetch|web/i.test(name)) return t("Web 搜索");
+  if (/read|write|edit|patch/i.test(name)) return t("文件");
   if (/bash|shell|terminal/i.test(name)) return 'Bash';
-  if (/code|python/i.test(name)) return '代码执行';
+  if (/code|python/i.test(name)) return t("代码执行");
   if (/capability|mcp/i.test(name)) return 'MCP';
-  return '工具调用';
+  return t("工具调用");
 }
 
 function capabilityName(id: string): string {
   if (!id.startsWith('ypcap:')) return id.replaceAll('_', ' ');
   const encoded = id.split(':')[2];
-  if (!encoded) return '外部能力';
+  if (!encoded) return t("外部能力");
   try {
     const padded = encoded.replaceAll('-', '+').replaceAll('_', '/').padEnd(Math.ceil(encoded.length / 4) * 4, '=');
     const name = new TextDecoder().decode(Uint8Array.from(atob(padded), (char) => char.charCodeAt(0)));
-    if (!/^[\w.-]{1,80}$/.test(name)) return '外部能力';
-    return ({ browser_evaluate: '在网页中执行操作', browser_snapshot: '查看网页状态',
-      browser_navigate: '打开网页', web_search: '搜索网页', fetch_content: '读取网页内容' } as Record<string, string>)[name]
+    if (!/^[\w.-]{1,80}$/.test(name)) return t("外部能力");
+    return ({ browser_evaluate: t("在网页中执行操作"), browser_snapshot: t("查看网页状态"),
+      browser_navigate: t("打开网页"), web_search: t("搜索网页"), fetch_content: t("读取网页内容") } as Record<string, string>)[name]
       ?? name.replaceAll('_', ' ');
   } catch {
-    return '外部能力';
+    return t("外部能力");
   }
 }
 
 function capabilitySource(source: string): string {
-  if (source === 'builtin.host.browser') return '浏览器';
-  if (source.startsWith('builtin.web')) return '网页';
-  if (source.startsWith('builtin.')) return '内置能力';
+  if (source === 'builtin.host.browser') return t("浏览器");
+  if (source.startsWith('builtin.web')) return t("网页");
+  if (source.startsWith('builtin.')) return t("内置能力");
   return source;
 }
 
 function processPresentation(tool: LiveTool): { icon: 'file' | 'edit' | 'globe' | 'code' | 'lightning' | 'skills' | 'assistant' | 'briefcase'; title: string; detail: string } {
   const rawDetail = tool.summary.includes(' · ') ? tool.summary.slice(tool.summary.indexOf(' · ') + 3).trim() : '';
   const detail = rawDetail.startsWith('ypcap:') ? capabilityName(rawDetail) : rawDetail;
-  if (tool.category === '子智能体') return { icon: 'assistant', title: '子智能体正在协作', detail };
-  if (tool.category === 'Web 搜索') return { icon: 'globe', title: '搜索网页', detail };
-  if (tool.category === 'Skill') return { icon: 'skills', title: '使用技能', detail };
-  if (tool.category === 'MCP') return { icon: 'briefcase', title: '调用外部能力', detail };
-  if (tool.category === '浏览器') return { icon: 'globe', title: '浏览器操作', detail };
-  if (tool.category === '代码执行') return { icon: 'code', title: '运行代码', detail };
-  if (tool.category === 'Bash') return { icon: 'code', title: '执行命令', detail };
-  if (tool.name === 'read') return { icon: 'file', title: '读取文件', detail };
-  if (tool.name === 'write') return { icon: 'edit', title: '写入文件', detail };
-  if (tool.name === 'edit') return { icon: 'edit', title: '修改文件', detail };
-  if (tool.category === '文件') return { icon: 'file', title: '查看文件', detail };
-  return { icon: 'lightning', title: '使用工具', detail: detail || tool.name };
+  if (tool.category === t("子智能体")) return { icon: 'assistant', title: t("子智能体正在协作"), detail };
+  if (tool.category === t("Web 搜索")) return { icon: 'globe', title: t("搜索网页"), detail };
+  if (tool.category === 'Skill') return { icon: 'skills', title: t("使用技能"), detail };
+  if (tool.category === 'MCP') return { icon: 'briefcase', title: t("调用外部能力"), detail };
+  if (tool.category === t("浏览器")) return { icon: 'globe', title: t("浏览器操作"), detail };
+  if (tool.category === t("代码执行")) return { icon: 'code', title: t("运行代码"), detail };
+  if (tool.category === 'Bash') return { icon: 'code', title: t("执行命令"), detail };
+  if (tool.name === 'read') return { icon: 'file', title: t("读取文件"), detail };
+  if (tool.name === 'write') return { icon: 'edit', title: t("写入文件"), detail };
+  if (tool.name === 'edit') return { icon: 'edit', title: t("修改文件"), detail };
+  if (tool.category === t("文件")) return { icon: 'file', title: t("查看文件"), detail };
+  return { icon: 'lightning', title: t("使用工具"), detail: detail || tool.name };
 }
 
 function ProcessList({ tools, live, onOpen, onReview }: { tools: LiveTool[]; live?: boolean;
   onOpen: (tool: LiveTool) => void; onReview?: () => void }) {
   if (!tools.length) return null;
   const hasFileChanges = !live && tools.some((tool) => /(?:^|[._:/])(?:write|edit|apply_patch|patch)(?:$|[._:/])/i.test(tool.name));
-  return <div className="chat-process" aria-label="运行过程">
-    <div className="chat-process-heading"><strong>{live ? '正在处理' : '处理过程'} · {tools.length} 项操作</strong>
+  return <div className="chat-process" aria-label={t("运行过程")}>
+    <div className="chat-process-heading"><strong>{live ? t("正在处理") : t("处理过程")} · {tools.length} {t("项操作")}</strong>
       {hasFileChanges && onReview && <button type="button" className="chat-process-review" onClick={onReview}
-        title="审查本次文件修改"><AppIcon name="review" />审查修改</button>}</div>
+        title={t("审查本次文件修改")}><AppIcon name="review" />{t("审查修改")}</button>}</div>
     {tools.map((tool) => {
       const presentation = processPresentation(tool);
       return <button type="button" key={tool.id} onClick={() => onOpen(tool)}
-        title={`查看${tool.category === '子智能体' ? '子智能体' : '运行轨迹'}详情`}>
+        title={t("查看{0}详情", { 0: tool.category === t("子智能体") ? t("子智能体") : t("运行轨迹") })}>
         <span className={`chat-process-icon ${tool.status}`}><AppIcon name={presentation.icon} /></span>
         <span className="chat-process-content"><span>{presentation.title}</span>
           {presentation.detail && <small>{presentation.detail}</small>}</span>
-        <small className={`chat-process-status ${tool.status}`}>{tool.status === 'running' ? '进行中' : tool.status === 'failed' ? '失败' : '已完成'}</small>
+        <small className={`chat-process-status ${tool.status}`}>{tool.status === 'running' ? t("进行中") : tool.status === 'failed' ? t("失败") : t("已完成")}</small>
       </button>;
     })}
   </div>;
@@ -169,7 +171,7 @@ function tokenLabel(value: number | undefined): string {
 
 function stoppedNotice(run: AgentRunRecord): string {
   const duration = elapsedLabel(run);
-  return duration ? `你在 ${duration} 后停止了` : '你停止了当前任务';
+  return duration ? t("你在 {0} 后停止了", { 0: duration }) : t("你停止了当前任务");
 }
 
 function messageTime(at?: string): string | undefined {
@@ -178,17 +180,17 @@ function messageTime(at?: string): string | undefined {
     month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
   }).formatToParts(new Date(at));
   const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? '';
-  return `${value('month')}月${value('day')}日 ${value('hour')}:${value('minute')}`;
+  return t("{0}月{1}日 {2}:{3}", { 0: value('month'), 1: value('day'), 2: value('hour'), 3: value('minute') });
 }
 
 function privateImDeliveryLabel(status: PrivateImRunSummary['replyDeliveryStatus']): string {
   return {
-    not_created: '无回复投递记录',
-    pending: '等待投递',
-    delivering: '正在投递',
-    accepted: '企业微信已接收（未确认对方可见）',
-    failed: '投递失败',
-    unknown: '投递结果未知（不会自动重发）',
+    not_created: t("无回复投递记录"),
+    pending: t("等待投递"),
+    delivering: t("正在投递"),
+    accepted: t("企业微信已接收（未确认对方可见）"),
+    failed: t("投递失败"),
+    unknown: t("投递结果未知（不会自动重发）"),
   }[status];
 }
 
@@ -760,10 +762,10 @@ export function ChatPanel({
         }
         if (terminal) {
           run.output?.tools.forEach((tool) => recordActivity(run.runId,
-            tool.status === 'completed' ? '工具调用完成' : '工具调用失败',
+            tool.status === 'completed' ? t("工具调用完成") : t("工具调用失败"),
             tool.status === 'completed' ? 'done' : 'error', capabilityName(tool.name), run.updatedAt));
-          const replyText = run.status === 'succeeded' ? run.output?.message ?? '任务已完成；可在运行记录中查看结果。'
-            : run.failure?.message ?? `任务结束：${runStatusLabel(run.status)}`;
+          const replyText = run.status === 'succeeded' ? run.output?.message ?? t("任务已完成；可在运行记录中查看结果。")
+            : run.failure?.message ?? t("任务结束：{0}", { 0: runStatusLabel(run.status) });
           const replyRun = run.status === 'succeeded' ? cacheReplyRun(surface, replyText, run,
             activityEventsRef.current.filter((event) => event.runId === run.runId)) : undefined;
           const stoppedByUser = run.status === 'cancelled'
@@ -789,7 +791,7 @@ export function ChatPanel({
     } catch (error) {
       // The accepted run may still be executing. Resume observation, never resubmit it.
       setRunRecovery({ runId, text });
-      recordActivity(runId, '状态获取失败', 'error', formatError(error));
+      recordActivity(runId, t("状态获取失败"), 'error', formatError(error));
     }
   }
 
@@ -844,7 +846,7 @@ export function ChatPanel({
     sourceNavigationRef.current = assistantWorkConversationId;
     const item = workConversationsQuery.data.find((candidate) => candidate.id === assistantWorkConversationId);
     if (!item) {
-      setWorkListError('对应的工作会话不可用。');
+      setWorkListError(t("对应的工作会话不可用。"));
       clearAssistantWorkConversation?.();
       return;
     }
@@ -893,14 +895,14 @@ export function ChatPanel({
   async function saveTopRename() {
     if (!topRenaming || !desktop || !selectedWork || selectedWork.id === 'default') return;
     const title = topRenameDraft.trim();
-    if (!title) { setWorkListError('会话名称不能为空。'); setTopRenaming(false); return; }
+    if (!title) { setWorkListError(t("会话名称不能为空。")); setTopRenaming(false); return; }
     setTopRenaming(false);
     if (title === selectedWork.title) return;
     try {
       await desktop.updateWorkConversation(selectedWork.id, { title });
       void queryClient.invalidateQueries({ queryKey: ['work', 'conversations'] });
       setWorkListError('');
-    } catch (error) { setWorkListError(`重命名失败：${formatError(error)}`); }
+    } catch (error) { setWorkListError(t("重命名失败：{0}", { 0: formatError(error) })); }
   }
 
   async function openWorkSearchHit(hit: WorkSearchItem): Promise<void> {
@@ -912,11 +914,11 @@ export function ChatPanel({
     try {
       const result = await desktop.getWorkMessageWindow(hit.conversationId, hit.messageEntryId, 20);
       if (result.status !== 'ok') {
-        setSearchLocationError('这条历史消息暂时无法定位。可重新搜索或打开该会话查看最近消息。');
+        setSearchLocationError(t("这条历史消息暂时无法定位。可重新搜索或打开该会话查看最近消息。"));
         return;
       }
       setSearchWindow({ conversationId: hit.conversationId, entryId: hit.messageEntryId, result });
-    } catch (error) { setSearchLocationError(`消息定位失败：${formatError(error)}`); }
+    } catch (error) { setSearchLocationError(t("消息定位失败：{0}", { 0: formatError(error) })); }
   }
 
   async function sendMessage() {
@@ -926,7 +928,7 @@ export function ChatPanel({
     if ((!draft && !includedAttachments.length) || sending.current || runRecovery || workArchived
       || (surface === 'work' && desktop && !workConversationId)) return;
     const text = includedAttachments.length
-      ? `${draft || '请阅读附件。'}\n\n${includedAttachments.map((file) => `附件 ${file.name}：\n${file.contents}`).join('\n\n')}`
+      ? `${draft || t("请阅读附件。")}\n\n${includedAttachments.map((file) => t("附件 {0}：\n{1}", { 0: file.name, 1: file.contents })).join('\n\n')}`
       : draft;
     sending.current = true;
     followConversationBottom.current = true;
@@ -941,7 +943,7 @@ export function ChatPanel({
     try {
       if (!desktop) {
         setMessages((current) => [...current, { id: nextId.current++, role: 'assistant',
-          text: '这是浏览器预览回复。通过桌面应用启动后，消息会交给本地助理处理。' }]);
+          text: t("这是浏览器预览回复。通过桌面应用启动后，消息会交给本地助理处理。") }]);
       } else {
         let clientMessageId: string | undefined;
         if (surface === 'assistant') {
@@ -973,16 +975,16 @@ export function ChatPanel({
           pendingAssistantMessage.current = undefined;
           try { window.localStorage.removeItem('mindlink:assistant-pending-message'); } catch { /* optional retry cache */ }
         }
-        setSubmittedTask({ runId: receipt.runId, text: draft || '请阅读附件' });
+        setSubmittedTask({ runId: receipt.runId, text: draft || t("请阅读附件") });
         if (surface === 'work') void queryClient.invalidateQueries({ queryKey: ['work', 'conversations'] });
         setActiveRunId(receipt.runId);
         setActiveRunStatus(receipt.status);
-        recordActivity(receipt.runId, '已提交任务', 'done');
+        recordActivity(receipt.runId, t("已提交任务"), 'done');
         await observeRun(receipt.runId, text);
       }
     } catch (error) {
       setMessages((current) => [...current, { id: nextId.current++, role: 'error', text: formatError(error) }]);
-      recordActivity('submission', '提交失败', 'error', formatError(error));
+      recordActivity('submission', t("提交失败"), 'error', formatError(error));
       setInput((current) => current || draft);
       setAttachments(includedAttachments);
     } finally {
@@ -998,12 +1000,12 @@ export function ChatPanel({
     const selected = Array.from(files ?? []);
     if (attachmentInput.current) attachmentInput.current.value = '';
     const remaining = Math.max(0, 3 - attachments.length);
-    if (selected.length > remaining) setAttachmentError('每条消息最多添加 3 个文本附件。');
+    if (selected.length > remaining) setAttachmentError(t("每条消息最多添加 3 个文本附件。"));
     else setAttachmentError('');
     const added: Array<{ name: string; contents: string }> = [];
     for (const file of selected.slice(0, remaining)) {
       if (file.size > 100_000 || !/\.(txt|md|json|csv|ts|tsx|js|jsx|py|yaml|yml|xml|html|css)$/i.test(file.name)) {
-        setAttachmentError('仅支持 100 KB 以内的文本附件。');
+        setAttachmentError(t("仅支持 100 KB 以内的文本附件。"));
         continue;
       }
       added.push({ name: file.name, contents: await file.text() });
@@ -1019,13 +1021,13 @@ export function ChatPanel({
   }
 
   async function cancelRun(runId: string, needsConfirmation = true) {
-    if (!desktop || cancelInFlight.current || (needsConfirmation && !window.confirm('取消这个正在执行的任务？已经发生的外部操作无法撤销。'))) return;
+    if (!desktop || cancelInFlight.current || (needsConfirmation && !window.confirm(t("取消这个正在执行的任务？已经发生的外部操作无法撤销。")))) return;
     cancelInFlight.current = true;
     requestedStops.current.add(runId);
     setCancelBusy(true);
     try {
       const receipt = await desktop.cancelAgentRun(runId);
-      if (receipt.result === 'not_found') throw new Error('任务不可用或无权取消。');
+      if (receipt.result === 'not_found') throw new Error(t("任务不可用或无权取消。"));
       if (receipt.result === 'already_terminal') requestedStops.current.delete(runId);
       const run = await desktop.getAgentRun(runId);
       if (['succeeded', 'failed', 'cancelled', 'interrupted', 'result_unknown'].includes(run.status)) {
@@ -1036,7 +1038,7 @@ export function ChatPanel({
       if (runRecovery?.runId === runId) await resumeRun();
     } catch (error) {
       requestedStops.current.delete(runId);
-      setMessages((current) => [...current, { id: nextId.current++, role: 'error', text: `取消失败：${formatError(error)}` }]);
+      setMessages((current) => [...current, { id: nextId.current++, role: 'error', text: t("取消失败：{0}", { 0: formatError(error) }) }]);
     } finally {
       cancelInFlight.current = false;
       setCancelBusy(false);
@@ -1078,15 +1080,15 @@ export function ChatPanel({
       resolvedApprovals.current.add(approval.requestId);
       setApprovals((current) => current.filter((item) => item.requestId !== approval.requestId));
       if (approval.runId && [activeRunId, lastRun?.runId, navigationTarget?.runId].includes(approval.runId)) {
-        recordActivity(approval.runId, decision === 'approved' ? '已允许一次' : '已拒绝授权', decision === 'approved' ? 'done' : 'warning', capabilityName(approval.capabilityId));
+        recordActivity(approval.runId, decision === 'approved' ? t("已允许一次") : t("已拒绝授权"), decision === 'approved' ? 'done' : 'warning', capabilityName(approval.capabilityId));
       }
       if (decision === 'denied') {
         setMessages((current) => [...current, {
           id: nextId.current++,
           role: 'assistant',
           text: approval.assistantDelegation
-            ? `已拒绝专业任务 ${approval.assistantDelegation.taskId}，未启动执行。`
-            : `已拒绝${capabilityName(approval.capabilityId)}，没有执行这次操作。`,
+            ? t("已拒绝专业任务 {0}，未启动执行。", { 0: approval.assistantDelegation.taskId })
+            : t("已拒绝{0}，没有执行这次操作。", { 0: capabilityName(approval.capabilityId) }),
         }]);
         return;
       }
@@ -1097,14 +1099,14 @@ export function ChatPanel({
       setMessages((current) => [...current, {
         id: nextId.current++,
         role: 'assistant',
-        text: result.message ?? `${capabilityName(approval.capabilityId)}已执行。`,
+        text: result.message ?? t("{0}已执行。", { 0: capabilityName(approval.capabilityId) }),
       }]);
       await refreshApprovals();
     } catch (error) {
       setMessages((current) => [...current, {
         id: nextId.current++,
         role: 'error',
-        text: `审批处理失败：${formatError(error)}`,
+        text: t("审批处理失败：{0}", { 0: formatError(error) }),
       }]);
     } finally {
       setApprovalBusy(undefined);
@@ -1238,8 +1240,8 @@ export function ChatPanel({
       <PageToolbar active={active}><header className={`chat-header ${surface === 'work' && activityOpen ? 'has-workspace-tabs' : ''}`}
         style={{ '--workspace-toolbar-width': rightPanelMaximized ? 'calc(100% - 300px)' : `${rightPanelWidth}px` } as CSSProperties}>
           <div className="chat-heading">
-            <button type="button" className="chat-list-toggle" title={`${listOpen ? '收起' : '打开'}${surface === 'work' ? '工作列表' : '会话列表'}`}
-              aria-label={`${listOpen ? '收起' : '打开'}${surface === 'work' ? '工作列表' : '会话列表'}`} aria-expanded={listOpen}
+            <button type="button" className="chat-list-toggle" title={`${listOpen ? t("收起") : t("打开")}${surface === 'work' ? t("工作列表") : t("会话列表")}`}
+              aria-label={`${listOpen ? t("收起") : t("打开")}${surface === 'work' ? t("工作列表") : t("会话列表")}`} aria-expanded={listOpen}
               onClick={() => {
                 if (listOpen) {
                   setListOpen(false);
@@ -1250,19 +1252,19 @@ export function ChatPanel({
                 }
               }}><AppIcon name="panel-left" /></button>
             <span className="chat-toolbar-divider" aria-hidden="true" />
-            <nav className="chat-breadcrumb" aria-label="会话位置">
-              <span>{surface === 'work' ? '工作' : '助理'}</span><AppIcon name="chevron" />
+            <nav className="chat-breadcrumb" aria-label={t("会话位置")}>
+              <span>{surface === 'work' ? t("工作") : t("助理")}</span><AppIcon name="chevron" />
               {surface === 'work' && workPath.map((folder) => <span className="chat-breadcrumb-part" key={folder.id} title={folder.name}>{folder.name}<AppIcon name="chevron" /></span>)}
               {surface === 'work' && topRenaming ? <input className="chat-title-input" autoFocus
-                aria-label="会话名称" value={topRenameDraft} onChange={(event) => setTopRenameDraft(event.target.value)}
+                aria-label={t("会话名称")} value={topRenameDraft} onChange={(event) => setTopRenameDraft(event.target.value)}
                 onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); if (event.key === 'Escape') setTopRenaming(false); }}
                 onBlur={() => void saveTopRename()} />
-                : <strong title={surface === 'work' ? (selectedWork?.title || '未命名会话') : undefined}>{surface === 'work'
-                  ? workConversationId === 'default' ? '旧工作归档' : selectedWork?.title || '未命名会话'
-                  : archiveOpen ? '原桌面会话' : scheduleOrigin ? '定时任务会话' : '当前会话'}</strong>}
+                : <strong title={surface === 'work' ? (selectedWork?.title || t("未命名会话")) : undefined}>{surface === 'work'
+                  ? workConversationId === 'default' ? t("旧工作归档") : selectedWork?.title || t("未命名会话")
+                  : archiveOpen ? t("原桌面会话") : scheduleOrigin ? t("定时任务会话") : t("当前会话")}</strong>}
             </nav>
             {surface === 'work' && selectedWork?.id !== 'default' && <button type="button" className="chat-rename-preview"
-              disabled={!selectedWork || workTreeLocked} title="重命名会话" aria-label="重命名会话"
+              disabled={!selectedWork || workTreeLocked} title={t("重命名会话")} aria-label={t("重命名会话")}
               onClick={() => { setTopRenameDraft(selectedWork?.title ?? ''); setTopRenaming(true); }}><AppIcon name="edit" /></button>}
           </div>
           {surface === 'work' && activityOpen && <div className="workspace-tab-host" ref={setWorkspaceTabHost} />}
@@ -1270,23 +1272,23 @@ export function ChatPanel({
             {navigationTarget && (
               <span role="status">
                 {locatedRun === 'loading' || (locatedRun === 'error' && privateImSummary === 'loading')
-                  ? '正在加载任务记录…'
+                  ? t("正在加载任务记录…")
                   : privateImSummary && privateImSummary !== 'loading'
-                    ? `企业微信 · ${privateImSummary.runStatus} · ${privateImDeliveryLabel(privateImSummary.replyDeliveryStatus)}`
+                    ? t("企业微信 · {0} · {1}", { 0: privateImSummary.runStatus, 1: privateImDeliveryLabel(privateImSummary.replyDeliveryStatus) })
                   : locatedRun === 'error'
-                    ? '任务记录不可用'
+                    ? t("任务记录不可用")
                     : locatedRun
-                      ? `${locatedRun.owner.entryPoint === 'scheduler' ? '定时任务' : locatedRun.owner.entryPoint === 'im' ? '企业微信' : '桌面'} · ${locatedRun.status} · 会话 ${locatedRun.context.conversation.conversationId}`
-                      : `已定位会话 ${navigationTarget.conversationId}`}
+                      ? t("{0} · {1} · 会话 {2}", { 0: locatedRun.owner.entryPoint === 'scheduler' ? t("定时任务") : locatedRun.owner.entryPoint === 'im' ? t("企业微信") : t("桌面"), 1: locatedRun.status, 2: locatedRun.context.conversation.conversationId })
+                      : t("已定位会话 {0}", { 0: navigationTarget.conversationId })}
               </span>
             )}
-            {locatedRun === 'error' && <button type="button" className="runtime-link" onClick={() => setLocationRetry((value) => value + 1)}>重新获取任务</button>}
-            {scheduleOrigin && <button type="button" className="runtime-link" onClick={onReturnToSchedules}>返回定时任务</button>}
+            {locatedRun === 'error' && <button type="button" className="runtime-link" onClick={() => setLocationRetry((value) => value + 1)}>{t("重新获取任务")}</button>}
+            {scheduleOrigin && <button type="button" className="runtime-link" onClick={onReturnToSchedules}>{t("返回定时任务")}</button>}
             {locatedRun && typeof locatedRun !== 'string' && ['queued', 'running', 'waiting_approval'].includes(locatedRun.status) && locatedRun.owner.entryPoint !== 'im' && (
-              <button type="button" className="runtime-link" disabled={cancelBusy} onClick={() => void cancelRun(locatedRun.runId)}>取消运行</button>
+              <button type="button" className="runtime-link" disabled={cancelBusy} onClick={() => void cancelRun(locatedRun.runId)}>{t("取消运行")}</button>
             )}
-            {activityOpen && <button type="button" className="panel-maximize-toggle" title={rightPanelMaximized ? '还原右侧面板' : '铺满右侧面板'}
-              aria-label={rightPanelMaximized ? '还原右侧面板' : '铺满右侧面板'} aria-pressed={rightPanelMaximized}
+            {activityOpen && <button type="button" className="panel-maximize-toggle" title={rightPanelMaximized ? t("还原右侧面板") : t("铺满右侧面板")}
+              aria-label={rightPanelMaximized ? t("还原右侧面板") : t("铺满右侧面板")} aria-pressed={rightPanelMaximized}
               onClick={() => {
                 if (rightPanelMaximized) setRightPanelMaximized(false);
                 else {
@@ -1295,26 +1297,26 @@ export function ChatPanel({
                   setListMaximized(false);
                 }
               }}><AppIcon name={rightPanelMaximized ? 'collapse' : 'expand'} /></button>}
-            <button ref={activityToggle} type="button" className="panel-toggle" title={`${activityOpen ? '收起' : '打开'}${surface === 'assistant' ? '助理面板' : '右侧面板'}`}
-              aria-label={`${activityOpen ? '收起' : '打开'}${surface === 'assistant' ? '助理面板' : '右侧面板'}`} aria-expanded={activityOpen}
-              onClick={() => { restoreActivityFocus.current = true; if (activityOpen) setRightPanelMaximized(false); setActivityOpen((value) => !value); }}><AppIcon name="panel" /><span className="panel-toggle-label">{surface === 'assistant' ? '助理面板' : '右侧面板'}</span></button>
+            <button ref={activityToggle} type="button" className="panel-toggle" title={`${activityOpen ? t("收起") : t("打开")}${surface === 'assistant' ? t("助理面板") : t("右侧面板")}`}
+              aria-label={`${activityOpen ? t("收起") : t("打开")}${surface === 'assistant' ? t("助理面板") : t("右侧面板")}`} aria-expanded={activityOpen}
+              onClick={() => { restoreActivityFocus.current = true; if (activityOpen) setRightPanelMaximized(false); setActivityOpen((value) => !value); }}><AppIcon name="panel" /><span className="panel-toggle-label">{surface === 'assistant' ? t("助理面板") : t("右侧面板")}</span></button>
           </div>
           {surface === 'assistant' && <div className="assistant-channel-state" role="status">
-            {archiveOpen ? '旧助理会话归档 · 只读' : assistantLinkQuery.data?.linked
-              ? '桌面与企业微信消息汇总 · 上下文独立'
-              : assistantLinkQuery.error ? '助理连接状态不可用' : '桌面助理 · 可在设置中绑定企业微信私聊'}
+            {archiveOpen ? t("旧助理会话归档 · 只读") : assistantLinkQuery.data?.linked
+              ? t("桌面与企业微信消息汇总 · 上下文独立")
+              : assistantLinkQuery.error ? t("助理连接状态不可用") : t("桌面助理 · 可在设置中绑定企业微信私聊")}
             <button type="button" className="runtime-link" onClick={() => setArchiveOpen((value) => !value)}>
-              {archiveOpen ? '返回助理对话' : '查看旧助理会话'}
+              {archiveOpen ? t("返回助理对话") : t("查看旧助理会话")}
             </button>
           </div>}
       </header></PageToolbar>
-      {listOpen && <aside className="conversation-list-preview" aria-label={surface === 'work' ? '工作列表' : '会话列表预览'}>
-        {surface !== 'work' && <div className="conversation-list-heading"><strong>会话列表</strong></div>}
+      {listOpen && <aside className="conversation-list-preview" aria-label={surface === 'work' ? t("工作列表") : t("会话列表预览")}>
+        {surface !== 'work' && <div className="conversation-list-heading"><strong>{t("会话列表")}</strong></div>}
         {surface === 'work' ? <>
-          {workConversationsQuery.isLoading && <p>正在读取工作列表…</p>}
-          {workConversationsQuery.error && <p role="alert">工作列表读取失败：{formatError(workConversationsQuery.error)}</p>}
-          {workFoldersQuery.error && <p role="alert">文件夹读取失败：{formatError(workFoldersQuery.error)}</p>}
-          {workTagsQuery.error && <p role="alert">标签读取失败：{formatError(workTagsQuery.error)}</p>}
+          {workConversationsQuery.isLoading && <p>{t("正在读取工作列表…")}</p>}
+          {workConversationsQuery.error && <p role="alert">{t("工作列表读取失败：")}{formatError(workConversationsQuery.error)}</p>}
+          {workFoldersQuery.error && <p role="alert">{t("文件夹读取失败：")}{formatError(workFoldersQuery.error)}</p>}
+          {workTagsQuery.error && <p role="alert">{t("标签读取失败：")}{formatError(workTagsQuery.error)}</p>}
           {workListError && <p role="alert">{workListError}</p>}
           {desktop && <WorkTree desktop={desktop} conversations={workConversationsQuery.data ?? []}
             folders={workFoldersQuery.data ?? []} tags={workTagsQuery.data ?? []}
@@ -1328,10 +1330,10 @@ export function ChatPanel({
               }
             }}
             onOpen={openWorkConversation} onCreate={newWorkConversation} onSearchHit={openWorkSearchHit} />}
-        </> : <><div className="conversation-list-current"><span>{archiveOpen ? '原桌面会话' : '当前会话'}</span><small>当前</small></div>
-          <p>历史会话列表尚未接入，此处为界面预览。</p></>}
+        </> : <><div className="conversation-list-current"><span>{archiveOpen ? t("原桌面会话") : t("当前会话")}</span><small>{t("当前")}</small></div>
+          <p>{t("历史会话列表尚未接入，此处为界面预览。")}</p></>}
         {surface === 'work' && !listMaximized && <div className="left-panel-resize-handle" role="separator" tabIndex={0}
-          aria-label="调整工作列表宽度" aria-orientation="vertical" aria-valuemin={240} aria-valuemax={720} aria-valuenow={leftPanelWidth}
+          aria-label={t("调整工作列表宽度")} aria-orientation="vertical" aria-valuemin={240} aria-valuemax={720} aria-valuenow={leftPanelWidth}
           onPointerDown={(event) => {
             if (window.matchMedia('(max-width: 900px)').matches) return;
             event.preventDefault();
@@ -1366,7 +1368,7 @@ export function ChatPanel({
       </aside>}
       <div className="chat-main">
         {surface === 'work' && emptyConversation && <div className="mindlink-work-background" aria-hidden="true">
-          <img src={mindlinkSeal} alt="" /><strong>元朴思联</strong><span>MindLink</span>
+          <img src={mindlinkSeal} alt="" /><strong>{PROJECT_SLOGAN_ZH}</strong><span>{PROJECT_SLOGAN_EN}</span>
         </div>}
 
         <div className="conversation" ref={conversation} aria-live="polite" onScroll={() => {
@@ -1377,17 +1379,17 @@ export function ChatPanel({
         }}>
           <div className="conversation-inner" ref={conversationInner}>
             {canLoadOlder && <button type="button" className="chat-load-older" disabled={olderLoading}
-              onClick={() => void loadOlderMessages()}>加载更早消息</button>}
+              onClick={() => void loadOlderMessages()}>{t("加载更早消息")}</button>}
             {surface === 'work' && !emptyConversation && <div className="mindlink-work-background-track" aria-hidden="true">
               {Array.from({ length: watermarkCount }, (_, index) =>
                 <div className="mindlink-work-background" key={index} style={{ top: `${400 + index * 800}px` }}>
-                  <img src={mindlinkSeal} alt="" /><strong>元朴思联</strong><span>MindLink</span>
+                  <img src={mindlinkSeal} alt="" /><strong>{PROJECT_SLOGAN_ZH}</strong><span>{PROJECT_SLOGAN_EN}</span>
                 </div>)}
             </div>}
             {emptyConversation && <div className="empty-chat">
-              <div className="mindlink-welcome" aria-label="元朴思联 MindLink">
+              <div className="mindlink-welcome" aria-label={PROJECT_SLOGAN}>
                 <img src={mindlinkSeal} alt="" />
-                <strong>元朴思联</strong><span>MindLink</span>
+                <strong>{PROJECT_SLOGAN_ZH}</strong><span>{PROJECT_SLOGAN_EN}</span>
               </div>
               <div className="empty-chat-heading">
                 {surface === 'assistant' && <div className="empty-chat-mark" aria-hidden="true"><AppIcon name="assistant" /></div>}
@@ -1397,51 +1399,51 @@ export function ChatPanel({
             </div>}
             {locatedRun && typeof locatedRun !== 'string' && (
               <article className="located-run-card">
-                <div className="approval-heading"><span>运行详情</span><strong>{locatedRun.owner.entryPoint === 'scheduler' ? '定时任务' : locatedRun.owner.entryPoint === 'im' ? '企业微信会话' : '桌面对话'}</strong></div>
+                <div className="approval-heading"><span>{t("运行详情")}</span><strong>{locatedRun.owner.entryPoint === 'scheduler' ? t("定时任务") : locatedRun.owner.entryPoint === 'im' ? t("企业微信会话") : t("桌面对话")}</strong></div>
                 <dl>
-                  <div><dt>运行状态</dt><dd>{locatedRun.status}</dd></div>
-                  {locatedRun.owner.entryPoint === 'im' && <div><dt>回复投递</dt><dd>{privateImSummary && privateImSummary !== 'loading' ? privateImDeliveryLabel(privateImSummary.replyDeliveryStatus) : '状态暂不可用'}</dd></div>}
-                  <div><dt>会话</dt><dd>{locatedRun.context.conversation.conversationId}</dd></div>
-                  <div><dt>工作区</dt><dd>{locatedRun.context.workspaceId}</dd></div>
+                  <div><dt>{t("运行状态")}</dt><dd>{locatedRun.status}</dd></div>
+                  {locatedRun.owner.entryPoint === 'im' && <div><dt>{t("回复投递")}</dt><dd>{privateImSummary && privateImSummary !== 'loading' ? privateImDeliveryLabel(privateImSummary.replyDeliveryStatus) : t("状态暂不可用")}</dd></div>}
+                  <div><dt>{t("会话")}</dt><dd>{locatedRun.context.conversation.conversationId}</dd></div>
+                  <div><dt>{t("工作区")}</dt><dd>{locatedRun.context.workspaceId}</dd></div>
                 </dl>
                 {locatedRun.output?.message && <p>{locatedRun.output.message}</p>}
                 {locatedRun.failure && <p role="alert">{locatedRun.failure.message}</p>}
-                {scheduleOrigin && <button type="button" className="runtime-link" onClick={onReturnToSchedules}>返回关联定时任务</button>}
+                {scheduleOrigin && <button type="button" className="runtime-link" onClick={onReturnToSchedules}>{t("返回关联定时任务")}</button>}
               </article>
             )}
             {locatedRun === 'error' && privateImSummary && privateImSummary !== 'loading' && (
               <article className="located-run-card">
-                <div className="approval-heading"><span>运行详情</span><strong>企业微信私聊</strong></div>
+                <div className="approval-heading"><span>{t("运行详情")}</span><strong>{t("企业微信私聊")}</strong></div>
                 <dl>
-                  <div><dt>运行状态</dt><dd>{privateImSummary.runStatus}</dd></div>
-                  <div><dt>回复投递</dt><dd>{privateImDeliveryLabel(privateImSummary.replyDeliveryStatus)}</dd></div>
+                  <div><dt>{t("运行状态")}</dt><dd>{privateImSummary.runStatus}</dd></div>
+                  <div><dt>{t("回复投递")}</dt><dd>{privateImDeliveryLabel(privateImSummary.replyDeliveryStatus)}</dd></div>
                 </dl>
               </article>
             )}
             {searchLocationError && <p className="archive-notice" role="alert">{searchLocationError}</p>}
             {searchWindow?.conversationId === workConversationId && <div className="work-message-window-banner" role="status">
-              <span>正在查看搜索命中附近的历史消息。</span>
-              <button type="button" onClick={() => setSearchWindow(undefined)}>返回最近消息</button>
+              <span>{t("正在查看搜索命中附近的历史消息。")}</span>
+              <button type="button" onClick={() => setSearchWindow(undefined)}>{t("返回最近消息")}</button>
             </div>}
             {(archiveOpen ? (archiveQuery.data ?? []).map((item, index): ChatMessage => ({ id: index + 1, role: item.role, text: item.text, at: item.at, run: item.run }))
               : searchWindow && searchWindow.conversationId === workConversationId ? searchWindow.result.messages.map((item, index): ChatMessage => ({ id: index + 1, entryId: item.id, role: item.role, text: item.text, at: item.at, run: item.run }))
                 : emptyConversation ? [] : messages).map((message) => message.role === 'notice'
               ? <div key={message.id} className="conversation-stop-run" role="status"><ReplyRunDetails run={message.run} summary={message.text} />
                   {message.process?.length ? <ProcessList tools={message.process} onOpen={(tool) => {
-                    setActivityOpen(true); setActivityTab(tool.category === '子智能体' ? 'subagents' : 'trajectory');
+                    setActivityOpen(true); setActivityTab(tool.category === t("子智能体") ? 'subagents' : 'trajectory');
                   }} /> : null}
                 </div>
               : <article key={message.entryId ?? message.id} data-message-entry-id={message.entryId} className={`message ${message.role}`}>
-                {surface === 'assistant' && message.role === 'assistant' && <span className="assistant-message-avatar" role="img" aria-label="助理标识"><img src={new URL('../_legacy-ui/assets/assistant/portrait-resting.png', import.meta.url).href} alt="" /></span>}
+                {surface === 'assistant' && message.role === 'assistant' && <span className="assistant-message-avatar" role="img" aria-label={t("助理标识")}><img src={new URL('../assets/assistant/portrait-resting.png', import.meta.url).href} alt="" /></span>}
                 <div className="message-label">
-                  {message.role === 'user' ? '你' : message.role === 'error' ? '运行错误' : 'MindLink'}
+                  {message.role === 'user' ? t("你") : message.role === 'error' ? t("运行错误") : PROJECT_SLOGAN_EN}
                 </div>
                 {surface === 'assistant' && message.channel && <span className="assistant-message-channel">
-                  {message.channel === 'wecom' ? '企业微信' : '桌面'}
+                  {message.channel === 'wecom' ? t("企业微信") : t("桌面")}
                 </span>}
                 <div className="message-body">
                   {message.process?.length ? <ProcessList tools={message.process} onOpen={(tool) => {
-                    setActivityOpen(true); setActivityTab(tool.category === '子智能体' ? 'subagents' : 'trajectory');
+                    setActivityOpen(true); setActivityTab(tool.category === t("子智能体") ? 'subagents' : 'trajectory');
                   }} onReview={surface === 'work' && message.role === 'assistant'
                     ? () => { setReviewRunId(message.run?.runId); setActivityOpen(true); setActivityTab('review'); } : undefined} /> : null}
                   {message.role === 'assistant' ? <AssistantReply text={message.text} surface={surface} run={message.run}
@@ -1453,42 +1455,42 @@ export function ChatPanel({
                     <div className={`tool-event ${tool.status}`} key={`${message.id}-${tool.name}`}>
                       <span className="tool-check">{tool.status === 'completed' ? '✓' : '!'}</span>
                       <span>{toolLabel(tool.name)}</span><code>{tool.name}</code>
-                      <small>{tool.status === 'completed' ? '已完成' : '失败'}</small>
+                      <small>{tool.status === 'completed' ? t("已完成") : t("失败")}</small>
                     </div>
                   ))}
                 </div>
                 {message.role === 'user' && <div className="user-message-meta">
                   {messageTime(message.at) && <time dateTime={message.at}>{messageTime(message.at)}</time>}
                   <button type="button" className={copiedUserMessageId === message.id ? 'copied' : ''}
-                    aria-label={copiedUserMessageId === message.id ? '已复制这条消息' : '复制这条消息'} data-tooltip={copiedUserMessageId === message.id ? '已复制' : '复制'}
+                    aria-label={copiedUserMessageId === message.id ? t("已复制这条消息") : t("复制这条消息")} data-tooltip={copiedUserMessageId === message.id ? t("已复制") : t("复制")}
                     onClick={() => void copyUserMessage(message)}><AppIcon name={copiedUserMessageId === message.id ? 'check' : 'copy'} /></button>
                 </div>}
               </article>
             )}
             {surface === 'work' && Boolean(workConversationsQuery.data?.find((item) => item.id === workConversationId)?.previousWorkingDirectories?.length)
-              && <p className="archive-notice" role="status">工作目录已移动。历史消息中的旧绝对路径保留原文，可能已失效；请从右侧文件树打开当前文件。</p>}
-            {archiveOpen && archiveQuery.isLoading && <p className="archive-notice">正在读取原桌面会话…</p>}
-            {archiveOpen && archiveQuery.error && <p className="archive-notice" role="alert">原桌面会话读取失败：{formatError(archiveQuery.error)}</p>}
-            {archiveOpen && archiveQuery.data?.length === 0 && <p className="archive-notice">原桌面会话还没有消息。</p>}
-            {!archiveOpen && surface === 'assistant' && mirrorQuery.data?.length ? <div className="assistant-mirror-status" aria-label="旧企业微信投递记录（只读）">
-              <p>旧企业微信投递记录（只读）</p>
+              && <p className="archive-notice" role="status">{t("工作目录已移动。历史消息中的旧绝对路径保留原文，可能已失效；请从右侧文件树打开当前文件。")}</p>}
+            {archiveOpen && archiveQuery.isLoading && <p className="archive-notice">{t("正在读取原桌面会话…")}</p>}
+            {archiveOpen && archiveQuery.error && <p className="archive-notice" role="alert">{t("原桌面会话读取失败：")}{formatError(archiveQuery.error)}</p>}
+            {archiveOpen && archiveQuery.data?.length === 0 && <p className="archive-notice">{t("原桌面会话还没有消息。")}</p>}
+            {!archiveOpen && surface === 'assistant' && mirrorQuery.data?.length ? <div className="assistant-mirror-status" aria-label={t("旧企业微信投递记录（只读）")}>
+              <p>{t("旧企业微信投递记录（只读）")}</p>
               {mirrorQuery.data.map((mirror) => <div key={mirror.mirrorId}>
-                <span>{mirror.part === 'user' ? '消息' : '回复'}：{mirror.status === 'accepted' ? '企业微信已接收' : mirror.status === 'pending' ? '等待投递' : mirror.status === 'delivering' ? '正在投递' : mirror.status === 'unknown' ? '结果未知' : '投递失败'}</span>
+                <span>{mirror.part === 'user' ? t("消息") : t("回复")}：{mirror.status === 'accepted' ? t("企业微信已接收") : mirror.status === 'pending' ? t("等待投递") : mirror.status === 'delivering' ? t("正在投递") : mirror.status === 'unknown' ? t("结果未知") : t("投递失败")}</span>
               </div>)}
             </div> : null}
             {!archiveOpen && !workArchived && busy && (
               <article className="message assistant pending">
-                {surface === 'assistant' && <span className="assistant-message-avatar" aria-hidden="true"><img src={new URL('../_legacy-ui/assets/assistant/portrait-resting.png', import.meta.url).href} alt="" /></span>}
-                <div className="message-label">MindLink</div>
+                {surface === 'assistant' && <span className="assistant-message-avatar" aria-hidden="true"><img src={new URL('../assets/assistant/portrait-resting.png', import.meta.url).href} alt="" /></span>}
+                <div className="message-label">{PROJECT_SLOGAN_EN}</div>
                 {surface === 'work' && activeLive && activeLive.tools.length > 0 &&
                   <ProcessList tools={activeLive.tools.slice(-8)} live onOpen={(tool) => {
-                    setActivityOpen(true); setActivityTab(tool.category === '子智能体' ? 'subagents' : 'trajectory');
+                    setActivityOpen(true); setActivityTab(tool.category === t("子智能体") ? 'subagents' : 'trajectory');
                   }} />}
                 {surface === 'work' && activeLive?.text
                   ? <div className="message-body"><AssistantReply text={activeLive.text} surface="work"
                     onOpenFilePath={openWorkspaceFile} resolveWorkspaceImage={resolveWorkspaceImage}
                     onOpenImageInSidebar={openImageInSidebar} onAddToConversation={addPreviewToConversation} /></div>
-                  : <div className="thinking"><span /><span /><span /> {activeRunStatus === 'waiting_approval' ? '等待授权' : '正在处理'}</div>}
+                  : <div className="thinking"><span /><span /><span /> {activeRunStatus === 'waiting_approval' ? t("等待授权") : t("正在处理")}</div>}
               </article>
             )}
           </div>
@@ -1498,29 +1500,29 @@ export function ChatPanel({
           {!archiveOpen && !workArchived && readyApprovalContextRef.current === approvalContext && approvals.map((approval) => (
             <article className="approval-card composer-approval" key={approval.requestId} role="alert">
               <div className="approval-heading">
-                <span>等待你的决定</span>
-                <strong>{approval.assistantDelegation ? '专业任务授权' : `${capabilitySource(approval.sourceInstanceId)}操作需要授权`}</strong>
+                <span>{t("等待你的决定")}</span>
+                <strong>{approval.assistantDelegation ? t("专业任务授权") : t("{0}操作需要授权", { 0: capabilitySource(approval.sourceInstanceId) })}</strong>
               </div>
               {approval.assistantDelegation ? <DelegationApprovalDetails delegation={approval.assistantDelegation} /> : <dl>
-                <div><dt>操作</dt><dd>{capabilityName(approval.capabilityId)}</dd></div>
-                <div><dt>来源</dt><dd>{capabilitySource(approval.sourceInstanceId)}</dd></div>
+                <div><dt>{t("操作")}</dt><dd>{capabilityName(approval.capabilityId)}</dd></div>
+                <div><dt>{t("来源")}</dt><dd>{capabilitySource(approval.sourceInstanceId)}</dd></div>
               </dl>}
               <p>{approval.assistantDelegation
-                ? '仅允许此任务使用列出的来源和能力；具体敏感能力调用仍需单独审批。'
-                : '本次决定仅对当前操作生效。'}</p>
+                ? t("仅允许此任务使用列出的来源和能力；具体敏感能力调用仍需单独审批。")
+                : t("本次决定仅对当前操作生效。")}</p>
               <div className="approval-actions">
-                <button type="button" disabled={Boolean(approvalBusy) || !readyApprovals.has(approval.requestId)} onClick={() => void decideApproval(approval, 'denied')}>拒绝</button>
+                <button type="button" disabled={Boolean(approvalBusy) || !readyApprovals.has(approval.requestId)} onClick={() => void decideApproval(approval, 'denied')}>{t("拒绝")}</button>
                 <button type="button" className="primary" disabled={Boolean(approvalBusy) || !readyApprovals.has(approval.requestId)} onClick={() => void decideApproval(approval, 'approved')}>
-                  {approvalBusy === approval.requestId ? '处理中…' : !readyApprovals.has(approval.requestId) ? '正在准备授权…' : '允许这次操作'}
+                  {approvalBusy === approval.requestId ? t("处理中…") : !readyApprovals.has(approval.requestId) ? t("正在准备授权…") : t("允许这次操作")}
                 </button>
               </div>
             </article>
           ))}
-          {bridgeError && <p role="status">暂时无法读取授权状态，正在重连…</p>}
+          {bridgeError && <p role="status">{t("暂时无法读取授权状态，正在重连…")}</p>}
           {runRecovery && <div className="run-recovery" role="alert">
-            <span>无法获取任务状态。任务可能仍在执行，请恢复查看后再发送。</span>
-            <button type="button" disabled={busy} onClick={() => void resumeRun()}>重新获取状态</button>
-            <button type="button" disabled={cancelBusy || busy} onClick={() => void cancelRun(runRecovery.runId)}>取消任务</button>
+            <span>{t("无法获取任务状态。任务可能仍在执行，请恢复查看后再发送。")}</span>
+            <button type="button" disabled={busy} onClick={() => void resumeRun()}>{t("重新获取状态")}</button>
+            <button type="button" disabled={cancelBusy || busy} onClick={() => void cancelRun(runRecovery.runId)}>{t("取消任务")}</button>
           </div>}
           <div className="composer">
             <input ref={attachmentInput} className="composer-attachment-input" type="file" multiple
@@ -1528,69 +1530,69 @@ export function ChatPanel({
               onChange={(event) => void addAttachments(event.currentTarget.files)} />
             <textarea
               ref={composerInput}
-              aria-label="消息"
+              aria-label={t("消息")}
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={workArchived ? workConversationId === 'default' ? '旧工作归档只读，请选择或新建工作' : '会话已归档，恢复后可继续对话' : archiveOpen ? '归档只读，请返回已绑定会话继续对话' : emo.composer.placeholder}
+              placeholder={workArchived ? workConversationId === 'default' ? t("旧工作归档只读，请选择或新建工作") : t("会话已归档，恢复后可继续对话") : archiveOpen ? t("归档只读，请返回已绑定会话继续对话") : emo.composer.placeholder}
               disabled={archiveOpen || workArchived || (surface === 'work' && Boolean(desktop) && !workConversationId)}
               rows={2}
             />
-            {attachments.length > 0 && <div className="composer-attachments" aria-label="待发送附件">
+            {attachments.length > 0 && <div className="composer-attachments" aria-label={t("待发送附件")}>
               {attachments.map((file, index) => <span key={`${file.name}-${index}`}>{file.name}
-                <button type="button" aria-label={`移除附件 ${file.name}`} onClick={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>
+                <button type="button" aria-label={t("移除附件 {0}", { 0: file.name })} onClick={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>
               </span>)}
             </div>}
             <div className="composer-toolbar">
               <div className="composer-actions">
-                <button type="button" className="composer-utility" title="添加文本附件" aria-label="添加附件" disabled={archiveOpen || workArchived || busy}
+                <button type="button" className="composer-utility" title={t("添加文本附件")} aria-label={t("添加附件")} disabled={archiveOpen || workArchived || busy}
                   onClick={() => attachmentInput.current?.click()}><AppIcon name="plus" /></button>
                 {surface === 'work' && <button type="button" className="composer-permission" title={fullAccessEnabled
-                  ? '完全权限已开启 · 后续任务无需逐次审批' : '逐次审批 · 点击开启完全权限'}
-                  aria-label={fullAccessEnabled ? '关闭完全权限，恢复逐次审批' : '开启完全权限，后续任务无需逐次审批'}
+                  ? t("完全权限已开启 · 后续任务无需逐次审批") : t("逐次审批 · 点击开启完全权限")}
+                  aria-label={fullAccessEnabled ? t("关闭完全权限，恢复逐次审批") : t("开启完全权限，后续任务无需逐次审批")}
                   aria-pressed={fullAccessEnabled} disabled={!workConversationId || workArchived || archiveOpen || busy}
                   onClick={toggleFullAccess}><AppIcon name={fullAccessEnabled ? 'unlock' : 'lock'} /></button>}
-                <button type="button" className="composer-redaction-preview" title={`脱敏${redactionPreviewEnabled ? '已选中' : '未选中'} · 界面预览，尚未生效`}
-                  aria-label={`${redactionPreviewEnabled ? '关闭' : '启用'}脱敏（界面预览，尚未生效）`} aria-pressed={redactionPreviewEnabled}
+                <button type="button" className="composer-redaction-preview" title={t("脱敏{0} · 界面预览，尚未生效", { 0: redactionPreviewEnabled ? t("已选中") : t("未选中") })}
+                  aria-label={t("{0}脱敏（界面预览，尚未生效）", { 0: redactionPreviewEnabled ? t("关闭") : t("启用") })} aria-pressed={redactionPreviewEnabled}
                   onClick={() => setRedactionPreviewEnabled((value) => !value)}><AppIcon name={redactionPreviewEnabled ? 'shield-filled' : 'shield'} /></button>
               </div>
-              {(archiveOpen || workArchived) && <span className="composer-hint">{workArchived ? workConversationId === 'default' ? '旧工作归档只读' : '会话已归档 · 只读' : '原桌面会话归档只读'}</span>}
-              {surface === 'assistant' && !archiveOpen && <span className="composer-hint">此处发送到桌面助理</span>}
+              {(archiveOpen || workArchived) && <span className="composer-hint">{workArchived ? workConversationId === 'default' ? t("旧工作归档只读") : t("会话已归档 · 只读") : t("原桌面会话归档只读")}</span>}
+              {surface === 'assistant' && !archiveOpen && <span className="composer-hint">{t("此处发送到桌面助理")}</span>}
               {surface === 'work' && <div ref={modelControlsRef} className="composer-runtime-controls">
-                <button type="button" className="composer-model-button" aria-label="选择模型" aria-expanded={modelOpen}
+                <button type="button" className="composer-model-button" aria-label={t("选择模型")} aria-expanded={modelOpen}
                   onClick={() => { setContextOpen(false); setModelOpen((value) => !value); }}>
-                  <span className="composer-model-label">{currentModel?.model ?? '选择模型'}</span>
+                  <span className="composer-model-label">{currentModel?.model ?? t("选择模型")}</span>
                   <svg aria-hidden="true" viewBox="0 0 16 16" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </button>
-                {modelOpen && <div className="composer-model-popover" role="dialog" aria-label="选择模型">
-                  <strong>模型</strong>
+                {modelOpen && <div className="composer-model-popover" role="dialog" aria-label={t("选择模型")}>
+                  <strong>{t("模型")}</strong>
                   {modelChoices.length ? <div className="composer-model-list">{modelChoices.map((item) =>
                     <button type="button" key={`${item.provider}/${item.model}`}
                       className={currentModel?.provider === item.provider && currentModel.model === item.model ? 'selected' : ''}
                       onClick={() => { chooseModel({ ...item, thinkingLevel: threeStepThinking(modelSelection?.thinkingLevel) }); setModelOpen(false); }}>
                       <span>{item.name}</span><small>{item.provider}</small>
-                    </button>)}</div> : <p>请先在模型设置中配置模型。</p>}
+                    </button>)}</div> : <p>{t("请先在模型设置中配置模型。")}</p>}
                   {surface === 'work' && currentModel && <div className="composer-thinking">
-                      <div className="composer-thinking-heading"><span>思考强度</span><output>{thinkingLevels[thinkingLevelIndex]?.label}</output></div>
+                      <div className="composer-thinking-heading"><span>{t("思考强度")}</span><output>{thinkingLevels[thinkingLevelIndex]?.label}</output></div>
                       <div className="composer-thinking-slider">
                         <div className="composer-thinking-track" aria-hidden="true">
                           <i style={{ width: `${thinkingLevelIndex / (thinkingLevels.length - 1) * 100}%` }} />
                           {thinkingLevels.map((level, index) => <span key={level.value} data-active={index <= thinkingLevelIndex} />)}
                         </div>
                         <input type="range" min={0} max={thinkingLevels.length - 1} step={1} value={thinkingLevelIndex}
-                          aria-label="思考强度" aria-valuetext={thinkingLevels[thinkingLevelIndex]?.label}
+                          aria-label={t("思考强度")} aria-valuetext={thinkingLevels[thinkingLevelIndex]?.label}
                           onChange={(event) => {
                             const level = thinkingLevels[Number(event.target.value)];
                             if (!level) return;
                             chooseModel({ ...currentModel, ...(level.value ? { thinkingLevel: level.value } : {}) });
                           }} />
                       </div>
-                      <div className="composer-thinking-ends"><span>低</span><span>高</span></div>
+                      <div className="composer-thinking-ends"><span>{t("低")}</span><span>{t("高")}</span></div>
                     </div>}
                 </div>}
                 <button type="button" className="composer-context-ring"
-                  data-tooltip={contextRingPercent === undefined ? '上下文用量暂不可用' : `上下文已用 ${Math.round(contextRingPercent)}%`}
-                  aria-label={contextRingPercent === undefined ? '查看上下文用量，当前用量暂不可用' : `查看上下文用量，已用 ${Math.round(contextRingPercent)}%`}
+                  data-tooltip={contextRingPercent === undefined ? t("上下文用量暂不可用") : t("上下文已用 {0}%", { 0: Math.round(contextRingPercent) })}
+                  aria-label={contextRingPercent === undefined ? t("查看上下文用量，当前用量暂不可用") : t("查看上下文用量，已用 {0}%", { 0: Math.round(contextRingPercent) })}
                   aria-expanded={contextOpen}
                   onClick={() => { setModelOpen(false); setContextOpen((value) => !value); }}>
                   <svg aria-hidden="true" viewBox="0 0 36 36" fill="none">
@@ -1600,31 +1602,31 @@ export function ChatPanel({
                         strokeDasharray={`${contextRingPercent} ${100 - contextRingPercent}`} />}
                   </svg>
                 </button>
-                {contextOpen && <div className="composer-context-popover" role="dialog" aria-label="上下文用量">
-                  <strong>上下文已用 {trajectory?.context?.percent == null ? '—' : `${Math.round(trajectory.context.percent)}%`}</strong>
+                {contextOpen && <div className="composer-context-popover" role="dialog" aria-label={t("上下文用量")}>
+                  <strong>{t("上下文已用")} {trajectory?.context?.percent == null ? '—' : `${Math.round(trajectory.context.percent)}%`}</strong>
                   <span>{trajectory?.context?.tokens == null ? '—' : trajectory.context.tokens.toLocaleString('en-US')}
                     {' / '}{trajectory?.context?.contextWindow?.toLocaleString('en-US') ?? '—'}</span>
                   <div className="composer-context-progress"><i style={{ width: `${Math.min(100, Math.max(0, trajectory?.context?.percent ?? 0))}%` }} /></div>
-                  <dl><div><dt>系统提示词</dt><dd>{tokenLabel(trajectory?.context?.breakdown?.systemPrompt)}</dd></div>
-                    <div><dt>工具定义</dt><dd>{tokenLabel(trajectory?.context?.breakdown?.tools)}</dd></div>
-                    <div><dt>对话消息</dt><dd>{tokenLabel(trajectory?.context?.breakdown?.messages)}</dd></div>
-                    <div><dt>其他</dt><dd>{tokenLabel(trajectory?.context?.breakdown?.other)}</dd></div></dl>
+                  <dl><div><dt>{t("系统提示词")}</dt><dd>{tokenLabel(trajectory?.context?.breakdown?.systemPrompt)}</dd></div>
+                    <div><dt>{t("工具定义")}</dt><dd>{tokenLabel(trajectory?.context?.breakdown?.tools)}</dd></div>
+                    <div><dt>{t("对话消息")}</dt><dd>{tokenLabel(trajectory?.context?.breakdown?.messages)}</dd></div>
+                    <div><dt>{t("其他")}</dt><dd>{tokenLabel(trajectory?.context?.breakdown?.other)}</dd></div></dl>
                   <button type="button" className="composer-open-trajectory" onClick={() => {
                     setContextOpen(false); setActivityOpen(true); setActivityTab('trajectory');
-                  }}>打开运行轨迹 →</button>
+                  }}>{t("打开运行轨迹 →")}</button>
                 </div>}
               </div>}
               {busy && activeRunId ? <button type="button" className="composer-stop" onClick={() => void cancelRun(activeRunId, false)}
-                disabled={cancelBusy} aria-label="停止任务" title="停止当前任务"><AppIcon name="pause" /></button>
-                : <button type="button" onClick={() => void sendMessage()} disabled={archiveOpen || workArchived || (surface === 'work' && Boolean(desktop) && !workConversationId) || (!input.trim() && attachments.length === 0) || busy || Boolean(runRecovery)} aria-label="发送消息"><AppIcon name="send" /></button>}
+                disabled={cancelBusy} aria-label={t("停止任务")} title={t("停止当前任务")}><AppIcon name="pause" /></button>
+                : <button type="button" onClick={() => void sendMessage()} disabled={archiveOpen || workArchived || (surface === 'work' && Boolean(desktop) && !workConversationId) || (!input.trim() && attachments.length === 0) || busy || Boolean(runRecovery)} aria-label={t("发送消息")}><AppIcon name="send" /></button>}
             </div>
           </div>
           {attachmentError && <p className="composer-attachment-error" role="alert">{attachmentError}</p>}
         </div>
       </div>
       {(surface === 'work' || surface === 'assistant') && (
-        <dialog ref={activityDialog} className={`activity-panel ${surface === 'assistant' ? 'assistant-home-panel' : ''}`} aria-label={surface === 'assistant' ? '助理面板' : '当前会话侧栏'} onCancel={() => { setActivityOpen(false); setRightPanelMaximized(false); }}>
-          <div className="activity-resize-handle" role="separator" aria-label="调整右侧栏宽度" aria-orientation="vertical" aria-valuemin={260}
+        <dialog ref={activityDialog} className={`activity-panel ${surface === 'assistant' ? 'assistant-home-panel' : ''}`} aria-label={surface === 'assistant' ? t("助理面板") : t("当前会话侧栏")} onCancel={() => { setActivityOpen(false); setRightPanelMaximized(false); }}>
+          <div className="activity-resize-handle" role="separator" aria-label={t("调整右侧栏宽度")} aria-orientation="vertical" aria-valuemin={260}
             aria-valuemax={maxRightPanelWidth(chatPanel.current?.clientWidth ?? window.innerWidth - 50, listOpen, surface === 'work')} aria-valuenow={rightPanelWidth} tabIndex={0}
             onPointerDown={(event) => {
               if (window.matchMedia('(max-width: 560px)').matches) return;
@@ -1690,7 +1692,7 @@ export function ChatPanel({
               aria-hidden={!isCurrent}>
               <FileWorkspace host={sessionHost} browserHost={browserHost}
                 browserRequest={isCurrent && browserRequest?.conversationId === sessionId ? browserRequest.serial : undefined}
-                scopeKey={sessionId} rootName={session?.workingDirectory?.split(/[\\/]/).filter(Boolean).at(-1) || '工作区'}
+                scopeKey={sessionId} rootName={session?.workingDirectory?.split(/[\\/]/).filter(Boolean).at(-1) || t("工作区")}
                 requestPath={isCurrent ? filePreviewPath : undefined} requestImage={isCurrent ? imagePreviewRequest : undefined}
                 onActiveFileChange={isCurrent ? setFilePreviewPath : undefined} tabHost={isCurrent ? workspaceTabHost : null}
                 view={isCurrent ? activityTab : sidebarSessions.current.get(sessionId)?.tab ?? 'files'}
@@ -1700,7 +1702,7 @@ export function ChatPanel({
                   lastRunId={reviewRunId ?? lastRun?.runId ?? [...messages].reverse().find((message) => message.run?.runId)?.run?.runId}
                   refreshKey={reviewRefreshKey} active={active && activityOpen && activityTab === 'review'} /> : null}
                 runContent={isCurrent ? activityTab === 'trajectory'
-                  ? <SessionTrajectoryViewer trajectory={trajectory} title={selectedWork?.title ?? '工作会话'}
+                  ? <SessionTrajectoryViewer trajectory={trajectory} title={selectedWork?.title ?? t("工作会话")}
                       onRefresh={() => { if (desktop) void desktop.getWorkTrajectory(sessionId).then(setTrajectory); }} />
                   : <SubagentViewer trajectory={trajectory} onOpenTrajectory={() => setActivityTab('trajectory')} /> : null} />
             </div>;

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 
 import { AppIcon } from '../../composites/app-icon.js';
 import { normalizeAddressInput, type BrowserViewState } from './browser-state.js';
+import { t } from '../../../languages/index.js';
 
 /** Address bar and navigation controls; drives the webview directly (zcode BrowserToolbar port). */
 export function BrowserToolbar({ state, disabled, onNavigate, onBack, onForward, onReload, onOpenExternal }: {
@@ -24,17 +25,17 @@ export function BrowserToolbar({ state, disabled, onNavigate, onBack, onForward,
     onNavigate(url);
   }
 
-  return <form className="browser-toolbar" onSubmit={submit} role="search" aria-label="浏览器控制">
-    <button type="button" className="browser-nav-button browser-nav-back" title="后退" aria-label="后退" disabled={disabled || !state.canGoBack}
+  return <form className="browser-toolbar" onSubmit={submit} role="search" aria-label={t("浏览器控制")}>
+    <button type="button" className="browser-nav-button browser-nav-back" title={t("后退")} aria-label={t("后退")} disabled={disabled || !state.canGoBack}
       onClick={onBack}><AppIcon name="chevron" /></button>
-    <button type="button" className="browser-nav-button" title="前进" aria-label="前进"
+    <button type="button" className="browser-nav-button" title={t("前进")} aria-label={t("前进")}
       disabled={disabled || !state.canGoForward} onClick={onForward}><AppIcon name="chevron" /></button>
-    <button type="button" className={`browser-nav-button ${state.isLoading ? 'browser-reloading' : ''}`} title={state.isLoading ? '停止' : '重新加载'}
-      aria-label={state.isLoading ? '停止' : '重新加载'} disabled={disabled} onClick={onReload}><AppIcon name="refresh" /></button>
+    <button type="button" className={`browser-nav-button ${state.isLoading ? 'browser-reloading' : ''}`} title={state.isLoading ? t("停止") : t("重新加载")}
+      aria-label={state.isLoading ? t("停止") : t("重新加载")} disabled={disabled} onClick={onReload}><AppIcon name="refresh" /></button>
     <input className="browser-address" type="text" spellCheck={false} autoComplete="off"
-      aria-label="地址栏" placeholder="输入网址（http(s)）" value={value} disabled={disabled}
+      aria-label={t("地址栏")} placeholder={t("输入网址（http(s)）")} value={value} disabled={disabled}
       onChange={(event) => setDraft(event.target.value)} />
-    {state.url && <button type="button" className="browser-nav-button" title="在系统浏览器中打开" aria-label="在系统浏览器中打开"
+    {state.url && <button type="button" className="browser-nav-button" title={t("在系统浏览器中打开")} aria-label={t("在系统浏览器中打开")}
       disabled={disabled} onClick={() => onOpenExternal(state.url)}><AppIcon name="expand" /></button>}
   </form>;
 }

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { htmlPreviewDocument } from './preview-content.js';
+import { t } from '../../languages/index.js';
 
-export function HtmlPreviewCard({ html, onAddToConversation, source, sourceLanguage = 'html-preview', title = '图示预览' }: {
+export function HtmlPreviewCard({ html, onAddToConversation, source, sourceLanguage = 'html-preview', title = t("图示预览") }: {
   html: string;
   onAddToConversation?: (markdown: string) => void;
   source?: string;
@@ -25,7 +26,7 @@ export function HtmlPreviewCard({ html, onAddToConversation, source, sourceLangu
     const url = URL.createObjectURL(new Blob([document], { type: 'text/html;charset=utf-8' }));
     const anchor = window.document.createElement('a');
     anchor.href = url;
-    anchor.download = '图示.html';
+    anchor.download = t("图示.html");
     anchor.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
   }
@@ -35,15 +36,15 @@ export function HtmlPreviewCard({ html, onAddToConversation, source, sourceLangu
 
   return <section className="html-preview-card" aria-label={title}>
     <div className="html-preview-toolbar"><strong>{title}</strong><div>
-      <button type="button" onClick={() => setExpanded(true)} aria-label="放大图示">放大</button>
-      <button type="button" onClick={() => setSourceOpen((value) => !value)} aria-pressed={sourceOpen}>源码</button>
-      <button type="button" onClick={download}>下载</button>
-      {onAddToConversation && <button type="button" onClick={() => onAddToConversation(`\`\`\`${sourceLanguage}\n${source ?? html}\n\`\`\``)}>添加到对话</button>}
+      <button type="button" onClick={() => setExpanded(true)} aria-label={t("放大图示")}>{t("放大")}</button>
+      <button type="button" onClick={() => setSourceOpen((value) => !value)} aria-pressed={sourceOpen}>{t("源码")}</button>
+      <button type="button" onClick={download}>{t("下载")}</button>
+      {onAddToConversation && <button type="button" onClick={() => onAddToConversation(`\`\`\`${sourceLanguage}\n${source ?? html}\n\`\`\``)}>{t("添加到对话")}</button>}
     </div></div>
     {sourceOpen ? <pre className="html-preview-source"><code>{source ?? html}</code></pre> : frame('html-preview-frame')}
-    {expanded && <dialog ref={dialog} className="html-preview-dialog" aria-label={`放大${title}`}
+    {expanded && <dialog ref={dialog} className="html-preview-dialog" aria-label={t("放大{0}", { 0: title })}
       onClose={() => setExpanded(false)} onClick={(event) => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
-      <div className="html-preview-dialog-bar"><strong>{title}</strong><button type="button" onClick={() => dialog.current?.close()} aria-label="关闭图示">关闭</button></div>
+      <div className="html-preview-dialog-bar"><strong>{title}</strong><button type="button" onClick={() => dialog.current?.close()} aria-label={t("关闭图示")}>{t("关闭")}</button></div>
       {frame('html-preview-dialog-frame')}
     </dialog>}
   </section>;

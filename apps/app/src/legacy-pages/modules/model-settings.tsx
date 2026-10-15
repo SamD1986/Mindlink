@@ -1,16 +1,17 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CustomModelSettings, CustomProviderSettings, ModelApi, ModelCatalog, ModelSettings, SaveModelSettingsInput } from '@mindlink-agent/protocol';
-import deepseekIcon from '../assets/provider-icons/model-provider-deepseek.png';
-import kimiIcon from '../assets/provider-icons/model-provider-moonshot-kimi.png';
-import minimaxIcon from '../assets/provider-icons/model-provider-minimax.png';
-import alibabaIcon from '../assets/provider-icons/model-provider-alibaba-cloud.png';
-import xiaomiIcon from '../assets/provider-icons/model-provider-xiaomi-mimo.png';
-import openaiIcon from '../assets/provider-icons/model-provider-openai.png';
-import xaiIcon from '../assets/provider-icons/model-provider-xai.png';
-import zaiIcon from '../assets/provider-icons/model-provider-zai-app.png';
-import openrouterIcon from '../assets/provider-icons/model-provider-openrouter-light.png';
-import opencodeIcon from '../assets/provider-icons/model-provider-opencode-light.png';
+import deepseekIcon from '../../assets/provider-icons/model-provider-deepseek.png';
+import kimiIcon from '../../assets/provider-icons/model-provider-moonshot-kimi.png';
+import minimaxIcon from '../../assets/provider-icons/model-provider-minimax.png';
+import alibabaIcon from '../../assets/provider-icons/model-provider-alibaba-cloud.png';
+import xiaomiIcon from '../../assets/provider-icons/model-provider-xiaomi-mimo.png';
+import openaiIcon from '../../assets/provider-icons/model-provider-openai.png';
+import xaiIcon from '../../assets/provider-icons/model-provider-xai.png';
+import zaiIcon from '../../assets/provider-icons/model-provider-zai-app.png';
+import openrouterIcon from '../../assets/provider-icons/model-provider-openrouter-light.png';
+import opencodeIcon from '../../assets/provider-icons/model-provider-opencode-light.png';
+import { t } from '../../languages/index.js';
 
 type Editor = { kind: 'provider' } | { kind: 'model'; provider: CustomProviderSettings; item?: CustomModelSettings };
 
@@ -20,7 +21,7 @@ function formatError(error: unknown): string {
 
 function loadCatalog(provider?: string) {
   if (typeof window.mindlink?.getModelCatalog !== 'function') {
-    throw new Error('桌面应用需要重新启动，才能加载模型列表。');
+    throw new Error(t("桌面应用需要重新启动，才能加载模型列表。"));
   }
   return window.mindlink.getModelCatalog(provider);
 }
@@ -59,7 +60,7 @@ function ModelEditor({ editor, onClose, onSaved }: {
     const context = Number(contextWindow);
     const output = Number(maxTokens);
     if (!Number.isSafeInteger(context) || context < 1 || !Number.isSafeInteger(output) || output < 1) {
-      setValidationError('上下文窗口和最大输出 Token 必须是正整数。');
+      setValidationError(t("上下文窗口和最大输出 Token 必须是正整数。"));
       return;
     }
     let thinkingLevelMap: SaveModelSettingsInput['thinkingLevelMap'];
@@ -68,7 +69,7 @@ function ModelEditor({ editor, onClose, onSaved }: {
         const parsed: unknown = JSON.parse(thinkingMap);
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('invalid');
         thinkingLevelMap = parsed as SaveModelSettingsInput['thinkingLevelMap'];
-      } catch { setValidationError('推理等级映射必须是 JSON 对象。'); return; }
+      } catch { setValidationError(t("推理等级映射必须是 JSON 对象。")); return; }
     } else if (item?.thinkingLevelMap) thinkingLevelMap = {};
     save.mutate({ provider: editor.provider.id, model: modelId, baseUrl: editor.provider.baseUrl,
       api: editor.provider.api, apiKeyEnv: editor.provider.apiKeyEnv, activate: false,
@@ -77,36 +78,36 @@ function ModelEditor({ editor, onClose, onSaved }: {
       ...(thinkingLevelMap ? { thinkingLevelMap } : {}),
     });
   };
-  const title = editor.kind === 'provider' ? '创建自定义供应商' : item ? '编辑模型' : '添加模型';
+  const title = editor.kind === 'provider' ? t("创建自定义供应商") : item ? t("编辑模型") : t("添加模型");
   return <div className="model-editor-backdrop">
     <section className="model-editor" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="model-editor-header"><h2>{title}</h2><button type="button" className="model-editor-close" aria-label="关闭" onClick={onClose}>×</button></div>
+      <div className="model-editor-header"><h2>{title}</h2><button type="button" className="model-editor-close" aria-label={t("关闭")} onClick={onClose}>×</button></div>
       <form onSubmit={submit}>
         <div className="model-editor-fields">
           {editor.kind === 'provider' ? <>
-            <label>供应商 ID <input value={providerId} onChange={(event) => setProviderId(event.target.value)} placeholder="例如 my-provider" maxLength={80} required spellCheck={false} /></label>
-            <label>中文名称 <span className="model-editor-quiet">可选</span><input value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder="例如 自定义模型服务" maxLength={80} /></label>
+            <label>{t("供应商 ID")} <input value={providerId} onChange={(event) => setProviderId(event.target.value)} placeholder={t("例如 my-provider")} maxLength={80} required spellCheck={false} /></label>
+            <label>{t("中文名称")} <span className="model-editor-quiet">{t("可选")}</span><input value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder={t("例如 自定义模型服务")} maxLength={80} /></label>
             <label>Base URL <input type="url" value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} placeholder="https://api.example.com/v1" required spellCheck={false} /></label>
-            <label>API 格式 <select value={api} onChange={(event) => setApi(event.target.value as ModelApi)}>{supportedApis.map((value) => <option key={value} value={value}>{apiLabels[value]}</option>)}</select></label>
-            <label>API Key <span className="model-editor-quiet">可留空，改用环境变量</span><input type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder="输入 API Key" autoComplete="new-password" /></label>
-            <label>密钥环境变量 <span className="model-editor-quiet">可选</span><input value={apiKeyEnv} onChange={(event) => setApiKeyEnv(event.target.value)} placeholder="例如 PROVIDER_API_KEY" spellCheck={false} /></label>
+            <label>{t("API 格式")} <select value={api} onChange={(event) => setApi(event.target.value as ModelApi)}>{supportedApis.map((value) => <option key={value} value={value}>{apiLabels[value]}</option>)}</select></label>
+            <label>API Key <span className="model-editor-quiet">{t("可留空，改用环境变量")}</span><input type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder={t("输入 API Key")} autoComplete="new-password" /></label>
+            <label>{t("密钥环境变量")} <span className="model-editor-quiet">{t("可选")}</span><input value={apiKeyEnv} onChange={(event) => setApiKeyEnv(event.target.value)} placeholder={t("例如 PROVIDER_API_KEY")} spellCheck={false} /></label>
           </> : <>
-            <label>模型 ID <input value={modelId} onChange={(event) => setModelId(event.target.value)} readOnly={Boolean(item)} placeholder="模型 ID" required maxLength={200} spellCheck={false} /></label>
-            <label>上下文窗口 <input type="number" min="1" step="1" value={contextWindow} onChange={(event) => setContextWindow(event.target.value)} required /></label>
-            <label>最大输出 Token <input type="number" min="1" step="1" value={maxTokens} onChange={(event) => setMaxTokens(event.target.value)} required /></label>
-            <details className="model-editor-advanced" open><summary>高级配置</summary>
-              <div className="model-editor-advanced-body"><div><strong>输入类型</strong><div className="model-editor-options"><span className="model-editor-fixed-option">✓ 文本</span>
-                <label><input type="checkbox" checked={imageInput} onChange={(event) => setImageInput(event.target.checked)} /> 图片</label></div></div>
-                <div><strong>模型能力</strong><div className="model-editor-options"><label><input type="checkbox" checked={reasoning} onChange={(event) => setReasoning(event.target.checked)} /> 推理</label></div></div>
-                {reasoning && <label>推理等级映射 <span className="model-editor-quiet">可选，JSON 对象</span><textarea value={thinkingMap} onChange={(event) => setThinkingMap(event.target.value)} placeholder={'{"off": false, "high": true}'} spellCheck={false} /></label>}
+            <label>{t("模型 ID")} <input value={modelId} onChange={(event) => setModelId(event.target.value)} readOnly={Boolean(item)} placeholder={t("模型 ID")} required maxLength={200} spellCheck={false} /></label>
+            <label>{t("上下文窗口")} <input type="number" min="1" step="1" value={contextWindow} onChange={(event) => setContextWindow(event.target.value)} required /></label>
+            <label>{t("最大输出 Token")} <input type="number" min="1" step="1" value={maxTokens} onChange={(event) => setMaxTokens(event.target.value)} required /></label>
+            <details className="model-editor-advanced" open><summary>{t("高级配置")}</summary>
+              <div className="model-editor-advanced-body"><div><strong>{t("输入类型")}</strong><div className="model-editor-options"><span className="model-editor-fixed-option">{t("✓ 文本")}</span>
+                <label><input type="checkbox" checked={imageInput} onChange={(event) => setImageInput(event.target.checked)} /> {t("图片")}</label></div></div>
+                <div><strong>{t("模型能力")}</strong><div className="model-editor-options"><label><input type="checkbox" checked={reasoning} onChange={(event) => setReasoning(event.target.checked)} /> {t("推理")}</label></div></div>
+                {reasoning && <label>{t("推理等级映射")} <span className="model-editor-quiet">{t("可选，JSON 对象")}</span><textarea value={thinkingMap} onChange={(event) => setThinkingMap(event.target.value)} placeholder={'{"off": false, "high": true}'} spellCheck={false} /></label>}
               </div>
             </details>
           </>}
         </div>
         {validationError && <p className="model-editor-error" role="alert">{validationError}</p>}
-        {save.error && <p className="model-editor-error" role="alert">保存失败：{formatError(save.error)}</p>}
-        <div className="model-editor-actions"><button type="button" onClick={onClose}>取消</button>
-          <button type="submit" disabled={save.isPending || (editor.kind === 'provider' ? !providerId.trim() || !baseUrl.trim() : !modelId.trim())}>{save.isPending ? '保存中…' : '保存'}</button></div>
+        {save.error && <p className="model-editor-error" role="alert">{t("保存失败：")}{formatError(save.error)}</p>}
+        <div className="model-editor-actions"><button type="button" onClick={onClose}>{t("取消")}</button>
+          <button type="submit" disabled={save.isPending || (editor.kind === 'provider' ? !providerId.trim() || !baseUrl.trim() : !modelId.trim())}>{save.isPending ? t("保存中…") : t("保存")}</button></div>
       </form>
     </section>
   </div>;
@@ -141,12 +142,12 @@ function providerIconSource(id: string): string | undefined {
 function providerChineseName(id: string, settings?: ModelSettings): string {
   const configured = settings?.providerNames?.[id];
   if (configured) return configured;
-  if (id === 'deepseek') return '深度求索';
-  if (id === 'kimi-coding' || id.startsWith('moonshotai')) return '月之暗面';
-  if (id.startsWith('minimax')) return '稀宇科技';
-  if (id.startsWith('qwen-')) return '阿里云百炼';
-  if (id.startsWith('xiaomi')) return '小米 MiMo';
-  if (id.startsWith('zai')) return '智谱';
+  if (id === 'deepseek') return t("深度求索");
+  if (id === 'kimi-coding' || id.startsWith('moonshotai')) return t("月之暗面");
+  if (id.startsWith('minimax')) return t("稀宇科技");
+  if (id.startsWith('qwen-')) return t("阿里云百炼");
+  if (id.startsWith('xiaomi')) return t("小米 MiMo");
+  if (id.startsWith('zai')) return t("智谱");
   return '';
 }
 
@@ -163,11 +164,11 @@ function ProviderPicker({ providers, onSelect, onCustom, onBack }: {
   onBack(): void;
 }) {
   return <div className="model-provider-picker">
-    <div className="model-provider-picker-title"><button type="button" onClick={onBack} aria-label="返回供应商详情">←</button><h3>添加供应商</h3></div>
+    <div className="model-provider-picker-title"><button type="button" onClick={onBack} aria-label={t("返回供应商详情")}>←</button><h3>{t("添加供应商")}</h3></div>
     <div className="model-provider-picker-grid"><button type="button" onClick={onCustom}>
-      <span className="model-provider-card-icon custom" aria-hidden="true">＋</span><span>创建自定义供应商</span><span className="model-provider-card-arrow" aria-hidden="true">›</span>
+      <span className="model-provider-card-icon custom" aria-hidden="true">＋</span><span>{t("创建自定义供应商")}</span><span className="model-provider-card-arrow" aria-hidden="true">›</span>
     </button></div>
-    <h4>模型目录</h4><div className="model-provider-picker-grid">
+    <h4>{t("模型目录")}</h4><div className="model-provider-picker-grid">
       {providers.map((item) => <button key={item.id} type="button" onClick={() => onSelect(item.id)}>
         <ProviderIcon id={item.id} />
         <span className="model-provider-card-name"><strong>{providerChineseName(item.id) || item.name}</strong>{providerChineseName(item.id) && <small>{item.name}</small>}</span>
@@ -210,17 +211,17 @@ function ProviderDetails({ provider, settings, onSettings, onEdit, onError, onNo
   const [search, setSearch] = useState('');
   const [showKey, setShowKey] = useState(false);
   const saveProvider = useMutation({ mutationFn: (input: SaveModelSettingsInput) => window.mindlink!.saveModelSettings(input),
-    onSuccess: (result) => { onSettings(result); setApiKey(''); setRemoveApiKey(false); onError(''); onNotice('供应商配置已保存'); },
+    onSuccess: (result) => { onSettings(result); setApiKey(''); setRemoveApiKey(false); onError(''); onNotice(t("供应商配置已保存")); },
     onError: (error) => onError(formatError(error)),
   });
   const activate = useMutation({ mutationFn: (item: typeof models[number]) => window.mindlink!.saveModelSettings({
     provider, model: item.model, baseUrl: isCustom ? baseUrl : '', api: isCustom ? api : item.api as ModelApi,
     apiKeyEnv: isCustom ? customProvider?.apiKeyEnv ?? '' : '',
-  }), onSuccess: (result) => { onSettings(result); onError(''); onNotice('已切换，下一条消息生效'); },
+  }), onSuccess: (result) => { onSettings(result); onError(''); onNotice(t("已切换，下一条消息生效")); },
     onError: (error) => onError(formatError(error)),
   });
   const remove = useMutation({ mutationFn: (item: CustomModelSettings) => window.mindlink!.deleteModelSettings(provider, item.model),
-    onSuccess: (result) => { onSettings(result); onError(''); onNotice('模型已删除'); },
+    onSuccess: (result) => { onSettings(result); onError(''); onNotice(t("模型已删除")); },
     onError: (error) => onError(formatError(error)),
   });
   const dirty = (isCustom && (baseUrl !== endpoint || api !== modelApi || providerName !== (settings.providerNames?.[provider] ?? ''))) || Boolean(apiKey || removeApiKey);
@@ -235,41 +236,41 @@ function ProviderDetails({ provider, settings, onSettings, onEdit, onError, onNo
   };
   const filtered = models.filter((item) => `${item.name} ${item.model}`.toLowerCase().includes(search.toLowerCase()));
   return <div className="model-provider-detail">
-    {onBack && <button type="button" className="model-provider-back" onClick={onBack}>← 返回供应商目录</button>}
-    <div className="model-provider-title"><ProviderIcon id={provider} /><div><h3>{providerChineseName(provider, settings) || providerEnglishName}</h3><p>{providerChineseName(provider, settings) ? providerEnglishName : (isCustom ? '自定义供应商' : '模型目录')}</p></div>
-      {settings.provider === provider && <span className="model-provider-current">当前使用</span>}</div>
+    {onBack && <button type="button" className="model-provider-back" onClick={onBack}>{t("← 返回供应商目录")}</button>}
+    <div className="model-provider-title"><ProviderIcon id={provider} /><div><h3>{providerChineseName(provider, settings) || providerEnglishName}</h3><p>{providerChineseName(provider, settings) ? providerEnglishName : (isCustom ? t("自定义供应商") : t("模型目录"))}</p></div>
+      {settings.provider === provider && <span className="model-provider-current">{t("当前使用")}</span>}</div>
     <form className="model-provider-form" onSubmit={save}>
-      {isCustom && <label>中文名称 <input value={providerName} onChange={(event) => setProviderName(event.target.value)} maxLength={80} placeholder="可选" /></label>}
+      {isCustom && <label>{t("中文名称")} <input value={providerName} onChange={(event) => setProviderName(event.target.value)} maxLength={80} placeholder={t("可选")} /></label>}
       <label>Base URL <input value={isCustom ? baseUrl : endpoint} onChange={(event) => setBaseUrl(event.target.value)} readOnly={!isCustom}
-        placeholder={catalog.isLoading ? '正在读取…' : '暂无接口地址'} spellCheck={false} /></label>
-      <label>API 格式 <select value={isCustom ? api : isModelApi(modelApi) ? modelApi : 'openai-completions'} onChange={(event) => setApi(event.target.value as ModelApi)} disabled={!isCustom}>
+        placeholder={catalog.isLoading ? t("正在读取…") : t("暂无接口地址")} spellCheck={false} /></label>
+      <label>{t("API 格式")} <select value={isCustom ? api : isModelApi(modelApi) ? modelApi : 'openai-completions'} onChange={(event) => setApi(event.target.value as ModelApi)} disabled={!isCustom}>
         {supportedApis.map((value) => <option key={value} value={value}>{apiLabels[value]}</option>)}</select></label>
       <label>API Key <span className="model-provider-key-field"><input type={showKey ? 'text' : 'password'} value={apiKey}
         onChange={(event) => { setApiKey(event.target.value); setRemoveApiKey(false); }} disabled={credential === 'oauth' || removeApiKey}
-        placeholder={credential === 'api_key' ? '已保存；输入新 Key 可替换' : credential === 'oauth' ? 'OAuth 已连接' : '输入 API Key，或使用环境变量'} autoComplete="new-password" />
-        <button type="button" onClick={() => setShowKey((value) => !value)} disabled={!apiKey} aria-label={showKey ? '隐藏 API Key' : '显示 API Key'} title={showKey ? '隐藏 API Key' : '显示 API Key'}>{showKey ? '隐藏' : '显示'}</button></span></label>
+        placeholder={credential === 'api_key' ? t("已保存；输入新 Key 可替换") : credential === 'oauth' ? t("OAuth 已连接") : t("输入 API Key，或使用环境变量")} autoComplete="new-password" />
+        <button type="button" onClick={() => setShowKey((value) => !value)} disabled={!apiKey} aria-label={showKey ? t("隐藏 API Key") : t("显示 API Key")} title={showKey ? t("隐藏 API Key") : t("显示 API Key")}>{showKey ? t("隐藏") : t("显示")}</button></span></label>
       <div className="model-provider-form-footer">
-        {credential === 'api_key' && <label className="model-provider-remove-key"><input type="checkbox" checked={removeApiKey} onChange={(event) => { setRemoveApiKey(event.target.checked); setApiKey(''); }} />清除已保存的 API Key</label>}
-        <button type="submit" disabled={!dirty || saveProvider.isPending || (!isCustom && !first) || (isCustom && !baseUrl.trim())}>{saveProvider.isPending ? '保存中…' : '保存配置'}</button>
+        {credential === 'api_key' && <label className="model-provider-remove-key"><input type="checkbox" checked={removeApiKey} onChange={(event) => { setRemoveApiKey(event.target.checked); setApiKey(''); }} />{t("清除已保存的 API Key")}</label>}
+        <button type="submit" disabled={!dirty || saveProvider.isPending || (!isCustom && !first) || (isCustom && !baseUrl.trim())}>{saveProvider.isPending ? t("保存中…") : t("保存配置")}</button>
       </div>
     </form>
-    <div className="model-provider-models-heading"><div><h4>模型列表</h4><p>{isCustom ? '此供应商的自定义模型' : '从目录选择当前使用的模型'}</p></div>
-      {customProvider && <button type="button" onClick={() => onEdit({ kind: 'model', provider: customProvider })}>＋ 添加模型</button>}</div>
-    {models.length > 8 && <input className="model-provider-search" aria-label="搜索模型" placeholder="搜索模型" value={search} onChange={(event) => setSearch(event.target.value)} />}
-    {catalog.isLoading && !isCustom && <p>正在读取模型目录…</p>}
-    {catalog.error && !isCustom && <p role="alert">模型目录读取失败：{formatError(catalog.error)}</p>}
+    <div className="model-provider-models-heading"><div><h4>{t("模型列表")}</h4><p>{isCustom ? t("此供应商的自定义模型") : t("从目录选择当前使用的模型")}</p></div>
+      {customProvider && <button type="button" onClick={() => onEdit({ kind: 'model', provider: customProvider })}>{t("＋ 添加模型")}</button>}</div>
+    {models.length > 8 && <input className="model-provider-search" aria-label={t("搜索模型")} placeholder={t("搜索模型")} value={search} onChange={(event) => setSearch(event.target.value)} />}
+    {catalog.isLoading && !isCustom && <p>{t("正在读取模型目录…")}</p>}
+    {catalog.error && !isCustom && <p role="alert">{t("模型目录读取失败：")}{formatError(catalog.error)}</p>}
     <div className="model-provider-model-list">
       {filtered.map((item) => <div className="model-provider-model-row" key={item.model}>
         <ProviderIcon id={provider} /><div className="model-provider-model-name"><strong>{item.name}</strong>{item.model !== item.name && <span>{item.model}</span>}</div>
-        {item.active && <span className="model-provider-active">当前使用</span>}
-        {customProvider && <button type="button" title="编辑模型" aria-label={`编辑 ${item.name}`} onClick={() => onEdit({ kind: 'model', provider: customProvider, item: item as CustomModelSettings })}>编辑</button>}
-        {!item.active && <button type="button" title="设为当前" disabled={activate.isPending || !isModelApi(item.api)} onClick={() => activate.mutate(item)}>设为当前</button>}
-        {isCustom && <button type="button" title="删除模型" aria-label={`删除 ${item.name}`} disabled={remove.isPending} onClick={() => {
-          const keyNote = item.credential === 'api_key' && custom.length === 1 ? '已保存的 API Key 也会删除。' : '';
-          if (window.confirm(`删除模型 ${item.name}？${keyNote}`)) remove.mutate(item as CustomModelSettings);
-        }}>删除</button>}
+        {item.active && <span className="model-provider-active">{t("当前使用")}</span>}
+        {customProvider && <button type="button" title={t("编辑模型")} aria-label={t("编辑 {0}", { 0: item.name })} onClick={() => onEdit({ kind: 'model', provider: customProvider, item: item as CustomModelSettings })}>{t("编辑")}</button>}
+        {!item.active && <button type="button" title={t("设为当前")} disabled={activate.isPending || !isModelApi(item.api)} onClick={() => activate.mutate(item)}>{t("设为当前")}</button>}
+        {isCustom && <button type="button" title={t("删除模型")} aria-label={t("删除 {0}", { 0: item.name })} disabled={remove.isPending} onClick={() => {
+          const keyNote = item.credential === 'api_key' && custom.length === 1 ? t("已保存的 API Key 也会删除。") : '';
+          if (window.confirm(t("删除模型 {0}？{1}", { 0: item.name, 1: keyNote }))) remove.mutate(item as CustomModelSettings);
+        }}>{t("删除")}</button>}
       </div>)}
-      {!catalog.isLoading && filtered.length === 0 && <p className="model-provider-empty">{search ? '没有匹配的模型' : '这里还没有模型'}</p>}
+      {!catalog.isLoading && filtered.length === 0 && <p className="model-provider-empty">{search ? t("没有匹配的模型") : t("这里还没有模型")}</p>}
     </div>
   </div>;
 }
@@ -292,30 +293,30 @@ export function ModelSettingsPanel({ active }: { active: boolean }) {
   ));
   const provider = selected && (customProviders.includes(selected) || catalog.data?.providers.some((item) => item.id === selected))
     ? selected : settings?.provider ?? '';
-  return <section className="settings-models" aria-label="模型设置">
-    <header className="model-settings-header"><h2>模型设置</h2><div className="model-settings-subhead"><p>管理模型供应商，配置后可在工作中选择使用。</p>
-      <div><button type="button" aria-label="刷新模型设置" title="刷新模型设置" onClick={() => { void client.invalidateQueries({ queryKey: ['settings', 'models'] }); void client.invalidateQueries({ queryKey: ['settings', 'model-catalog'] }); }}>↻</button>
-        <button type="button" className="model-add-provider" onClick={() => setAddingProvider(true)}>＋ 添加供应商</button></div></div></header>
-    {!desktop && <p role="alert">请在桌面应用中配置模型。</p>}
-    {query.isLoading && <p>正在读取模型设置…</p>}
-    {query.error && <p role="alert">读取失败：{formatError(query.error)}</p>}
+  return <section className="settings-models" aria-label={t("模型设置")}>
+    <header className="model-settings-header"><h2>{t("模型设置")}</h2><div className="model-settings-subhead"><p>{t("管理模型供应商，配置后可在工作中选择使用。")}</p>
+      <div><button type="button" aria-label={t("刷新模型设置")} title={t("刷新模型设置")} onClick={() => { void client.invalidateQueries({ queryKey: ['settings', 'models'] }); void client.invalidateQueries({ queryKey: ['settings', 'model-catalog'] }); }}>↻</button>
+        <button type="button" className="model-add-provider" onClick={() => setAddingProvider(true)}>{t("＋ 添加供应商")}</button></div></div></header>
+    {!desktop && <p role="alert">{t("请在桌面应用中配置模型。")}</p>}
+    {query.isLoading && <p>{t("正在读取模型设置…")}</p>}
+    {query.error && <p role="alert">{t("读取失败：")}{formatError(query.error)}</p>}
     {settings && <div className="model-provider-layout">
-      <nav className="model-provider-nav" aria-label="供应商">
-        <span className="model-provider-nav-label">已添加供应商</span>
+      <nav className="model-provider-nav" aria-label={t("供应商")}>
+        <span className="model-provider-nav-label">{t("已添加供应商")}</span>
         {catalogProviders.map((item) => <button type="button" key={item.id} className={provider === item.id ? 'selected' : ''} onClick={() => { setSelected(item.id); setAddingProvider(false); setFromPicker(false); }}>
           <ProviderIcon id={item.id} /><span className="model-provider-nav-name"><strong>{providerChineseName(item.id, settings) || item.name}</strong>{providerChineseName(item.id, settings) && <small>{item.name}</small>}</span>
           <i className={settings.providerCredentials?.[item.id] === 'api_key' || settings.providerCredentials?.[item.id] === 'oauth' ? 'configured' : ''} aria-hidden="true" /></button>)}
-        {catalog.error && <p role="alert">目录读取失败：{formatError(catalog.error)}</p>}
-        <span className="model-provider-nav-label">自定义供应商</span>
+        {catalog.error && <p role="alert">{t("目录读取失败：")}{formatError(catalog.error)}</p>}
+        <span className="model-provider-nav-label">{t("自定义供应商")}</span>
         {customProviders.map((id) => <button type="button" key={id} className={provider === id ? 'selected' : ''} onClick={() => { setSelected(id); setAddingProvider(false); setFromPicker(false); }}>
           <ProviderIcon id={id} /><span className="model-provider-nav-name"><strong>{providerChineseName(id, settings) || id}</strong>{providerChineseName(id, settings) && <small>{id}</small>}</span>
           <i className={settings.providerCredentials?.[id] === 'api_key' || settings.providerCredentials?.[id] === 'oauth' ? 'configured' : ''} aria-hidden="true" /></button>)}
-        {customProviders.length === 0 && <p>还没有自定义供应商</p>}
+        {customProviders.length === 0 && <p>{t("还没有自定义供应商")}</p>}
       </nav>
       {addingProvider ? <ProviderPicker providers={catalog.data?.providers ?? []} onSelect={(id) => { setSelected(id); setAddingProvider(false); setFromPicker(true); }}
         onCustom={() => setEditor({ kind: 'provider' })} onBack={() => { setAddingProvider(false); setFromPicker(false); }} />
         : provider ? <ProviderDetails key={provider} provider={provider} settings={settings} onSettings={(result) => client.setQueryData(['settings', 'models'], result)}
-        onEdit={setEditor} onError={setOperationError} onNotice={setNotice} onBack={fromPicker ? () => setAddingProvider(true) : undefined} /> : <p className="model-provider-empty">请选择或添加供应商</p>}
+        onEdit={setEditor} onError={setOperationError} onNotice={setNotice} onBack={fromPicker ? () => setAddingProvider(true) : undefined} /> : <p className="model-provider-empty">{t("请选择或添加供应商")}</p>}
     </div>}
     {operationError && <p role="alert" className="model-operation-error">{operationError}</p>}
     {notice && <p role="status" className="model-operation-notice">{notice}</p>}
@@ -324,7 +325,7 @@ export function ModelSettingsPanel({ active }: { active: boolean }) {
       setSelected(savedProvider);
       setAddingProvider(false);
       setFromPicker(false);
-      setEditor(null); setOperationError(''); setNotice('已保存，下一条消息生效');
+      setEditor(null); setOperationError(''); setNotice(t("已保存，下一条消息生效"));
     }} />}
   </section>;
 }

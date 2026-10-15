@@ -1,4 +1,5 @@
 import type { AgentRunStatus } from '@mindlink-agent/protocol';
+import { t } from '../../languages/index.js';
 
 export type AssistantAction = 'idle' | 'wave' | 'heart' | 'reading' | 'typing' | 'backtyping' | 'hammer';
 export interface AssistantActivity {
@@ -11,8 +12,8 @@ export interface AssistantActivity {
 }
 
 export const assistantActionLabels: Record<AssistantAction, string> = {
-  idle: '待命', wave: '向你问好', heart: '任务完成', reading: '阅读与查资料',
-  typing: '电脑办公', backtyping: '后台处理', hammer: '构建与修复',
+  idle: t("待命"), wave: t("向你问好"), heart: t("任务完成"), reading: t("阅读与查资料"),
+  typing: t("电脑办公"), backtyping: t("后台处理"), hammer: t("构建与修复"),
 };
 
 /** Presentation policy only: it never changes the agent, tools or permissions. */

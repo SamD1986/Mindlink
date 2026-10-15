@@ -13,6 +13,7 @@ import { FileDiffView } from './file-diff-view.js';
 import { getKnownFileVersion, rememberFileVersion, type CachedFileVersion } from './file-version-cache.js';
 import { countDiffChanges, createUnifiedDiff } from './text-diff.js';
 import { PdfView } from './pdf-view.js';
+import { t } from '../../../languages/index.js';
 
 const MAX_RENDERED_LINES = 2000;
 type TextPreviewMode = 'result' | 'diff';
@@ -80,7 +81,7 @@ function ImageViewer({ mediaType, base64, alt }: { mediaType: string; base64: st
   }, [base64, mediaType]);
   if (!src) return null;
   return <>
-    <button type="button" className="file-preview-image-open" aria-label={`全屏预览图片：${alt}`}
+    <button type="button" className="file-preview-image-open" aria-label={t("全屏预览图片：{0}", { 0: alt })}
       onClick={() => setFullScreen(true)}><img className="file-preview-image" src={src} alt={alt} /></button>
     {fullScreen && <ImageLightbox src={src} alt={alt} onClose={() => setFullScreen(false)} />}
   </>;
@@ -135,16 +136,16 @@ export function FilePreview({ host, scopeKey, filePath, onRequestLocate }: {
   return <div className="file-preview">
     {toolbarVisible && <div className="file-toolbar">
       <div className="file-toolbar-side">
-        {preview?.kind === 'text' && <div className="file-content-toggle" role="group" aria-label="文件显示方式">
-          {canRender && <button type="button" title="渲染预览" aria-label="渲染预览" aria-pressed={contentView === 'rendered'}
+        {preview?.kind === 'text' && <div className="file-content-toggle" role="group" aria-label={t("文件显示方式")}>
+          {canRender && <button type="button" title={t("渲染预览")} aria-label={t("渲染预览")} aria-pressed={contentView === 'rendered'}
             onClick={() => { setContentView('rendered'); setMode('result'); }}><AppIcon name="eye" /></button>}
-          <button type="button" title="查看源代码" aria-label="查看源代码" aria-pressed={!canRender || contentView === 'source'}
+          <button type="button" title={t("查看源代码")} aria-label={t("查看源代码")} aria-pressed={!canRender || contentView === 'source'}
             onClick={() => { setContentView('source'); setMode('result'); }}><AppIcon name="code" /></button>
         </div>}
         {isTextWithPrevious ? <>
-          <div className="file-view-toggle" role="tablist" aria-label="预览视图切换">
-            <button type="button" aria-pressed={mode === 'result'} onClick={() => setMode('result')}>最终内容</button>
-            <button type="button" aria-pressed={mode === 'diff'} onClick={() => setMode('diff')}>替换效果</button>
+          <div className="file-view-toggle" role="tablist" aria-label={t("预览视图切换")}>
+            <button type="button" aria-pressed={mode === 'result'} onClick={() => setMode('result')}>{t("最终内容")}</button>
+            <button type="button" aria-pressed={mode === 'diff'} onClick={() => setMode('diff')}>{t("替换效果")}</button>
           </div>
           {mode === 'diff' && stats && <span className="file-diff-stats">
             <b className="add">+{stats.added}</b> <b className="del">-{stats.removed}</b>
@@ -152,28 +153,28 @@ export function FilePreview({ host, scopeKey, filePath, onRequestLocate }: {
         </> : <span className="file-preview-meta">{meta}</span>}
       </div>
       {preview && <div className="file-toolbar-actions">
-        {onRequestLocate && <button type="button" className="file-toolbar-button" title="在文件树中定位"
-          aria-label="在文件树中定位" onClick={() => onRequestLocate(filePath)}><AppIcon name="locate" /></button>}
-        <button type="button" className="file-toolbar-button" title="复制路径" aria-label="复制路径"
+        {onRequestLocate && <button type="button" className="file-toolbar-button" title={t("在文件树中定位")}
+          aria-label={t("在文件树中定位")} onClick={() => onRequestLocate(filePath)}><AppIcon name="locate" /></button>}
+        <button type="button" className="file-toolbar-button" title={t("复制路径")} aria-label={t("复制路径")}
           onClick={() => { void navigator.clipboard.writeText(filePath); }}><AppIcon name="copy" /></button>
-        <button type="button" className="file-toolbar-button" title="刷新" aria-label="刷新"
+        <button type="button" className="file-toolbar-button" title={t("刷新")} aria-label={t("刷新")}
           onClick={() => { void query.refetch(); }}><AppIcon name="refresh" /></button>
       </div>}
     </div>}
     <div className="file-preview-body">
-      {query.isLoading && <p className="file-preview-loading">正在读取文件…</p>}
-      {query.error && <p className="file-preview-error" role="alert">文件无法预览：{query.error instanceof Error ? query.error.message : String(query.error)}</p>}
+      {query.isLoading && <p className="file-preview-loading">{t("正在读取文件…")}</p>}
+      {query.error && <p className="file-preview-error" role="alert">{t("文件无法预览：")}{query.error instanceof Error ? query.error.message : String(query.error)}</p>}
       {preview?.kind === 'unsupported' && <p className="file-preview-error" role="alert">{preview.reason}</p>}
       {preview?.kind === 'image' && <ImageViewer mediaType={preview.mediaType} base64={preview.base64} alt={name} />}
       {preview?.kind === 'pdf' && <PdfView base64={preview.base64} />}
       {preview?.kind === 'text' && <>
-        {preview.truncated && <p className="file-preview-truncated" role="status">文件超过 256 KB，仅显示开头部分。</p>}
+        {preview.truncated && <p className="file-preview-truncated" role="status">{t("文件超过 256 KB，仅显示开头部分。")}</p>}
         {mode === 'diff' && previous
           ? <FileDiffView fileName={name} oldText={previous.content} newText={preview.content} />
           : canRender && contentView === 'rendered' && contentKind === 'markdown'
             ? <div className="file-preview-markdown"><MessageContent text={preview.content} /></div>
             : canRender && contentView === 'rendered' && isHtml
-              ? <iframe className="file-preview-html" title={`${name} 渲染预览`} sandbox="" referrerPolicy="no-referrer"
+              ? <iframe className="file-preview-html" title={t("{0} 渲染预览", { 0: name })} sandbox="" referrerPolicy="no-referrer"
                   srcDoc={staticHtmlSrcDoc(preview.content)} />
             : <TextPreview fileName={name} content={preview.content} />}
       </>}

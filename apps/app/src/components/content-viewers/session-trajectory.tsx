@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { SessionTrajectory, SessionTrajectoryRow } from '@mindlink-agent/protocol';
+import { t } from '../../languages/index.js';
 
 const kindLabels: Record<SessionTrajectoryRow['kind'], string> = {
-  user: '用户', assistant: '助手', tool: '工具', model: '模型', context: '上下文', subagent: '子智能体',
+  user: t("用户"), assistant: t("助手"), tool: t("工具"), model: t("模型"), context: t("上下文"), subagent: t("子智能体"),
 };
 const lanes = ['user', 'model', 'tool', 'context'] as const;
 
@@ -32,7 +33,7 @@ function SessionTimeline({ trajectory, mode, onRound }: {
     }
     return (Date.parse(row.at) - first) / span;
   };
-  return <div className="session-timeline" aria-label="会话时间轴">
+  return <div className="session-timeline" aria-label={t("会话时间轴")}>
     {lanes.map((lane) => <div className={`session-timeline-lane ${lane}`} key={lane}>
       <span>{kindLabels[lane]}</span><div>
         {trajectory.rows.filter((row) => row.kind === lane || lane === 'tool' && row.kind === 'subagent')
@@ -86,44 +87,44 @@ export function SessionTrajectoryViewer({ trajectory, title, onRefresh }: {
   }, [groups, jumpRound]);
   return <div className="session-trajectory-viewer">
     <header className="session-trajectory-header">
-      <strong>当前会话 · {title}</strong>
-      {onRefresh && <button type="button" onClick={onRefresh} aria-label="刷新运行轨迹">↻</button>}
+      <strong>{t("当前会话 ·")} {title}</strong>
+      {onRefresh && <button type="button" onClick={onRefresh} aria-label={t("刷新运行轨迹")}>↻</button>}
     </header>
     <div className="session-trajectory-controls">
-      <div className="session-trajectory-modes" role="tablist" aria-label="轨迹概览方式">
-        {([['time', '时长', elapsed(rows[0]?.at, rows.at(-1)?.at)],
-          ['round', '轮次', String(trajectory?.rounds ?? 0)],
-          ['calls', '调用', String(trajectory?.calls ?? 0)]] as const).map(([key, label, value]) =>
+      <div className="session-trajectory-modes" role="tablist" aria-label={t("轨迹概览方式")}>
+        {([['time', t("时长"), elapsed(rows[0]?.at, rows.at(-1)?.at)],
+          ['round', t("轮次"), String(trajectory?.rounds ?? 0)],
+          ['calls', t("调用"), String(trajectory?.calls ?? 0)]] as const).map(([key, label, value]) =>
           <button type="button" role="tab" key={key} aria-selected={mode === key}
             className={mode === key ? 'active' : ''} onClick={() => setMode(key)}>{label} <b>{value}</b></button>)}
       </div>
-      <input type="search" aria-label="搜索运行轨迹" placeholder="搜索" value={query}
+      <input type="search" aria-label={t("搜索运行轨迹")} placeholder={t("搜索")} value={query}
         onChange={(event) => setQuery(event.target.value)} />
     </div>
     {trajectory && <SessionTimeline trajectory={trajectory} mode={mode} onRound={scrollToRound} />}
     <div className="session-trajectory-rows">
-      {!trajectory && <p className="session-trajectory-empty">正在读取当前会话…</p>}
+      {!trajectory && <p className="session-trajectory-empty">{t("正在读取当前会话…")}</p>}
       {trajectory && !rows.length && (!trajectory.live || trajectory.live.finishedAt)
-        && <p className="session-trajectory-empty">当前会话还没有运行记录。</p>}
-      {trajectory && rows.length > 0 && !groups.length && <p className="session-trajectory-empty">没有匹配的记录。</p>}
+        && <p className="session-trajectory-empty">{t("当前会话还没有运行记录。")}</p>}
+      {trajectory && rows.length > 0 && !groups.length && <p className="session-trajectory-empty">{t("没有匹配的记录。")}</p>}
       {trajectory?.live && !trajectory.live.finishedAt && <section className="session-live-round">
-        <h3>正在运行</h3>
+        <h3>{t("正在运行")}</h3>
         <ol><li className="session-row assistant">
-          <span className="session-row-kind">{trajectory.live.text ? '助手' : '思考'}</span>
+          <span className="session-row-kind">{trajectory.live.text ? t("助手") : t("思考")}</span>
           <span className="session-row-text" title={trajectory.live.text.slice(-240)}>
-            {trajectory.live.text ? trajectory.live.text.slice(-240) : '正在处理本轮输入'}</span>
-          <time>实时</time>
+            {trajectory.live.text ? trajectory.live.text.slice(-240) : t("正在处理本轮输入")}</span>
+          <time>{t("实时")}</time>
         </li>{trajectory.live.tools.slice().reverse().map((tool) => <li className={`session-row tool ${tool.status}`} key={tool.id}>
           <span className="session-row-kind">{tool.category}</span><span className="session-row-text">{tool.summary}</span>
-          <time>{tool.status === 'running' ? '运行中' : tool.status === 'failed' ? '失败' : '完成'}</time>
+          <time>{tool.status === 'running' ? t("运行中") : tool.status === 'failed' ? t("失败") : t("完成")}</time>
         </li>)}</ol>
       </section>}
       {groups.map(({ round, rows: groupRows }) => <section key={round} id={`trajectory-round-${round}`}>
-        <h3>{round ? `第 ${round} 轮` : '会话设置'} <span>· {groupRows[0]?.at && new Date(groupRows[0].at).toLocaleTimeString('zh-CN', { hour12: false })}</span></h3>
+        <h3>{round ? t("第 {0} 轮", { 0: round }) : t("会话设置")} <span>· {groupRows[0]?.at && new Date(groupRows[0].at).toLocaleTimeString('zh-CN', { hour12: false })}</span></h3>
         <ol>{groupRows.map((row) => <Row key={row.id} row={row} />)}</ol>
       </section>)}
       {!query && rows.length > visibleCount && <button className="session-show-earlier" type="button"
-        onClick={() => setVisibleCount((count) => count + 300)}>显示更早记录 · {rows.length - visibleCount} 条</button>}
+        onClick={() => setVisibleCount((count) => count + 300)}>{t("显示更早记录 ·")} {rows.length - visibleCount} {t("条")}</button>}
     </div>
   </div>;
 }
@@ -135,7 +136,7 @@ export function SubagentViewer({ trajectory, onOpenTrajectory }: {
   const [selectedId, setSelectedId] = useState<string>();
   const selected = trajectory?.children.find((child) => child.id === selectedId);
   if (selected) return <div className="session-child-detail">
-    <button type="button" className="session-child-back" onClick={() => setSelectedId(undefined)}>← 子智能体</button>
+    <button type="button" className="session-child-back" onClick={() => setSelectedId(undefined)}>{t("← 子智能体")}</button>
     <SessionTrajectoryViewer title={selected.agent}
       trajectory={{ conversationId: selected.id, rows: selected.rows, rounds: selected.rounds,
         calls: selected.calls, children: [], ...(selected.status === 'running' ? { live: {
@@ -144,12 +145,12 @@ export function SubagentViewer({ trajectory, onOpenTrajectory }: {
   </div>;
   const children = trajectory?.children ?? [];
   return <div className="session-trajectory-viewer session-subagent-viewer">
-    <header className="session-trajectory-header"><strong>子智能体</strong></header>
+    <header className="session-trajectory-header"><strong>{t("子智能体")}</strong></header>
     {children.length ? <ol className="session-subagent-list">{children.slice().reverse().map((child) => <li key={child.id}>
-      <strong>{child.agent}</strong><span>{child.status} · {child.rounds} 轮 · {child.calls} 次调用</span>
+      <strong>{child.agent}</strong><span>{child.status} · {child.rounds} {t("轮 ·")} {child.calls} {t("次调用")}</span>
       {child.status === 'running' && child.progress && <span>{child.progress}</span>}
-      <button type="button" onClick={() => setSelectedId(child.id)}>查看过程</button>
-    </li>)}</ol> : <p className="session-trajectory-empty">当前工作会话还没有子智能体记录。</p>}
-    {children.length > 0 && <button type="button" className="session-child-link" onClick={onOpenTrajectory}>查看父会话轨迹 →</button>}
+      <button type="button" onClick={() => setSelectedId(child.id)}>{t("查看过程")}</button>
+    </li>)}</ol> : <p className="session-trajectory-empty">{t("当前工作会话还没有子智能体记录。")}</p>}
+    {children.length > 0 && <button type="button" className="session-child-link" onClick={onOpenTrajectory}>{t("查看父会话轨迹 →")}</button>}
   </div>;
 }

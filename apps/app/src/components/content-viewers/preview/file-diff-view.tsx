@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { PatchDiff } from '@pierre/diffs/react';
 
 import { createUnifiedDiff } from './text-diff.js';
+import { t } from '../../../languages/index.js';
 
 function currentAppTheme(): 'light' | 'dark' {
   return document.documentElement.getAttribute('data-mindlink-theme') === 'mindlink-dark' ? 'dark' : 'light';
@@ -18,7 +19,7 @@ export function FileDiffView({ fileName, oldText, newText }: { fileName: string;
     [oldText, newText, fileName],
   );
   if (!patch) {
-    return <p className="file-preview-error" role="status">改动过大，替换效果视图不可用，请查看最终内容。</p>;
+    return <p className="file-preview-error" role="status">{t("改动过大，替换效果视图不可用，请查看最终内容。")}</p>;
   }
   return <div className="file-diff-view">
     <PatchDiff patch={patch} disableWorkerPool

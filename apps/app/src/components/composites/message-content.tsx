@@ -6,6 +6,7 @@ import { MermaidPreviewCard } from './mermaid-preview-card.js';
 import { MessageImage, type ImagePreview } from './message-image.js';
 import { completeHtmlPreview, completePreviewFence, wrappedHtmlPreview } from './preview-content.js';
 import { splitTextByFilePaths, workspaceFileHref } from './work-file-links.js';
+import { t } from '../../languages/index.js';
 
 type RenderOptions = {
   onOpenFilePath?: (path: string) => void;
@@ -16,7 +17,7 @@ type RenderOptions = {
 
 function fileLink(path: string, options: RenderOptions, key: string, label: ReactNode = path): ReactNode {
   return <button key={key} type="button" className="message-file-link"
-    title="在工作区中打开" onClick={() => options.onOpenFilePath?.(path)}>{label}</button>;
+    title={t("在工作区中打开")} onClick={() => options.onOpenFilePath?.(path)}>{label}</button>;
 }
 
 function textWithFilePaths(text: string, options: RenderOptions, key: string): ReactNode {
@@ -101,20 +102,20 @@ function blocks(tokens: Token[], options: RenderOptions): ReactNode[] {
         if (code.lang?.trim() === 'html-preview') {
           return completeHtmlPreview(code)
             ? <HtmlPreviewCard key={key} html={code.text} onAddToConversation={options.onAddToConversation} />
-            : <div key={key} className="html-preview-pending" role="status">正在生成图示…</div>;
+            : <div key={key} className="html-preview-pending" role="status">{t("正在生成图示…")}</div>;
         }
         if (code.lang?.trim() === 'html' && /^\s*<html-preview>/i.test(code.text)) {
           const wrapped = wrappedHtmlPreview(code);
           return wrapped
             ? <HtmlPreviewCard key={key} html={wrapped} onAddToConversation={options.onAddToConversation} />
-            : <div key={key} className="html-preview-pending" role="status">正在生成图示…</div>;
+            : <div key={key} className="html-preview-pending" role="status">{t("正在生成图示…")}</div>;
         }
         const language = code.lang?.trim();
         if (language === 'mermaid' || language === 'graph') {
           return completePreviewFence(code, language)
             ? <MermaidPreviewCard key={key} code={code.text} language={language}
               onAddToConversation={options.onAddToConversation} />
-            : <div key={key} className="html-preview-pending" role="status">正在生成图表…</div>;
+            : <div key={key} className="html-preview-pending" role="status">{t("正在生成图表…")}</div>;
         }
         return <pre key={key}><code>{code.text}</code></pre>;
       }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useWorkspace } from '../shell/workspace.js';
 import { ChatPanel } from './chat.js';
 import './styles.css';
+import { t } from '../languages/index.js';
 
 /**
  * Chatbox 浮层容器：可拖拽、可缩放的对话窗口。
@@ -114,7 +115,7 @@ export function Chatbox() {
         onPointerUp={handleDragEnd}
         onPointerCancel={handleDragEnd}
       >
-        <span className="chatbox-title">对话</span>
+        <span className="chatbox-title">{t("对话")}</span>
       </div>
       <div className="chatbox-content">
         <ChatPanel

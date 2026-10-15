@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react';
 
 import { HtmlPreviewCard } from './html-preview-card.js';
+import { t } from '../../languages/index.js';
 
 let initialized = false;
 
@@ -30,8 +31,8 @@ export function MermaidPreviewCard({ code, language, onAddToConversation }: {
     return () => { cancelled = true; };
   }, [code, id]);
 
-  if (error) return <pre className="html-preview-error"><code>{code}</code><span>图表无法预览，请检查语法。</span></pre>;
-  if (!svg) return <div className="html-preview-pending" role="status">正在生成图表…</div>;
-  return <HtmlPreviewCard html={svg} source={code} sourceLanguage={language} title="图表预览"
+  if (error) return <pre className="html-preview-error"><code>{code}</code><span>{t("图表无法预览，请检查语法。")}</span></pre>;
+  if (!svg) return <div className="html-preview-pending" role="status">{t("正在生成图表…")}</div>;
+  return <HtmlPreviewCard html={svg} source={code} sourceLanguage={language} title={t("图表预览")}
     onAddToConversation={onAddToConversation} />;
 }
