@@ -87,7 +87,7 @@ tasks:
 
   - id: UI-03
     title: "窗口控制桥与无边框窗口（唯一改动桌面壳的一刀）"
-    status: pending
+    status: in_progress
     goal: "让上栏能自绘最小化/最大化/关闭，并保持拖拽、双击最大化、平台差异正确。"
     scope:
       in:
@@ -104,11 +104,24 @@ tasks:
       - {type: assertion, expect: "macOS 上不出现与系统红绿灯重复的控件"}
     dependencies: ["UI-02"]
     risk_level: L3
-    touches: ["packages/mindlink-protocol/src/index.ts", "apps/desktop/src/preload.ts", "apps/desktop/src/main.ts", "apps/app/src/top-bar/**"]
+    touches: ["packages/mindlink-protocol/src/index.ts", "apps/desktop/src/preload.ts", "apps/desktop/src/main.ts", "apps/app/src/top-bar/**", "apps/desktop/test/window-controls.test.mjs", "apps/desktop/test/ui-rebuild-shell-probe.mjs"]
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "协议层新增 5 个方法（minimizeWindow / toggleMaximizeWindow / closeWindow / isWindowMaximized / onWindowMaximizeChanged），桥方法数 87 → 91"
+        - "apps/desktop/test/window-controls.test.mjs 5 条全绿：协议声明齐、preload 通道映射齐、4 个通道全部走 trustedHandler、非 macOS 自绘标题栏且无 'default'、最大化事件转发到渲染层"
+        - "真机探针 apps/desktop/test/ui-rebuild-shell-probe.mjs 8/8：桥方法 5/5、无边框（outer-inner=7，带系统标题栏约 39）、最大化后外框 3072x1680 = 屏幕可用区、按钮 aria-label 跟随切换（证明事件真的送到渲染层）、还原、最小化（document.visibilityState=hidden）、截图、关闭后应用退出（exitCode=0）"
+        - "证据：.tasks/ui-rebuild/evidence/UI-03/（截图 + results.md）"
+      pitfalls:
+        - "真机探针必须传独立 --user-data-dir：默认 userData 上只要有另一个实例或残留实例锁，新实例会被 requestSingleInstanceLock 挡掉，**秒退且没有任何输出**，看起来像崩溃"
+        - "Electron 没实现 CDP 的 Browser 域（页面会话与浏览器级连接都报 \"'Browser.getWindowForTarget' wasn't found\"），读窗口状态要用渲染层可观测信号：最大化看外框尺寸是否等于 screen.availWidth/availHeight，最小化看 document.visibilityState"
+        - "本机没装 playwright，仓库既有探针用的 chromium.connectOverCDP 跑不了 —— 用 Node 内置 WebSocket 写最小 CDP 客户端（Runtime.evaluate + Page.captureScreenshot）即可"
+      note: "未并入 main，按仓库口径不标 done；macOS 红绿灯行为无法在本机验证"
 
   - id: UI-04
     title: "上栏内容：标签页 + 窗口按钮"
-    status: pending
+    status: in_progress
     goal: "标签页与窗口按钮共存，且不抢拖拽区。"
     scope:
       in: ["src/top-bar/：标签页模型（先做占位数据）、标签切换、与窗口按钮的布局分区"]
@@ -120,7 +133,20 @@ tasks:
       - {type: assertion, expect: "标签可切换且高亮正确；窗口按钮与标签互不遮挡；空白处可拖动窗口"}
     dependencies: ["UI-02", "UI-03"]
     risk_level: L2
-    touches: ["apps/app/src/top-bar/**"]
+    touches: ["apps/app/src/top-bar/**", "apps/app/test/top-bar.test.mjs"]
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "apps/app/test/top-bar.test.mjs 6 条全绿：标签去重/关闭/关当前标签后取右邻再取左邻、上栏渲染标签条与窗口按钮、窗口按钮调 5 个桥方法且 macOS 整块不渲染、拖拽区不含可点元素、三个动作都有 data-window-action 供探针定位"
+        - "真机截图（1.25 倍 DPI，1424x918）：上栏「Work ×」「Assistant」两个标签 + 右上三个窗口按钮；四栏与画布齐全、无重叠/裁切/滚动条"
+        - "apps/app 测试 54 用例 / 53 通过 / 1 失败，失败项仍为既有的 message-content"
+      decisions:
+        - "一个标签 = 画布上的一份布局（tab id 即 layout id）：左栏点入口 → 打开/切换到对应标签，与'读布局文件摆 widget'是同一件事"
+        - "标签状态目前由 top-bar 自持；UI-05/UI-09 接入后提到 shell 统一持有（跨栏协作不许栏之间互相 import）"
+        - "标签文案是占位常量（Work/Assistant），字段已按 labelKey 设计，UI-15 抽语言包时机械替换"
+        - "窗口按钮用自绘 SVG（AppIcon 里没有最小化/最大化/关闭字形），不扩展共享图标资产"
+      note: "未并入 main"
 
   - id: UI-05
     title: "左栏内容：Wiki / 技能与工具 / 设置 + pin 区"

@@ -683,5 +683,14 @@ export interface DesktopBridge {
     requestId: string,
     decision: CapabilityApprovalDecisionInput['decision'],
   ): Promise<CapabilityApprovalDecisionResult>;
+  /**
+   * 窗口控制：由渲染层的上栏自绘标题栏调用（macOS 用系统红绿灯，不调这些）。
+   * 与其它桥方法一样只接受可信渲染帧；窗口实现细节留在桌面壳里。
+   */
+  minimizeWindow(): Promise<void>;
+  toggleMaximizeWindow(): Promise<boolean>;
+  closeWindow(): Promise<void>;
+  isWindowMaximized(): Promise<boolean>;
+  onWindowMaximizeChanged(listener: (maximized: boolean) => void): () => void;
   onNotificationNavigation(listener: (target: NotificationNavigationTarget) => void): () => void;
 }

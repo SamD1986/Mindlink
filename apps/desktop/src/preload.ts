@@ -102,6 +102,15 @@ const bridge: DesktopBridge = {
   },
   browserDetachGuest: (key) => ipcRenderer.invoke('browser:detach-guest', key),
   openInSystemBrowser: (url) => ipcRenderer.invoke('browser:open-external', url),
+  minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+  toggleMaximizeWindow: () => ipcRenderer.invoke('window:toggle-maximize'),
+  closeWindow: () => ipcRenderer.invoke('window:close'),
+  isWindowMaximized: () => ipcRenderer.invoke('window:is-maximized'),
+  onWindowMaximizeChanged: (listener) => {
+    const handler = (_event: IpcRendererEvent, maximized: Parameters<typeof listener>[0]) => listener(maximized);
+    ipcRenderer.on('window:maximize-changed', handler);
+    return () => ipcRenderer.removeListener('window:maximize-changed', handler);
+  },
   onBrowserGuestCrashed: (listener) => {
     const handler = (_event: IpcRendererEvent, guestKey: Parameters<typeof listener>[0]) => listener(guestKey);
     ipcRenderer.on('browser:guest-crashed', handler);

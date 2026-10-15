@@ -123,7 +123,11 @@ function createWindow(): void {
     minWidth: 800,
     minHeight: 560,
     backgroundColor: '#ffffff',
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+    // 无边框窗口：Windows/Linux 隐藏系统标题栏，由上栏自绘标签页与窗口按钮；
+    // macOS 保留系统红绿灯（hiddenInset），避免出现两套控件。
+    ...(process.platform === 'darwin'
+      ? { titleBarStyle: 'hiddenInset' as const }
+      : { frame: false }),
     title: emoBrand.name,
     ...(emoBrand.icon ? { icon: emoBrand.icon } : {}),
     webPreferences: {
@@ -139,6 +143,12 @@ function createWindow(): void {
   window.once('closed', () => {
     if (mainWindow === window) mainWindow = undefined;
   });
+  // 最大化状态变化要通知渲染层，上栏的按钮图标才能跟着切换。
+  const notifyMaximizeChanged = (maximized: boolean) => {
+    if (!window.isDestroyed()) window.webContents.send('window:maximize-changed', maximized);
+  };
+  window.on('maximize', () => notifyMaximizeChanged(true));
+  window.on('unmaximize', () => notifyMaximizeChanged(false));
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   // Embedded-browser guests are hardened here instead of banned outright:
   // force the guest sandbox, strip privileged attributes and only allow
@@ -207,6 +217,16 @@ if (hasSingleInstanceLock) void app.whenReady().then(async () => {
     },
   );
 
+  // 窗口控制：上栏自绘标题栏使用；同样只接受可信渲染帧。
+  ipcMain.handle('window:minimize', trustedHandler(() => { mainWindow?.minimize(); }));
+  ipcMain.handle('window:toggle-maximize', trustedHandler(() => {
+    if (!mainWindow) return false;
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
+    else mainWindow.maximize();
+    return mainWindow.isMaximized();
+  }));
+  ipcMain.handle('window:close', trustedHandler(() => { mainWindow?.close(); }));
+  ipcMain.handle('window:is-maximized', trustedHandler(() => mainWindow?.isMaximized() ?? false));
   ipcMain.handle('runtime:info', trustedHandler(() => runtime.info()));
   ipcMain.handle('settings:hotkeys:get', trustedHandler(() => runtime.getHotkeySettings()));
   ipcMain.handle('settings:hotkeys:save', trustedHandler((input) => runtime.saveHotkeySetting(input)));
