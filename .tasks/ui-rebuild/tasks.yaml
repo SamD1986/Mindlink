@@ -9,7 +9,7 @@ tasks:
   # ───────────────────────── 阶段 1：地基 ─────────────────────────
   - id: UI-01
     title: "归档旧 UI 到 src/_legacy-ui 并隔离出构建"
-    status: in_progress
+    status: done
     goal: "把旧 UI（shell/composition/modules 外壳/样式/调色板）整体移入归档区，保证随时可回看，且不影响构建与类型检查。"
     scope:
       in:
@@ -49,11 +49,11 @@ tasks:
         - "独立脚本核过活代码 113 个相对导入全部可解析（grep 会漏，见 pitfall）"
       pitfalls:
         - "按模块名 grep 找'谁引用了被搬走的文件'会漏：shared/brand-showcase.tsx 引用 ../emo.js 就是漏网的第一例。改用导入说明符逐条解析（脚本 check-imports.py）"
-      note: "未并入 main，按仓库口径不标 done"
+      note: "已并入 main"
 
   - id: UI-02
     title: "立起新骨架：shell 容器 + 上下左右四栏 + workbench 槽位"
-    status: in_progress
+    status: done
     goal: "只搭结构，不含任何业务内容；四栏之间互不影响，窗口任意缩放不破版。"
     scope:
       in:
@@ -83,11 +83,11 @@ tasks:
       pitfalls:
         - "height:100vh 叠加 body 默认外边距会让页面高出视口 16px、冒出滚动条并把四栏整体内缩 8px —— 必须用 html/body/#root height:100% + margin:0 + overflow:hidden，并补 box-sizing:border-box"
         - "Electron 探针会复用磁盘缓存的旧 index.html/CSS，量到的是修复前的假象 —— 探针必须用内存分区（partition 不带 persist: 前缀）并加缓存穿透参数，否则结论是假的"
-      note: "未并入 main，按仓库口径不标 done"
+      note: "已并入 main"
 
   - id: UI-03
     title: "窗口控制桥与无边框窗口（唯一改动桌面壳的一刀）"
-    status: in_progress
+    status: done
     goal: "让上栏能自绘最小化/最大化/关闭，并保持拖拽、双击最大化、平台差异正确。"
     scope:
       in:
@@ -117,11 +117,11 @@ tasks:
         - "真机探针必须传独立 --user-data-dir：默认 userData 上只要有另一个实例或残留实例锁，新实例会被 requestSingleInstanceLock 挡掉，**秒退且没有任何输出**，看起来像崩溃"
         - "Electron 没实现 CDP 的 Browser 域（页面会话与浏览器级连接都报 \"'Browser.getWindowForTarget' wasn't found\"），读窗口状态要用渲染层可观测信号：最大化看外框尺寸是否等于 screen.availWidth/availHeight，最小化看 document.visibilityState"
         - "本机没装 playwright，仓库既有探针用的 chromium.connectOverCDP 跑不了 —— 用 Node 内置 WebSocket 写最小 CDP 客户端（Runtime.evaluate + Page.captureScreenshot）即可"
-      note: "未并入 main，按仓库口径不标 done；macOS 红绿灯行为无法在本机验证"
+      note: "已并入 main；macOS 红绿灯行为无法在本机验证"
 
   - id: UI-04
     title: "上栏内容：标签页 + 窗口按钮"
-    status: in_progress
+    status: done
     goal: "标签页与窗口按钮共存，且不抢拖拽区。"
     scope:
       in: ["src/top-bar/：标签页模型（先做占位数据）、标签切换、与窗口按钮的布局分区"]
@@ -151,11 +151,11 @@ tasks:
         - "跨层常量必须机核：'主进程放灯的位置'与'渲染层预留的让位宽度'分处两个文件，靠人眼对不上 —— 本次就是靠交叉校验发现旧让位被丢掉的，现在每次测试都会断言 x+52 <= 让位宽度且灯在上栏里垂直居中"
       design_notes:
         - ".tasks/ui-rebuild/design/mac-topbar.html：mac 让位前后的上栏示意图（含 Windows 对照），用于讲解而非真机截图"
-      note: "未并入 main；macOS 红绿灯实际位置与全屏/双击缩放/Dock 图标仍无法在 Windows 本机验证"
+      note: "已并入 main；macOS 红绿灯实际位置与全屏/双击缩放/Dock 图标仍无法在 Windows 本机验证"
 
   - id: UI-05
     title: "左栏内容：Wiki / 技能与工具 / 设置 + pin 区"
-    status: in_progress
+    status: done
     goal: "左栏放固定入口与用户 pin 的 dashboard 入口；点击切换的是 workbench 布局，不是整页。"
     scope:
       in: ["src/left-bar/：固定入口按钮、pin 区渲染、pin 的增删排序", "pin/布局的存储接口（渲染层只调接口，不直接读写 localStorage）"]
@@ -182,11 +182,11 @@ tasks:
       known_gaps:
         - "重载后 pin 项的显示名会回落到布局 id（如 'skills'），因为布局标题要等 UI-09 的布局登记表提供；UI-09 接入时一并解决"
         - "pin 项统一用书签图标，尚未按布局各自的图标显示（同 UI-09）"
-      note: "未并入 main"
+      note: "已并入 main"
 
   - id: UI-06
     title: "右栏内容：会话相关按钮 + 常驻 LOGO"
-    status: in_progress
+    status: done
     goal: "右栏承载会话入口与常驻品牌位。"
     scope:
       in: ["src/right-bar/：会话按钮（开合 chatbox、打开会话列表的入口位）、常驻 LOGO 区"]
@@ -212,11 +212,11 @@ tasks:
         - "新增 token：--yp-font-brand-song / --yp-font-brand-cormorant / --yp-brand-ink（theme-contract 机核已覆盖）"
         - "印章换用 yuanpu2.0 的竖版 seal.png（154x229 RGBA），旧的 mindlink-seal.png 保留给归档区"
         - "机核 brand.test.mjs 守三条：品牌串不进语言包、字体与 OFL 文本齐备、子集缺字即红（改了字标必须 fontTools.subset 重新生成子集）"
-      note: "未并入 main；欢迎页正中那块'印章+大字标'空态（intro.tsx 的 fit-text）仍待 UI-11/UI-13 一起做"
+      note: "已并入 main；欢迎页正中那块'印章+大字标'空态（intro.tsx 的 fit-text）仍待 UI-11/UI-13 一起做"
 
   - id: UI-07
     title: "下栏占位"
-    status: in_progress
+    status: done
     goal: "预留底部栏位，参与布局但不吞事件。"
     scope:
       in: ["src/bottom-bar/：占位块 + 未来扩展位注释"]
@@ -234,12 +234,12 @@ tasks:
       evidence:
         - "下栏保留槽位 data-bottom-slot；整条栏 pointer-events: none、槽位内 auto —— 空着时不挡画布，将来放状态/进度条又能点"
         - "机核断言这两条 CSS 规矩，防止后续把下栏改成会吞事件的高条（right-bar.test.mjs 第 3 条）"
-      note: "未并入 main；下栏的功能仍是占位，具体放什么等需求"
+      note: "已并入 main；下栏的功能仍是占位，具体放什么等需求"
 
   # ───────────────────── 阶段 2：workbench 画布 ─────────────────────
   - id: UI-08
     title: "workbench 网格引擎：格坐标 + 基准 → 比例换算、吸附、背景色"
-    status: in_progress
+    status: done
     goal: "把“5×5px 网格”实现为基准吸附粒度 + 比例布局，保证不同窗口尺寸下相对位置稳定。"
     scope:
       in: ["src/workbench/grid/：坐标换算、5px 基准吸附、resize 按比例重排、越界/最小尺寸处理", "网格背景色接入主题 token（复用现有 --yp-canvas-grid 语义）"]
@@ -268,11 +268,11 @@ tasks:
         - "吸附步长下限 1/4 格：画布很大时避免拖动抖动（拖拽摆放本身留给 UI-16/UI-17）"
       pitfalls:
         - "探针读几何前必须等目标真的变化：Emulation 换尺寸后立刻读会拿到重渲染前的旧 DOM（widget 都在、只是还没按新尺寸重算），表现为'比例不一致'的假失败。要等画布 clientWidth 变了、再留一拍"
-      note: "未并入 main；拖拽摆放与自由调整尚未实现（属 UI-16/UI-17）"
+      note: "已并入 main；拖拽摆放与自由调整尚未实现（属 UI-16/UI-17）"
 
   - id: UI-09
     title: "布局文件格式 + 加载器 + 只读渲染"
-    status: in_progress
+    status: done
     goal: "换一份布局文件即换一页；非法布局被拒并给出可读错误。"
     scope:
       in: ["src/workbench/layouts/：格式定义、校验、内置布局、加载与切换", "只读渲染（用 2-3 个占位块验证）"]
@@ -300,12 +300,12 @@ tasks:
       known_gaps:
         - "布局标题与 widget 标题仍是占位文案（UI-15 抽语言包）"
         - "布局的加载来源目前是内置常量；用户自建布局的读写与 pin 的持久化搬迁（Runtime）在 UI-17/UI-09 后续处理"
-      note: "未并入 main"
+      note: "已并入 main"
 
   # ───────────────────── 阶段 3：搬家（不动逻辑） ─────────────────────
   - id: UI-10
     title: "components/atoms + composites（资产平移）"
-    status: pending
+    status: done
     goal: "建立组件基座，并把展示件资产从旧 shared/ 平移到新结构。"
     scope:
       in:
@@ -322,9 +322,21 @@ tasks:
     risk_level: L2
     touches: ["apps/app/src/components/atoms/**", "apps/app/src/components/composites/**", "apps/app/test/**"]
 
+    result:
+      branch: "ui/components-migration"
+      verified_at: "2026-10-15"
+      evidence:
+        - "atoms 六件（Button/Icon/Panel/Text/Toolbar/Tree）只吃主题 token，无业务逻辑"
+        - "21 个文件从 src/shared/ 平移进 src/components/composites/（git 全部识别为重命名 R），42 处 import 路径更新"
+        - "message-content 6/6（含 XSS）、viewer-modules 4/4、no-legacy-imports 2/2；typecheck 8 包 Done"
+        - "提交 0f78495，已并入 main"
+      pitfalls:
+        - "测试文件里 `register({ tsconfig: new URL(...).pathname })` 在 Windows 上得到 `/D:/…`，tsx 解析成 `D:\\D:\\…` 直接炸；改成 `register()` 走默认 tsconfig 即可"
+      note: "已并入 main"
+
   - id: UI-11
     title: "chatbox 浮层：自由窗口 + 整块搬运 chat 编排"
-    status: pending
+    status: done
     goal: "chatbox 成为上层浮层（可拖拽/缩放），对话全功能等价。"
     scope:
       in:
@@ -340,9 +352,20 @@ tasks:
     risk_level: L3
     touches: ["apps/app/src/chatbox/**"]
 
+    result:
+      branch: "ui/chatbox"
+      verified_at: "2026-10-15"
+      evidence:
+        - "src/chatbox/：浮层容器（标题栏拖动、右下手柄缩放、z-index 1000、随 chatboxOpen 开合）+ 整块搬入的 chat.tsx（1712 行，未改行为）"
+        - "pnpm -F @mindlink-agent/app build 通过；提交 ff2b94e，已并入 main"
+      known_gaps:
+        - "真机对话回归（发送/取消/恢复/审批/滚动/加载更早/工作会话树）由 UI-18 统一取证"
+        - "初版让 chat.tsx 直接引用 _legacy-ui（违反归档红线），且助理头像指向不存在的 _legacy-ui/assets → UI-15 已修为 legacy-pages + src/assets"
+      note: "已并入 main"
+
   - id: UI-12
     title: "content-viewers 归位（原 viewer）"
-    status: pending
+    status: done
     goal: "内容查看器落入 components/ 下，作为可共享层，并留下后续 widget 化备注。"
     scope:
       in:
@@ -358,9 +381,18 @@ tasks:
     risk_level: L2
     touches: ["apps/app/src/components/content-viewers/**"]
 
+    result:
+      branch: "ui/content-viewers"
+      verified_at: "2026-10-15"
+      evidence:
+        - "src/viewer/ → src/components/content-viewers/（含 file-host / browser-host 两个接缝，保持唯一对外接口）"
+        - "content-viewers/README.md 含 widget 化映射表与接缝约束"
+        - "viewer-modules 4/4；typecheck 8 包 Done；提交 02cf6fb，已并入 main"
+      note: "已并入 main"
+
   - id: UI-13
     title: "旧页面包装成整页 widget 搬入 components/widgets"
-    status: pending
+    status: done
     goal: "技能（797 行）、工作树（497 行）、定时任务（561 行）、设置（151 行）等旧页面先原样可用，不被 DSL 阻塞。"
     scope:
       in: ["src/components/widgets/<page-id>/：每个旧页面包一层整页 widget（元数据 + 原页面实现）"]
@@ -375,9 +407,20 @@ tasks:
     touches: ["apps/app/src/components/widgets/**"]
 
   # ───────────────────── 阶段 4：新能力 ─────────────────────
+
+    result:
+      branch: "ui/legacy-widgets"
+      verified_at: "2026-10-15"
+      evidence:
+        - "components/widgets/ 下四个过渡包装（skills / work-tree / scheduled-tasks / settings）+ README 标明过渡性质"
+        - "pnpm -F @mindlink-agent/app build 通过；提交 0967f89，已并入 main"
+      pitfalls:
+        - "初版四个包装层是 re-export 归档区（`export { SettingsPage } from '../../../_legacy-ui/...'`），既违反 UI-01 的归档红线，又让 UI-01..UI-13 本来还没被引用的旧页面进入构建；UI-15 已把活代码真正依赖的 14 个旧页面实现毕业到 src/legacy-pages/"
+      note: "已并入 main；页面重写（拆成原子组合）仍后置"
+
   - id: UI-14
     title: "theme 收编：token 分组 + 网格背景色 + 主题包格式"
-    status: pending
+    status: done
     goal: "把散落的样式收进 theme/，网格背景色可调，主题可打包。"
     scope:
       in: ["src/theme/：骨架/页面/组件 token 分组、调色板、字体、网格背景色；主题包（一份配色 + 一份清单）格式与加载"]
@@ -391,9 +434,21 @@ tasks:
     risk_level: L2
     touches: ["apps/app/src/theme/**", "apps/app/test/theme-contract.test.mjs"]
 
+    result:
+      branch: "ui/theme-refactor"
+      verified_at: "2026-10-15"
+      evidence:
+        - "themes/tokens.css 拆成 tokens/{skeleton,page,component,brand,typography}.css，tokens.css 退化为 @import 聚合层"
+        - "网格颜色 token 化：新增 --yp-canvas-grid-color（浅 #e7ebef / 深 #2a2e33），workbench/styles.css 不再硬编码"
+        - "主题包格式写进 themes/README.md：一份 theme.css（只覆盖既有 token）+ manifest.json（name/author/version），不得覆盖品牌 token、不得引入新 token 名"
+        - "theme-contract 2/2；提交 732f744，已并入 main"
+      pitfalls:
+        - "拆了 tokens.css 之后，按单文件读 token 的旧机核会假绿/假红：brand.test.mjs 就是读 themes/tokens.css 找品牌 token，拆分后必然找不到（UI-15 已改为读 tokens/ 全组）"
+      note: "已并入 main；主题包只定格式，加载器后置"
+
   - id: UI-15
     title: "languages：t() + 类型生成 + 抽取约 1800 条 + 禁中文回退机核"
-    status: pending
+    status: done
     goal: "切换语言包即切换全部界面文字。"
     scope:
       in: ["src/languages/：zh-CN.json / en-US.json、t()、按 zh-CN 生成 TS 类型（缺键/多键编译期报错）", "抽取 UI 文案（估约 1800 条，含 aria-label/title）", "新增机核：src/** 的字符串与 JSX 文本不得出现中日韩字符（排除注释与测试）"]
@@ -407,9 +462,32 @@ tasks:
     risk_level: L2
     touches: ["apps/app/src/languages/**", "apps/app/test/languages.test.mjs", "apps/app/src/**"]
 
+    result:
+      branch: "ui/l10n-zh"
+      verified_at: "2026-10-15"
+      evidence:
+        - "src/languages/{zh-CN.json,index.ts}：**消息即键**（gettext 风格），1071 条；zh 下 t(key) 逐字节返回 key，所以抽取是行为不变的重构"
+        - "AST 定点重写（.tasks/ui-rebuild/tools/l10n-extract.mjs）：35 个文件 / 1417 处，覆盖普通串、JSX 属性位（title/aria-label）、JSX 文本、带插值模板串（→ t(key, {0: expr})）"
+        - "新增机核 test/languages.test.mjs 四条：活代码无硬编码中文、用 t() 必须引入、value 必须等于 key、代码与包之间无缺键也无死条目"
+        - "typecheck 8 包 Done；build 通过；apps/app 测试 102/102；提交 8a973d5，已并入 main"
+      decisions:
+        - "**只做中文**（英文包后置）。消息即键让英文包后置不返工：将来补 en-US.json 只填同键的 value，不重命名任何键"
+        - "品牌串不进语言包：chat.tsx 里 6 处硬编码改为引用 src/shared/brand.ts 单一来源"
+        - "只认汉字（\u4e00-\u9fff）：纯标点片段（：、；）不抽取；模块说明符/属性名/字面量类型位形不碰"
+      pitfalls:
+        - "**禁止用正则做这次替换**：上一版正则把对象字面量写成 `queued: ${t(...)}`、把 `throw new Error('x')` 写成 `throw new Error({t('x')})`，产出 500+ 处语法错。必须走 AST（ts.createSourceFile）+ 定点迭代（最内层优先），否则嵌套模板串的改写范围会互相覆盖"
+        - "抽取器必须**可重跑**（语言包取并集）：第二遍扫描时已抽取的 t() 实参被跳过，若按本轮键重建语言包会静默丢掉上一轮的键"
+        - "活代码依赖的旧页面必须先毕业出归档区（见下），否则机核 no-legacy-imports 是红的：UI-11/UI-13 让 chatbox 与 widget 包装层直接 re-export _legacy-ui"
+        - "归档区从来没有 assets/：UI-01 搬 emo.ts 时把 `./assets/brand/*.png` 的 glob 一起搬走了，品牌图标 URL 一直取空串；chat.tsx 的助理头像也指向 _legacy-ui/assets（404）"
+      known_gaps:
+        - "只有中文包，英文包与语言切换器未做"
+        - "emo.json 这类**数据文件里**里的文案未纳入语言包（emojson 的欢迎文字等）"
+        - "模块级常量（如 reply-run-details 的 statusLabels）在模块初始化时就取值，运行时切语言不会跟着变"
+      note: "已并入 main；顺带把 UI-11/UI-13 遗留的归档红线与 3 处断链一起修掉"
+
   - id: UI-16
     title: "widget 体系：清单 + DSL 格式 + 解释器（受限，不执行用户代码）"
-    status: pending
+    status: done
     goal: "用户/LLM 产出的 UI 只是一份 JSON，由我们按原子白名单渲染。"
     scope:
       in: ["src/components/widgets/：widget 清单（id/标题键/尺寸约束/能力声明）、DSL 格式与 schema 校验、解释器（原子白名单）、能力声明与 Runtime 独立授权的对接"]
@@ -422,6 +500,18 @@ tasks:
     dependencies: ["UI-09", "UI-10"]
     risk_level: L3
     touches: ["apps/app/src/components/widgets/**", "apps/app/test/widget-dsl.test.mjs"]
+
+    result:
+      branch: "ui/widget-dsl"
+      verified_at: "2026-10-15"
+      evidence:
+        - "registry.ts：4 个过渡 widget 登记（skills / work-tree / scheduled-tasks / settings），各带标题键/尺寸约束/能力声明"
+        - "dsl-format.ts：15 个原子白名单 + schema 校验（未知原子、函数/对象 props、嵌套子组件递归校验一律拒）"
+        - "dsl-interpreter.tsx：只渲染数据，静态导入，永不 eval / 动态 import（保住 CSP script-src 'self'）"
+        - "widget-dsl 10/10；typecheck 8 包 Done；提交 1260734，已并入 main"
+      decisions:
+        - "声明能力不等于授权：DSL 只能声明需要什么，授权仍由 Runtime 逐请求决定"
+      note: "已并入 main"
 
   - id: UI-17
     title: "用户自建 widget 闭环：创作 → 校验 → 保存 → pin"
