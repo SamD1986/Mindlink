@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppIcon } from '../components/composites/app-icon.js';
+import { setUserWidgetPinned, subscribeUserWidgets, userWidgetStore } from '../components/widgets/user-widget-store.js';
+import { WIDGET_STUDIO_TAB_ID, userWidgetTabId } from '../components/widgets/user-widget-tabs.js';
+import type { UserWidget } from '../components/widgets/user-widget-format.js';
 import { useWorkspace } from '../shell/workspace.js';
 import {
   FIXED_ENTRIES,
@@ -10,23 +13,42 @@ import {
   type LeftBarEntry,
 } from './entries.js';
 import './styles.css';
+import { t } from '../languages/index.js';
+
+/** 创作台入口的文案（走语言包；见 languages/zh-CN.json）。 */
+const STUDIO_LABEL = t("我的 Widget");
 
 /**
- * 左栏：固定入口（Wiki / 技能与工具 / 设置）＋ 用户固定到左栏的布局。
+ * 左栏：固定入口（Wiki / 技能与工具 / 设置）＋ 用户固定到左栏的布局与自建 widget，
+ * 以及打开「自建 widget 创作台」的入口。
  *
- * 点入口切换的是**画布布局**（开上栏标签），不是整页 —— 状态经 shell 的窗口状态通道，
- * 本栏不 import 上栏。pin 走 entries.ts 里的存储接缝（渲染层只有那一处碰存储）。
+ * 点入口/ pin 切换的是**画布标签**（经 shell 的窗口状态通道），本栏不 import 上栏。
+ * 布局 pin 走 `entries.ts` 的 `LayoutPinStore`；自建 widget 的 pin 是 widget 记录上的
+ * `pinned` 标记，读同一个存储接缝 `userWidgetStore`（栏可以消费 `components/` 的共享单元）。
  */
 export function LeftBar() {
   const { state, openLayout, closeLayout } = useWorkspace();
   const store = useMemo(() => createLocalPinStore(), []);
   const [pinned, setPinned] = useState<string[]>([]);
+  const [pinnedWidgets, setPinnedWidgets] = useState<UserWidget[]>([]);
 
   useEffect(() => {
     let alive = true;
     void store.load().then((ids) => { if (alive) setPinned(ids); });
     return () => { alive = false; };
   }, [store]);
+
+  useEffect(() => {
+    let alive = true;
+    const reload = () => {
+      void userWidgetStore.load().then((list) => {
+        if (alive) setPinnedWidgets(list.filter((widget) => widget.pinned === true));
+      });
+    };
+    reload();
+    const unsubscribe = subscribeUserWidgets(reload);
+    return () => { alive = false; unsubscribe(); };
+  }, []);
 
   const persist = (ids: string[]) => { setPinned(ids); void store.save(ids); };
   const labels = new Map(state.tabs.map((tab) => [tab.id, tab.label]));
@@ -103,6 +125,55 @@ export function LeftBar() {
             </span>
           </span>
         ))}
+
+        {pinnedWidgets.map((widget) => (
+          <span
+            key={widget.id}
+            className="left-bar-pin"
+            data-left-pin={userWidgetTabId(widget.id)}
+            data-left-pin-kind="user-widget"
+          >
+            <button
+              type="button"
+              className="left-bar-button"
+              aria-label={widget.name}
+              title={widget.name}
+              onClick={() => openLayout({
+                id: userWidgetTabId(widget.id),
+                label: widget.name,
+                labelKey: `nav.layout.${userWidgetTabId(widget.id)}`,
+              })}
+            >
+              <AppIcon name="layers" />
+            </button>
+            <span className="left-bar-pin-actions">
+              <button
+                type="button"
+                className="left-bar-pin-action"
+                data-pin-action="unpin"
+                aria-label={t("取消固定 {0}", { 0: widget.name })}
+                onClick={() => { void setUserWidgetPinned(userWidgetStore, widget.id, false); }}
+              >
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="m3.5 3.5 5 5m0-5-5 5" /></svg>
+              </button>
+            </span>
+          </span>
+        ))}
+      </div>
+
+      <div className="left-bar-actions" data-left-actions>
+        <button
+          type="button"
+          className="left-bar-button"
+          data-left-action="widget-studio"
+          aria-label={STUDIO_LABEL}
+          title={STUDIO_LABEL}
+          onClick={() => openLayout({ id: WIDGET_STUDIO_TAB_ID, label: STUDIO_LABEL, labelKey: 'nav.widgetStudio' })}
+        >
+          <svg className="left-bar-glyph" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
       </div>
     </aside>
   );
