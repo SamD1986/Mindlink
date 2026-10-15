@@ -8,9 +8,9 @@ register();
 // preview/* is excluded here: pdf-view relies on Vite's `?url` worker import,
 // which plain Node ESM cannot resolve. Its behavior is exercised through the
 // renderer build and the desktop smoke test.
-const { classifyWorkFile } = await import('../src/viewer/core/content-kind.ts');
-const { formatFileTime, formatFileSize } = await import('../src/viewer/core/format.ts');
-const { FileTree, visibleWorkspacePaths } = await import('../src/viewer/files/file-tree.tsx');
+const { classifyWorkFile } = await import('../src/components/content-viewers/core/content-kind.ts');
+const { formatFileTime, formatFileSize } = await import('../src/components/content-viewers/core/format.ts');
+const { FileTree, visibleWorkspacePaths } = await import('../src/components/content-viewers/files/file-tree.tsx');
 
 test('viewer modules export their components and helpers', () => {
   assert.equal(typeof classifyWorkFile, 'function');

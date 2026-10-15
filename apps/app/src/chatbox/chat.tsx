@@ -39,10 +39,10 @@ import { WorkTree } from '../_legacy-ui/modules/work-tree.js';
 import { folderPath } from '../components/widgets/work-tree/work-tree-model.js';
 import { cacheReplyRun, findReplyRun, type ReplyRunInfo } from '../components/composites/reply-run-cache.js';
 import { normalizeWorkspacePath } from '../components/composites/work-file-links.js';
-import { FileWorkspace, ImagePreviewPanel, type ImagePreviewRequest } from '../viewer/files/file-tabs.js';
-import { ReviewPanel } from '../viewer/review/review-panel.js';
-import { SessionTrajectoryViewer, SubagentViewer } from '../viewer/session-trajectory.js';import type { ViewerBrowserHost } from '../viewer/host/browser-host.js';
-import type { ViewerFileHost } from '../viewer/host/file-host.js';
+import { FileWorkspace, ImagePreviewPanel, type ImagePreviewRequest } from '../components/content-viewers/files/file-tabs.js';
+import { ReviewPanel } from '../components/content-viewers/review/review-panel.js';
+import { SessionTrajectoryViewer, SubagentViewer } from '../components/content-viewers/session-trajectory.js';import type { ViewerBrowserHost } from '../components/content-viewers/host/browser-host.js';
+import type { ViewerFileHost } from '../components/content-viewers/host/file-host.js';
 
 type ToolState = { name: string; status: 'started' | 'completed' | 'failed' };
 type LiveTool = NonNullable<SessionTrajectory['live']>['tools'][number];

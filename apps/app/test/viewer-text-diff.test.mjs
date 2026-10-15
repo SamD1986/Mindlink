@@ -5,7 +5,7 @@ import { register } from 'tsx/esm/api';
 
 register();
 
-const { createUnifiedDiff } = await import('../src/viewer/preview/text-diff.ts');
+const { createUnifiedDiff } = await import('../src/components/content-viewers/preview/text-diff.ts');
 
 test('createUnifiedDiff produces a valid hunk with real context lines', () => {
   const oldText = 'line1\nline2\nline3\nline4\nline5';
