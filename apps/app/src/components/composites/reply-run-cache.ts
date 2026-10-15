@@ -4,7 +4,7 @@ export type ReplyRunInfo = DesktopReplyRunInfo;
 
 type CachedReplyRun = ReplyRunInfo & {
   runId: string;
-  surface: 'work' | 'assistant';
+  surface: 'work';
   text: string;
   transcriptId?: string;
 };
@@ -16,7 +16,7 @@ function readCache(): CachedReplyRun[] {
     const value: unknown = JSON.parse(window.localStorage.getItem(storageKey) ?? '[]');
     return Array.isArray(value) ? value.filter((item): item is CachedReplyRun => Boolean(item)
       && typeof item.runId === 'string' && typeof item.text === 'string'
-      && (item.surface === 'work' || item.surface === 'assistant')
+      && item.surface === 'work'
       && typeof item.createdAt === 'string' && typeof item.updatedAt === 'string'
       && Array.isArray(item.events) && Array.isArray(item.tools)) : [];
   } catch { return []; }

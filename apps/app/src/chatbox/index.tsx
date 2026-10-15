@@ -120,7 +120,6 @@ export function Chatbox() {
       <div className="chatbox-content">
         <ChatPanel
           active={state.chatboxOpen}
-          surface="work"
           onReturnToSchedules={() => {}}
           scheduleOrigin={false}
         />
