@@ -1,0 +1,72 @@
+.                                        | [WARN] Unsupported engine: wanted: {"node":">=24.15.0 <25"} (current: {"node":"v24.14.0","pnpm":"11.22.0"})
+apps/runtime                             | [WARN] Unsupported engine: wanted: {"node":">=24.15.0 <25"} (current: {"node":"v24.14.0","pnpm":"11.22.0"})
+packages/mindlink-assistant              | [WARN] Unsupported engine: wanted: {"node":">=24.15.0 <25"} (current: {"node":"v24.14.0","pnpm":"11.22.0"})
+$ node --test test/*.test.mjs
+✔ browser control service accepts only authenticated loopback runtime requests (56.6133ms)
+✔ uses authenticated SSE, reconnects after a lost receipt, and permits host deduplication (57.2662ms)
+✔ stop interrupts exponential reconnect backoff after a failed response (0.6423ms)
+✔ reports native submission without claiming the user saw it and deduplicates replay (0.8619ms)
+✔ returns explicit disabled, unsupported, denied, and native failure states (0.8501ms)
+✔ click navigates only after Runtime canonicalizes the conversation and run target (2.153ms)
+✔ App stop closes active notifications and prevents any later submission (0.3225ms)
+✔ bounds active native notifications and expires retained instances (17.1029ms)
+✔ renderer trust is bound to the configured entry document (0.4965ms)
+✔ packaged file trust rejects sibling files and remote origins (0.0913ms)
+✖ deduplicates concurrent starts and performs a bounded graceful stop (120.3808ms)
+✔ loads a validated notification run target through the authenticated Runtime bridge (95.5272ms)
+✔ management bridge uses authenticated schedule routes and handles empty revoke responses (99.3939ms)
+✔ stop cancels a start that has not spawned its Runtime yet (1.4467ms)
+✔ restarts a crashed Runtime once without overlapping instances (254.3668ms)
+✔ stops restarting after the bounded crash budget is exhausted (969.7568ms)
+✔ force terminates a Runtime that ignores the graceful shutdown deadline (89.4477ms)
+✔ rejects an incompatible Runtime protocol with an explicit error and no restart loop (188.7847ms)
+(node:37036) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ stages a real executable and activates it only on the next startup (1246.6923ms)
+✔ rejects invalid downloads without changing the active runtime (20.6079ms)
+✔ discards staged executables whose version or metadata is invalid (676.0721ms)
+✔ rolls back an unconfirmed activation on the next App start without touching user data (949.0869ms)
+✔ the protocol declares the window controls (3.9786ms)
+✔ the preload maps every window control to its channel (0.6908ms)
+✔ every window channel is registered and behind trustedHandler (1.2088ms)
+✔ the window hides the system title bar except on macOS (0.601ms)
+✔ the main process forwards maximize state changes to the renderer (0.4014ms)
+✖ the macOS traffic lights stay inside the inset the renderer reserves for them (0.922ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 26
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3029.2364
+
+✖ failing tests:
+
+test at test\runtime-manager.test.mjs:47:1
+✖ deduplicates concurrent starts and performs a bounded graceful stop (120.3808ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///D:/MindLink/apps/desktop/test/runtime-manager.test.mjs:55:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\window-controls.test.mjs:58:1
+✖ the macOS traffic lights stay inside the inset the renderer reserves for them (0.922ms)
+  TypeError: Cannot read properties of null (reading '1')
+      at TestContext.<anonymous> (file:///D:/MindLink/apps/desktop/test/window-controls.test.mjs:70:96)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7)
+D:\MindLink\apps\desktop:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @mindlink-agent/desktop@0.1.0 test: `node --test test/*.test.mjs`
+Exit status 1
+DESKTOP_TEST_EXIT=1

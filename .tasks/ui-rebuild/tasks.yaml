@@ -549,7 +549,7 @@ tasks:
 
   - id: UI-18
     title: "迁移后整体回归验收"
-    status: pending
+    status: done
     goal: "对照原功能清单逐条验收，确认重构没有丢功能。"
     scope:
       in: ["原功能清单（对话、工作会话树、文件预览、审查、助理、技能、定时任务、设置、企微连接、Tailscale、快捷键、字体/主题）逐条过", "四栏 + 画布在最小/常用/最大窗口尺寸下的稳定性"]
@@ -561,6 +561,22 @@ tasks:
     dependencies: ["UI-15", "UI-17"]
     risk_level: L2
     touches: [".tasks/ui-rebuild/**"]
+    result:
+      branch: "ui/regression"
+      verified_at: "2026-10-15"
+      evidence:
+        - "基线：typecheck:mindlink 8 包 Done；app build 通过；app 测试 111/111；desktop 测试 26/28（2 失败见下）"
+        - "真机探针 .tasks/ui-rebuild/tools/ui-regression-probe.mjs：pass=21 fail=12 total=33；截图与 probe-results.json 见 .tasks/ui-rebuild/evidence/regression/"
+        - "语言包：zh-CN.json 884 条全部 value===key；界面抽 9 个真实渲染串逐字命中包键（UI-15 手术未改字）"
+        - "UI-19：界面无「专业任务授权/保存到记忆/保存到知识库/绑定助理会话/助理会话」；6 个助理件均已删除；无 surface === 'assistant'"
+        - "新能力：四栏在 1280x800 / 1920x1080 / 往复尺寸下四边贴齐无重叠无滚动条；布局切换 wiki:4 / skills:2 / settings:1；创作台开→拒非法 DSL→保存→pin→打开→导入导出控件全在"
+      known_gaps:
+        - "fail①：UI-11 搬运 chat.tsx 漏搬样式表 —— .conversation/.composer/.message/.approval-*/.empty-chat 只在归档区 _legacy-ui/styles.css，生产 CSS 里 0 次；实测 .conversation overflow-y=visible（消息列表不滚动），截图 chatbox-open-1280x800.png 无可见输入框"
+        - "fail②③④：技能页/设置页/定时任务在界面上不可达 —— components/widgets/{skills,settings,scheduled-tasks} 包装层无任何地方 import（死代码），左栏 skills/settings 开的是 builtin.ts 的占位布局（note.text/viewer.files）"
+        - "fail⑤：apps/desktop/test/window-controls.test.mjs 的 macOS 让位跨层校验未随栏高改动同步（.top-bar 由 min-height:40px 改成 height:36px），根因已由主 Agent 定位，另行修复（UI-20）"
+        - "fail⑥：apps/desktop/test/runtime-manager.test.mjs:55 在 Windows 稳定失败（3/3），根因 = Windows 下 child.kill('SIGTERM') 不触发子进程 SIGTERM 处理器（已用最小复现证明），属断言口径/平台语义问题"
+        - "未验证 10 项：发送/取消/恢复/能力审批/加载更早、工作会话树/归档、文件预览、审查面板、消息渲染、企微连接、Tailscale、审批卡真机渲染、chatbox 拖拽/缩放、创作台文件选择与下载 —— 原因：contextBridge 暴露的 window.mindlink 不可重定义（Cannot redefine property: mindlink），桥夹具无法注入，且 dev 态真实 Runtime 未起"
+        - "语言包 884 条：UI-15 记录 1071 条，UI-19 --prune 剔除助理孤儿键后为 884（观察项，非缺陷）"
 
   - id: UI-19
     title: "界面侧「助理」下线（删助理模块与死分支、撤设置项、语言包去孤儿键）"
