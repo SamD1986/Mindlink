@@ -67,7 +67,10 @@ test('the macOS traffic lights stay inside the inset the renderer reserves for t
   const insetMatch = css.match(/\[data-os='mac'\] \.top-bar \{([^}]*)\}/);
   assert.ok(insetMatch, '渲染层缺少 macOS 让位规则');
   const inset = Number(insetMatch[1].match(/--top-bar-leading-inset:\s*(\d+)px/)[1]);
-  const barHeight = Number(css.match(/\.top-bar \{([^}]*)\}/)[1].match(/min-height:\s*(\d+)px/)[1]);
+  // 上栏高度：四栏尺寸统一那轮把 .top-bar 从 min-height 改成了 height，这里两种写法都要认
+  const barBlock = css.match(/\.top-bar \{([^}]*)\}/)?.[1] ?? '';
+  const barHeight = Number(barBlock.match(/(?:min-)?height:\s*(\d+)px/)?.[1] ?? Number.NaN);
+  assert.ok(Number.isFinite(barHeight), '上栏没有可解析的高度（height 或 min-height）');
 
   // 三个灯各 12px、间距 8px：总宽约 52px
   assert.ok(x + 52 <= inset, `红绿灯占 ${x}–${x + 52}px，超出渲染层预留的 ${inset}px`);
