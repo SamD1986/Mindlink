@@ -59,6 +59,14 @@ MindLink 面向桌面工作场景：用户在 Electron 中与 Pi 对话，通过
 
 用户要求在设置项里增加全局字体配置：界面字体大小、正文字体大小与字型可配置。渲染端探索结论：现有 CSS 无任何字体类 token，字号硬编码 px（muse-theme/styles/management/assistant-home 共约 238 处）；主题偏好走 renderer localStorage + documentElement 注入，字体配置复用同款模式，不新增 protocol/IPC/runtime 链路。界面字号经根字号缩放实现（px→rem 机械转换 + `--yp-font-scale-ui`），正文用独立 px token `--yp-font-size-content`，字型经 `--yp-font-family` 预设 + 自定义输入。开发卡见[设置全局字体配置（TASK-053）](tasks.yaml)；状态与验收以注册表为准。主工作区未提交增量与卡内触达文件有交集，集成前需协调合并顺序。
 
+## UI 结构重构（2026-10-14）
+
+用户确认按功能区重构渲染层 UI 结构，方案已定：**容器与画布分离** —— `shell/` 只做窗口容器（上/下/左/右四条栏 + 中间画布槽），`workbench/` 是 5×5px 网格画布（读布局文件摆放 widget，网格按"基准吸附粒度 + 比例换算"实现，禁用硬 px 以兼容界面字号缩放）；对话为 `chatbox/` **可拖拽/缩放的自由浮层**（堆叠于画布之上）；组件收在 `components/`（atoms/composites/widgets/content-viewers），配色与文字分别收在 `theme/`、`languages/`。用户自建 widget 采用**受限 DSL**：用户与 LLM 产出的只是 JSON，由白名单解释器渲染，**不执行用户代码**，因此 CSP（`script-src 'self'`）与"数据不得成为可执行 UI 贡献"两条约束均不需要放宽。
+
+边界确认：**只重写布局/骨架/样式/组件组织**；宿主桥与协议、内容查看器及其宿主接缝、展示件资产、对话编排（原 `modules/chat.tsx` 约 1496 行）四类**只能整块搬迁，不得借重构改造**；旧 UI 整体归档到 `apps/app/src/_legacy-ui/`（`tsconfig` exclude、不参与构建）。唯一需要改动 `apps/desktop` 的是"窗口控制桥 + 无边框窗口"，单独成卡验收。
+
+结构权威为 [渲染层架构](../apps/app/ARCHITECTURE.md)（已改为中文，描述目标结构）；任务卡、依赖与验收判据见 [UI 重构任务区](ui-rebuild/tasks.yaml)（**独立于主注册表维护**，本目录 `.gitignore` 中的 `ui/` 为既有本地提案区，不用于卡片）。文案抽取（约 1800 条界面文案）必须在结构定型后进行；三条旧机核（composition-boundary / ui-registry / theme-contract）须随新结构重写，不得直接删除。
+
 ## 工作会话审查标签（2026-09-27）
 
 用户确认迁移 ZCode 的「审查」面板：工作会话右侧栏新增审查 tab，按上一轮/本会话批量展示 agent 修改的文件（+N -N）与 unified diff。机制采用 ZCode 的「工具执行时读旧内容自产快照」：runtime 在 session.subscribe 捕获 edit/write 前后内容（不依赖 git、不改 Pi 上游），SQLite v16 新表持久化，新路由按 scope 聚合下发；渲染端复用 @pierre/diffs PatchDiff 与既有 tab 机制。bash 间接修改与子代理捕获不在本期范围。开发卡见[工作会话审查标签（TASK-072）](tasks.yaml)；状态与验收以注册表为准。

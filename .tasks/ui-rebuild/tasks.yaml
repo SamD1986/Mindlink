@@ -1,0 +1,327 @@
+version: 1
+area: ui
+feature:
+  title: "UI 重构：四栏外壳 + workbench 网格画布 + 受限 DSL widget"
+  status: planning
+  authority: "apps/app/ARCHITECTURE.md（UI 结构的唯一权威；本文件只登记任务与验收）"
+
+tasks:
+  # ───────────────────────── 阶段 1：地基 ─────────────────────────
+  - id: UI-01
+    title: "归档旧 UI 到 src/_legacy-ui 并隔离出构建"
+    status: pending
+    goal: "把旧 UI（shell/composition/modules 外壳/样式/调色板）整体移入归档区，保证随时可回看，且不影响构建与类型检查。"
+    scope:
+      in:
+        - "git mv 移入 src/_legacy-ui/：src/shell、src/composition、src/ui-registry.ts、src/modules、src/management.tsx、src/management.css、src/styles.css、src/muse-theme.css、src/emo.ts、themes/mindlink.css、themes/dark.css"
+        - "src/_legacy-ui/README.md：写明这是旧 UI 快照、不参与构建、IDE 报红属正常"
+        - "apps/app/tsconfig.json exclude src/_legacy-ui"
+        - "归档只测旧结构关系的测试：test/composition-boundary.test.mjs、test/ui-registry.test.mjs"
+      out: ["改写任何旧代码（归档件保持原样）", "删除 themes/tokens.css"]
+    constraints:
+      - "本卡与 UI-02 必须同批交付：单独归档会让 App 起不来"
+      - "归档件不得被 src/**（_legacy-ui 之外）import"
+    forbidden: ["直接把旧代码删掉（要求保留可查阅形态）", "在 _legacy-ui 里继续开发"]
+    acceptance:
+      - {type: command, run: "pnpm run typecheck:mindlink"}
+      - {type: command, run: "pnpm -F @mindlink-agent/app build"}
+      - {type: assertion, expect: "src/_legacy-ui/README.md 存在且写明非构建件；tsconfig exclude 生效（归档件报错不阻断 typecheck）"}
+    dependencies: []
+    risk_level: L2
+    touches:
+      - "apps/app/src/_legacy-ui/**"
+      - "apps/app/tsconfig.json"
+      - "apps/app/test/composition-boundary.test.mjs"
+      - "apps/app/test/ui-registry.test.mjs"
+
+  - id: UI-02
+    title: "立起新骨架：shell 容器 + 上下左右四栏 + workbench 槽位"
+    status: pending
+    goal: "只搭结构，不含任何业务内容；四栏之间互不影响，窗口任意缩放不破版。"
+    scope:
+      in:
+        - "src/shell/index.tsx + src/shell/layout.css：grid-template-areas 舞台（top/left/workbench/right/bottom）"
+        - "src/top-bar/index.tsx + styles.css、src/bottom-bar/**、src/left-bar/**、src/right-bar/**"
+        - "src/workbench/index.tsx：空白网格容器（画布引擎见 UI-08）"
+        - "src/main.tsx 改写：只挂 shell"
+        - "新增 test/shell-layout.test.mjs（断言四个栏与 workbench 槽都在）、test/no-legacy-imports.test.mjs"
+      out: ["任何页面内容、任何语言文案、任何主题调色板"]
+    constraints: ["栏与画布之间只通过 shell 的槽位组合，栏之间不得互相 import", "窗口最小尺寸下仍可用"]
+    forbidden: ["在栏里直接写业务逻辑", "把 bar 塞进 workbench 的槽位"]
+    acceptance:
+      - {type: command, run: "pnpm -F @mindlink-agent/app build"}
+      - {type: command, run: "node --test apps/app/test/shell-layout.test.mjs apps/app/test/no-legacy-imports.test.mjs"}
+      - {type: assertion, expect: "pnpm dev 起得来；四栏与中槽可见；窗口从最小尺寸拉到最大不出现重叠/裁切"}
+    dependencies: []
+    risk_level: L2
+    touches: ["apps/app/src/main.tsx", "apps/app/src/shell/**", "apps/app/src/{top,bottom,left,right}-bar/**", "apps/app/src/workbench/**", "apps/app/test/shell-layout.test.mjs", "apps/app/test/no-legacy-imports.test.mjs"]
+
+  - id: UI-03
+    title: "窗口控制桥与无边框窗口（唯一改动桌面壳的一刀）"
+    status: pending
+    goal: "让上栏能自绘最小化/最大化/关闭，并保持拖拽、双击最大化、平台差异正确。"
+    scope:
+      in:
+        - "packages/mindlink-protocol/src/index.ts：DesktopBridge 增 minimizeWindow/toggleMaximizeWindow/closeWindow/isWindowMaximized/onWindowMaximizeChanged"
+        - "apps/desktop/src/preload.ts：桥方法"
+        - "apps/desktop/src/main.ts：对应 ipcMain.handle（全部走 trustedHandler）；createWindow 改 frame:false(win)、保留 hiddenInset(mac)；转发 maximize/unmaximize 事件"
+        - "src/top-bar：三个按钮 + -webkit-app-region: drag / no-drag 分区"
+      out: ["标签页逻辑（属 UI-04）"]
+    constraints: ["桥方法数会从 87 变为 90+，须同步更新协议类型与相关断言", "mac 不画自绘按钮，使用系统红绿灯"]
+    forbidden: ["绕过 trustedHandler 直接注册 IPC", "在 renderer 里用 window.close() 之类的浏览器 API 冒充窗口控制"]
+    acceptance:
+      - {type: command, run: "pnpm run typecheck:mindlink"}
+      - {type: assertion, expect: "三个按钮真生效；双击标题栏最大化；拖拽区正确（按钮不可拖）；最大化状态变化时图标同步"}
+      - {type: assertion, expect: "macOS 上不出现与系统红绿灯重复的控件"}
+    dependencies: ["UI-02"]
+    risk_level: L3
+    touches: ["packages/mindlink-protocol/src/index.ts", "apps/desktop/src/preload.ts", "apps/desktop/src/main.ts", "apps/app/src/top-bar/**"]
+
+  - id: UI-04
+    title: "上栏内容：标签页 + 窗口按钮"
+    status: pending
+    goal: "标签页与窗口按钮共存，且不抢拖拽区。"
+    scope:
+      in: ["src/top-bar/：标签页模型（先做占位数据）、标签切换、与窗口按钮的布局分区"]
+      out: ["标签页与 chatbox/布局的联动（后续卡）", "多标签持久化"]
+    constraints: ["文案先走占位常量，等 UI-15 接 languages"]
+    forbidden: ["把标签页状态塞进 workbench（标签是窗口级的）"]
+    acceptance:
+      - {type: command, run: "pnpm -F @mindlink-agent/app build"}
+      - {type: assertion, expect: "标签可切换且高亮正确；窗口按钮与标签互不遮挡；空白处可拖动窗口"}
+    dependencies: ["UI-02", "UI-03"]
+    risk_level: L2
+    touches: ["apps/app/src/top-bar/**"]
+
+  - id: UI-05
+    title: "左栏内容：Wiki / 技能与工具 / 设置 + pin 区"
+    status: pending
+    goal: "左栏放固定入口与用户 pin 的 dashboard 入口；点击切换的是 workbench 布局，不是整页。"
+    scope:
+      in: ["src/left-bar/：固定入口按钮、pin 区渲染、pin 的增删排序", "pin/布局的存储接口（渲染层只调接口，不直接读写 localStorage）"]
+      out: ["布局文件解析与渲染（UI-09）", "widget 体系（UI-16）"]
+    constraints: ["存储接口按“将来搬到 Runtime 侧”设计（用户资产、可导出、跨设备）"]
+    forbidden: ["把页面整页挂在左栏里", "直接依赖 window.mindlink 之外的存储细节"]
+    acceptance:
+      - {type: command, run: "node --test apps/app/test/left-bar.test.mjs"}
+      - {type: assertion, expect: "pin 一条后重启仍存在；点击入口切换的是布局标识（可在 UI-09 接入后验证）"}
+    dependencies: ["UI-02"]
+    risk_level: L2
+    touches: ["apps/app/src/left-bar/**", "apps/app/test/left-bar.test.mjs"]
+
+  - id: UI-06
+    title: "右栏内容：会话相关按钮 + 常驻 LOGO"
+    status: pending
+    goal: "右栏承载会话入口与常驻品牌位。"
+    scope:
+      in: ["src/right-bar/：会话按钮（开合 chatbox、打开会话列表的入口位）、常驻 LOGO 区"]
+      out: ["chatbox 本体（UI-11）"]
+    constraints: ["LOGO 在所有布局下常驻，不随布局/主题消失"]
+    forbidden: ["在右栏里实现会话列表本身（那是 chatbox 的内容）"]
+    acceptance:
+      - {type: command, run: "pnpm -F @mindlink-agent/app build"}
+      - {type: assertion, expect: "LOGO 常驻可见；会话按钮可触发（事件先打日志，UI-11 接入后生效）"}
+    dependencies: ["UI-02"]
+    risk_level: L1
+    touches: ["apps/app/src/right-bar/**"]
+
+  - id: UI-07
+    title: "下栏占位"
+    status: pending
+    goal: "预留底部栏位，参与布局但不吞事件。"
+    scope:
+      in: ["src/bottom-bar/：占位块 + 未来扩展位注释"]
+      out: ["任何实际功能"]
+    constraints: ["不得拦截画布的指针事件"]
+    forbidden: ["把下栏写成固定高度而让画布无法铺满（须可折叠/可收）"]
+    acceptance:
+      - {type: assertion, expect: "占位栏可见；画布区域不被遮挡；点击画布不被下栏吞掉"}
+    dependencies: ["UI-02"]
+    risk_level: L1
+    touches: ["apps/app/src/bottom-bar/**"]
+
+  # ───────────────────── 阶段 2：workbench 画布 ─────────────────────
+  - id: UI-08
+    title: "workbench 网格引擎：格坐标 + 基准 → 比例换算、吸附、背景色"
+    status: pending
+    goal: "把“5×5px 网格”实现为基准吸附粒度 + 比例布局，保证不同窗口尺寸下相对位置稳定。"
+    scope:
+      in: ["src/workbench/grid/：坐标换算、5px 基准吸附、resize 按比例重排、越界/最小尺寸处理", "网格背景色接入主题 token（复用现有 --yp-canvas-grid 语义）"]
+      out: ["布局文件格式与加载（UI-09）", "widget 渲染（UI-16）"]
+    constraints:
+      - "网格必须用相对单位/比例，不得硬编码 px：界面字号缩放（--yp-font-scale-ui）不得让网格与文字错位"
+      - "布局文件存格坐标 + 基准列数（如 96×54），像素由画布尺寸换算"
+    forbidden: ["用 devicePixelRatio 直接算格尺寸（缩放会漂）", "在 resize 时重写布局数据（只重算像素，不改数据）"]
+    acceptance:
+      - {type: command, run: "node --test apps/app/test/workbench-grid.test.mjs"}
+      - {type: assertion, expect: "同一布局在 800×600 与 1920×1080 下相对位置一致；调整界面字号后不错位"}
+    dependencies: ["UI-02"]
+    risk_level: L3
+    touches: ["apps/app/src/workbench/grid/**", "apps/app/test/workbench-grid.test.mjs", "apps/app/src/workbench/styles.css"]
+
+  - id: UI-09
+    title: "布局文件格式 + 加载器 + 只读渲染"
+    status: pending
+    goal: "换一份布局文件即换一页；非法布局被拒并给出可读错误。"
+    scope:
+      in: ["src/workbench/layouts/：格式定义、校验、内置布局、加载与切换", "只读渲染（用 2-3 个占位块验证）"]
+      out: ["widget 的真实实现（UI-16）"]
+    constraints: ["布局文件是数据，不得成为代码路径（CSP script-src 'self'）", "文案走 languages 键，不写死"]
+    forbidden: ["在加载器里 eval/import 布局内容", "允许布局文件指定任意组件名（须在白名单内）"]
+    acceptance:
+      - {type: command, run: "node --test apps/app/test/workbench-layout.test.mjs"}
+      - {type: assertion, expect: "非法布局（越界、未知 widget、缺字段）被拒并报错；合法布局按格坐标渲染"}
+    dependencies: ["UI-08"]
+    risk_level: L2
+    touches: ["apps/app/src/workbench/layouts/**", "apps/app/test/workbench-layout.test.mjs"]
+
+  # ───────────────────── 阶段 3：搬家（不动逻辑） ─────────────────────
+  - id: UI-10
+    title: "components/atoms + composites（资产平移）"
+    status: pending
+    goal: "建立组件基座，并把展示件资产从旧 shared/ 平移到新结构。"
+    scope:
+      in:
+        - "src/components/atoms/：Button/Panel/Toolbar/Text/Tree/Icon 等，只吃主题 token"
+        - "src/components/composites/：从旧 shared/ 平移 message-content、html-preview-card、mermaid-preview-card、image-lightbox、message-image、preview-content、saved-content、reply-run-details、delegation-approval-details、avatar-mark、app-icon、panel-resize、reply-run-cache、font-preference、theme-preference、hotkeys、work-file-links、assistant-activity、assistant-reply、assistant-companion"
+      out: ["重写这些资产的行为（只平移，不改造）"]
+    constraints: ["平移后原有测试必须全绿（尤其 message-content 的 XSS 用例）"]
+    forbidden: ["在平移过程中“顺手优化”渲染逻辑（安全边界不许动）"]
+    acceptance:
+      - {type: command, run: "pnpm run typecheck:mindlink"}
+      - {type: command, run: "node --test apps/app/test/message-content.test.mjs apps/app/test/viewer-modules.test.mjs"}
+      - {type: assertion, expect: "composites 下不再有指向 _legacy-ui 的 import"}
+    dependencies: ["UI-01"]
+    risk_level: L2
+    touches: ["apps/app/src/components/atoms/**", "apps/app/src/components/composites/**", "apps/app/test/**"]
+
+  - id: UI-11
+    title: "chatbox 浮层：自由窗口 + 整块搬运 chat 编排"
+    status: pending
+    goal: "chatbox 成为上层浮层（可拖拽/缩放），对话全功能等价。"
+    scope:
+      in:
+        - "src/chatbox/：浮层容器（拖拽、缩放、层级、开合）、inspector 槽位"
+        - "把旧 modules/chat.tsx 的编排逻辑整块搬入（1496 行，不改行为）"
+      out: ["拆分编排逻辑（后置）", "把 chat 做成 workbench 布局（不做）"]
+    constraints: ["先搬后拆：本卡只搬不改，回归判据与改前一致", "浮层不得阻断下层 dashboard 的可见性（堆叠关系按 ARCHITECTURE.md）"]
+    forbidden: ["在本卡里顺手拆 hook/重命名（拆分另开卡）"]
+    acceptance:
+      - {type: command, run: "pnpm -F @mindlink-agent/app build"}
+      - {type: assertion, expect: "发送/取消/恢复/能力审批/滚动锚定/加载更早/工作会话列表树 逐条回归通过"}
+    dependencies: ["UI-02", "UI-10"]
+    risk_level: L3
+    touches: ["apps/app/src/chatbox/**"]
+
+  - id: UI-12
+    title: "content-viewers 归位（原 viewer）"
+    status: pending
+    goal: "内容查看器落入 components/ 下，作为可共享层，并留下后续 widget 化备注。"
+    scope:
+      in:
+        - "src/components/content-viewers/：从 src/viewer 原样平移（含两个 host 接缝）"
+        - "content-viewers/README.md：写明“后续重构成 widget”的映射表与不可破坏的接缝约束"
+      out: ["改成 widget（后置）", "改动内部渲染逻辑"]
+    constraints: ["两个 host 接缝（file-host/browser-host）保持唯一对外接口；组件不得直接触碰 window.mindlink"]
+    forbidden: ["让查看器组件 import chatbox 的实现"]
+    acceptance:
+      - {type: command, run: "node --test apps/app/test/viewer-modules.test.mjs apps/app/test/viewer-code-highlight.test.mjs apps/app/test/viewer-text-diff.test.mjs"}
+      - {type: assertion, expect: "文件树/预览/审查/轨迹/browser 全部可用；README.md 存在且含映射表"}
+    dependencies: ["UI-10", "UI-11"]
+    risk_level: L2
+    touches: ["apps/app/src/components/content-viewers/**"]
+
+  - id: UI-13
+    title: "旧页面包装成整页 widget 搬入 components/widgets"
+    status: pending
+    goal: "技能（797 行）、工作树（497 行）、定时任务（561 行）、设置（151 行）等旧页面先原样可用，不被 DSL 阻塞。"
+    scope:
+      in: ["src/components/widgets/<page-id>/：每个旧页面包一层整页 widget（元数据 + 原页面实现）"]
+      out: ["把整页 widget 拆成原子组合（后置）"]
+    constraints: ["每个 widget 自带元数据（id/标题键/默认尺寸/所需能力），能力只声明不授权"]
+    forbidden: ["在 DSL 解释器未就绪前就强行拆解页面"]
+    acceptance:
+      - {type: command, run: "pnpm -F @mindlink-agent/app build"}
+      - {type: assertion, expect: "每个旧页面在新壳里能打开且功能等价（逐页回归）"}
+    dependencies: ["UI-10", "UI-12"]
+    risk_level: L3
+    touches: ["apps/app/src/components/widgets/**"]
+
+  # ───────────────────── 阶段 4：新能力 ─────────────────────
+  - id: UI-14
+    title: "theme 收编：token 分组 + 网格背景色 + 主题包格式"
+    status: pending
+    goal: "把散落的样式收进 theme/，网格背景色可调，主题可打包。"
+    scope:
+      in: ["src/theme/：骨架/页面/组件 token 分组、调色板、字体、网格背景色；主题包（一份配色 + 一份清单）格式与加载"]
+      out: ["主题市场/分发（后置）"]
+    constraints: ["var(--yp-*) 必须在 tokens 中声明（机核）", "网格背景不得硬编码颜色"]
+    forbidden: ["在组件里写颜色字面量"]
+    acceptance:
+      - {type: command, run: "node --test apps/app/test/theme-contract.test.mjs"}
+      - {type: assertion, expect: "网格背景色随主题变化；切换主题不出现未声明 token 的告警"}
+    dependencies: ["UI-01"]
+    risk_level: L2
+    touches: ["apps/app/src/theme/**", "apps/app/test/theme-contract.test.mjs"]
+
+  - id: UI-15
+    title: "languages：t() + 类型生成 + 抽取约 1800 条 + 禁中文回退机核"
+    status: pending
+    goal: "切换语言包即切换全部界面文字。"
+    scope:
+      in: ["src/languages/：zh-CN.json / en-US.json、t()、按 zh-CN 生成 TS 类型（缺键/多键编译期报错）", "抽取 UI 文案（估约 1800 条，含 aria-label/title）", "新增机核：src/** 的字符串与 JSX 文本不得出现中日韩字符（排除注释与测试）"]
+      out: ["品牌名/图标（留在品牌配置，不进语言包）", "技能包自带文案"]
+    constraints: ["必须在结构定型（UI-01…UI-13）之后做，否则位移返工"]
+    forbidden: ["把中文注释也搬进语言包", "用运行时兜底掩盖缺键（缺键要编译期红）"]
+    acceptance:
+      - {type: command, run: "node --test apps/app/test/languages.test.mjs"}
+      - {type: assertion, expect: "切到 en-US 后界面无中文残留（品牌文本除外）"}
+    dependencies: ["UI-13"]
+    risk_level: L2
+    touches: ["apps/app/src/languages/**", "apps/app/test/languages.test.mjs", "apps/app/src/**"]
+
+  - id: UI-16
+    title: "widget 体系：清单 + DSL 格式 + 解释器（受限，不执行用户代码）"
+    status: pending
+    goal: "用户/LLM 产出的 UI 只是一份 JSON，由我们按原子白名单渲染。"
+    scope:
+      in: ["src/components/widgets/：widget 清单（id/标题键/尺寸约束/能力声明）、DSL 格式与 schema 校验、解释器（原子白名单）、能力声明与 Runtime 独立授权的对接"]
+      out: ["widget 的可视化编辑器（后置）"]
+    constraints: ["解释器只渲染数据，永不 eval/动态 import（CSP script-src 'self' 与 composition-boundary 约定都要保住）", "声明能力不等于授予权限，授权仍由 Runtime 决定"]
+    forbidden: ["把 DSL 转成函数体执行", "让 DSL 指定任意模块路径"]
+    acceptance:
+      - {type: command, run: "node --test apps/app/test/widget-dsl.test.mjs"}
+      - {type: assertion, expect: "未知原子/越界/未声明能力被拒；白名单内正常渲染"}
+    dependencies: ["UI-09", "UI-10"]
+    risk_level: L3
+    touches: ["apps/app/src/components/widgets/**", "apps/app/test/widget-dsl.test.mjs"]
+
+  - id: UI-17
+    title: "用户自建 widget 闭环：创作 → 校验 → 保存 → pin"
+    status: pending
+    goal: "用户用原子/组合件创作自己的 dashboard 页并固定到左栏。"
+    scope:
+      in: ["创作流程（LLM 产出 JSON → 校验 → 预览 → 保存）、保存位置（用户资产）、pin 到左栏（对接 UI-05）"]
+      out: ["第三方代码安装（明确不做）"]
+    constraints: ["产物是数据不是代码；不引入沙箱 iframe/webview"]
+    forbidden: ["允许用户代码在主渲染进程执行"]
+    acceptance:
+      - {type: assertion, expect: "从创作到 pin 全程不执行用户代码；越权/非法 DSL 被拒；重启后 pin 仍在"}
+    dependencies: ["UI-16", "UI-05"]
+    risk_level: L3
+    touches: ["apps/app/src/components/widgets/**", "apps/app/src/left-bar/**", "apps/app/src/workbench/**"]
+
+  - id: UI-18
+    title: "迁移后整体回归验收"
+    status: pending
+    goal: "对照原功能清单逐条验收，确认重构没有丢功能。"
+    scope:
+      in: ["原功能清单（对话、工作会话树、文件预览、审查、助理、技能、定时任务、设置、企微连接、Tailscale、快捷键、字体/主题）逐条过", "四栏 + 画布在最小/常用/最大窗口尺寸下的稳定性"]
+      out: ["新功能的验收（各自卡片内做）"]
+    constraints: ["验收必须由非本阶段主要实现者执行；记录版本、环境、命令与 pass/fail"]
+    forbidden: ["用“构建通过”替代业务验收", "拿旧 UI 的截图当新结构通过证据"]
+    acceptance:
+      - {type: assertion, expect: "原功能清单 100% 通过；新增能力（画布/布局/pin/widget）各有独立证据"}
+    dependencies: ["UI-15", "UI-17"]
+    risk_level: L2
+    touches: [".tasks/ui-rebuild/**"]
