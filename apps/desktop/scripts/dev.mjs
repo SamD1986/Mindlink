@@ -40,7 +40,7 @@ if (!rendererReady || !catalogReady) {
 
 const electron = run(
   pnpm,
-  ['--filter', '@mindlink-agent/desktop', 'start'],
+  ['--filter', '@mindlink-agent/desktop', 'start', '--', '--remote-debugging-port=9222'],
   {
     env: {
       ...process.env,

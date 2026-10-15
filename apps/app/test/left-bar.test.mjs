@@ -24,7 +24,8 @@ test('pins are added, removed and reordered from the bar', async () => {
   for (const action of ['up', 'down', 'unpin']) {
     assert.ok(source.includes(`data-pin-action="${action}"`), `没有 ${action} 操作`);
   }
-  assert.ok(source.includes('data-left-action="pin-current"'), '不能把当前布局固定到左栏');
+  // 「固定当前布局」按钮已移除（2026-10-15 用户需求），左栏最下不再有向下箭头
+  assert.ok(!source.includes('data-left-action="pin-current"'), '固定当前布局的按钮应已移除');
 });
 
 test('the renderer touches storage in exactly one place', async () => {

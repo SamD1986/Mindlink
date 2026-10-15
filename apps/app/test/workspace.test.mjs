@@ -49,8 +49,8 @@ test('the chatbox opens and closes through the window state', () => {
   assert.equal(setChatboxOpen(INITIAL_WORKSPACE, true).chatboxOpen, true);
 });
 
-test('the left bar carries the three fixed entries', () => {
-  assert.deepEqual(FIXED_ENTRIES.map((entry) => entry.id), ['wiki', 'skills', 'settings']);
+test('the left bar carries the four fixed entries', () => {
+  assert.deepEqual(FIXED_ENTRIES.map((entry) => entry.id), ['home', 'wiki', 'skills', 'settings']);
   for (const entry of FIXED_ENTRIES) assert.match(entry.labelKey, /^nav\./);
 });
 

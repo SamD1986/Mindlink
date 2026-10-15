@@ -4,7 +4,7 @@
  */
 
 .bottom-bar {
-  min-height: 28px;
+  height: 36px;
   display: flex;
   align-items: center;
   padding: 0 10px;

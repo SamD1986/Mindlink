@@ -46,7 +46,3 @@ test('every bar and the canvas own their stylesheet', async () => {
   }
 });
 
-test('the canvas consumes the grid token instead of painting its own pattern', async () => {
-  const css = await read('../src/workbench/styles.css');
-  assert.ok(css.includes('background-image: var(--yp-canvas-grid);'), 'canvas does not use --yp-canvas-grid');
-});

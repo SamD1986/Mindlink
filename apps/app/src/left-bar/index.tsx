@@ -6,7 +6,6 @@ import {
   createLocalPinStore,
   entryForLayout,
   movePin,
-  pinLayout,
   unpinLayout,
   type LeftBarEntry,
 } from './entries.js';
@@ -19,7 +18,7 @@ import './styles.css';
  * 本栏不 import 上栏。pin 走 entries.ts 里的存储接缝（渲染层只有那一处碰存储）。
  */
 export function LeftBar() {
-  const { state, openLayout } = useWorkspace();
+  const { state, openLayout, closeLayout } = useWorkspace();
   const store = useMemo(() => createLocalPinStore(), []);
   const [pinned, setPinned] = useState<string[]>([]);
 
@@ -32,11 +31,10 @@ export function LeftBar() {
   const persist = (ids: string[]) => { setPinned(ids); void store.save(ids); };
   const labels = new Map(state.tabs.map((tab) => [tab.id, tab.label]));
   const pinnedEntries = pinned.map((id) => entryForLayout(id, labels.get(id) ?? id));
-  const canPinActive = state.activeId !== null && !pinned.includes(state.activeId);
 
   return (
     <aside className="left-bar" data-bar="left">
-      <nav className="left-bar-entries" aria-label="Pages">
+      <nav className="left-bar-entries" data-left-entries>
         {FIXED_ENTRIES.map((entry) => (
           <button
             key={entry.id}
@@ -45,7 +43,15 @@ export function LeftBar() {
             data-left-entry={entry.id}
             aria-label={entry.label}
             title={entry.label}
-            onClick={() => openLayout({ id: entry.id, label: entry.label, labelKey: entry.labelKey })}
+            onClick={() => {
+              if (entry.id === 'home') {
+                // Home 按钮：关闭当前布局，回到空画布
+                if (state.activeId) closeLayout(state.activeId);
+              } else {
+                // 其他入口：打开对应布局
+                openLayout({ id: entry.id, label: entry.label, labelKey: entry.labelKey });
+              }
+            }}
           >
             <EntryIcon entry={entry} />
           </button>
@@ -98,24 +104,21 @@ export function LeftBar() {
           </span>
         ))}
       </div>
-
-      <button
-        type="button"
-        className="left-bar-button left-bar-pin-current"
-        data-left-action="pin-current"
-        aria-label="Pin current layout"
-        title="Pin current layout"
-        disabled={!canPinActive}
-        onClick={() => { if (state.activeId) persist(pinLayout(pinned, state.activeId)); }}
-      >
-        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2.5v7m-3-3 3 3 3-3" /></svg>
-      </button>
     </aside>
   );
 }
 
-/** 固定入口的图标：AppIcon 里没有齿轮字形，设置的齿轮在本栏自绘。 */
+/** 固定入口的图标：AppIcon 没有房子与齿轮字形，这两个在本栏自绘。 */
 function EntryIcon({ entry }: { entry: LeftBarEntry }) {
+  if (entry.icon === 'home') {
+    return (
+      <svg className="left-bar-glyph" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 11.5 12 4.5l8 7" />
+        <path d="M6.5 9.8V19.5h11V9.8" />
+        <path d="M10 19.5v-5h4v5" />
+      </svg>
+    );
+  }
   if (entry.icon === 'settings') {
     return (
       <svg className="left-bar-glyph" viewBox="0 0 24 24" aria-hidden="true">

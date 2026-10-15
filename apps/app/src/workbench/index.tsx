@@ -2,17 +2,22 @@ import { useMemo, type CSSProperties } from 'react';
 import { useWorkspace } from '../shell/workspace.js';
 import { cellSize, rectToPixels } from './grid/geometry.js';
 import { useCanvasSize } from './grid/use-canvas-size.js';
-import { WIDGET_REGISTRY, loadBuiltinLayouts } from './layouts/builtin.js';
+import { loadBuiltinLayouts, WIDGET_REGISTRY } from './layouts/builtin.js';
 import { WidgetPlaceholder } from './widget-placeholder.js';
+import { WorkbenchBackdrop } from './workbench-backdrop.js';
+import { WorkbenchBrand } from './workbench-brand.js';
+import '../../themes/fit-text.css';
 import './styles.css';
 
 /**
- * 画布：按**当前布局**摆放 widget。
+ * 画布：背景层（永远显示）+ 品牌字标（空态）+ widget 容器（有布局时）。
  *
- * - 布局文件来自 `layouts/`（UI-09），本地数据、加载期校验、不做动态 import；
- * - 网格换算见 `grid/geometry.ts`（UI-08）：只存格坐标，像素按画布尺寸按比例算，
- *   resize 只重算像素、不改写布局数据；
- * - widget 的真实实现、拖拽摆放与用户自建布局在 UI-13/UI-16/UI-17。
+ * 新结构（2026-10-15）：
+ * - 背景层（WorkbenchBackdrop）永远显示，四层堆叠（底色+纹理+墨洗+网格），跟随主题
+ * - 品牌字标（WorkbenchBrand）在无布局或空布局时显示，叠在背景上方
+ * - widget 容器在有布局时显示，渲染占位 widget
+ *
+ * 布局来自 `layouts/`（UI-09），网格换算见 `grid/geometry.ts`（UI-08）。
  */
 export function Workbench() {
   const { state } = useWorkspace();
@@ -23,25 +28,19 @@ export function Workbench() {
   const layout = state.activeId ? layouts.get(state.activeId) : undefined;
   const ready = layout !== undefined && size.width > 0 && size.height > 0;
   const cell = ready ? cellSize(layout.grid, size) : undefined;
+  const showBrand = !layout || (layout && layout.widgets.length === 0);
 
   return (
     <main className="workbench" data-workbench-canvas ref={ref}>
-      {!layout && (
-        <p className="workbench-empty" data-workbench-empty>
-          No layout open — pick one on the left bar
-        </p>
-      )}
+      {/* 背景层：永远显示 */}
+      <WorkbenchBackdrop />
 
+      {/* 品牌字标：无布局或空布局时显示 */}
+      {showBrand && <WorkbenchBrand />}
+
+      {/* Widget 容器：有布局时显示 */}
       {ready && cell && (
         <>
-          <div
-            className="workbench-gridlines"
-            data-workbench-gridlines
-            style={{
-              '--grid-cell-w': `${cell.width}px`,
-              '--grid-cell-h': `${cell.height}px`,
-            } as CSSProperties}
-          />
           {layout.widgets.map((instance) => {
             const spec = registry.get(instance.widget);
             if (!spec) return null;

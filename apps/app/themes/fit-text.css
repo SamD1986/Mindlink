@@ -1,0 +1,58 @@
+/*
+ * .fit-text — 容器查询 + CSS 自定义属性让文字铺满容器而不溢出。
+ *
+ * 来自 yuanpu2.0/hermes-agent（欢迎页字标），无 resize 监听、无测量循环。
+ * 用法：
+ *   <p class="fit-text" style="--fit-min: 2.75rem">
+ *     <span><span>元朴思联</span></span>
+ *     <span aria-hidden="true">元朴思联</span>
+ *   </p>
+ *
+ * 容器必须有 `container-type: inline-size`（可写在父元素或 .fit-text 自己）。
+ */
+
+@property --fit-captured-length {
+  syntax: '<length>';
+  initial-value: 0px;
+  inherits: true;
+}
+
+.fit-text {
+  --fit-captured-length: initial;
+  --fit-support-sentinel: var(--fit-captured-length, 9999px);
+
+  display: flex;
+  container-type: inline-size;
+}
+
+.fit-text > [aria-hidden] {
+  visibility: hidden;
+}
+
+.fit-text > :not([aria-hidden]) {
+  flex-grow: 1;
+  container-type: inline-size;
+
+  --fit-captured-length: 100cqi;
+  --fit-available-space: var(--fit-captured-length);
+}
+
+.fit-text > :not([aria-hidden]) > * {
+  --fit-support-sentinel: inherit;
+  --fit-captured-length: 100cqi;
+  --fit-ratio: tan(atan2(var(--fit-available-space), var(--fit-available-space) - var(--fit-captured-length)));
+
+  display: block;
+  inline-size: var(--fit-available-space);
+  font-size: clamp(
+    var(--fit-min, 1em),
+    1em * var(--fit-ratio),
+    var(--fit-max, infinity * 1px) - var(--fit-support-sentinel)
+  );
+}
+
+@container (inline-size > 0) {
+  .fit-text > :not([aria-hidden]) > * {
+    white-space: nowrap;
+  }
+}

@@ -9,10 +9,11 @@ export type LeftBarEntry = {
   id: string;
   label: string;
   labelKey: string;
-  icon: 'wiki' | 'skills' | 'settings' | 'pinned';
+  icon: 'home' | 'wiki' | 'skills' | 'settings' | 'pinned';
 };
 
 export const FIXED_ENTRIES: LeftBarEntry[] = [
+  { id: 'home', label: 'Home', labelKey: 'nav.home', icon: 'home' },
   { id: 'wiki', label: 'Wiki', labelKey: 'nav.wiki', icon: 'wiki' },
   { id: 'skills', label: 'Skills & tools', labelKey: 'nav.skills', icon: 'skills' },
   { id: 'settings', label: 'Settings', labelKey: 'nav.settings', icon: 'settings' },

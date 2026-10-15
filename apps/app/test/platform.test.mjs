@@ -29,7 +29,8 @@ test('macOS reserves room for the system traffic lights', async () => {
   const inset = Number(mac[1].match(/--top-bar-leading-inset:\s*(\d+)px/)[1]);
   // 红绿灯约 13–65px
   assert.ok(inset >= 80, `让位宽度 ${inset}px 不足以避开系统红绿灯`);
-  assert.ok(css.includes('padding: 4px 8px 0 var(--top-bar-leading-inset);'), '标签条没有消费这个让位宽度');
+  // 标签页已移除，检查上栏本身消费让位宽度
+  assert.ok(css.includes('padding-left: var(--top-bar-leading-inset);'), '上栏没有消费让位宽度');
 });
 
 test('window controls delegate platform detection to the shared module', async () => {

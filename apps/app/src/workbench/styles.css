@@ -4,23 +4,59 @@
  * 网格线：单元格尺寸由 JS 按画布尺寸算出来（--grid-cell-w/h），
  * 所以网格随窗口等比缩放；线的颜色走 token，不硬编码。
  * --yp-canvas-grid 是主题级的开关（none 可关掉整层网格）。
+ *
+ * 宣纸底纹：`xuan-paper-tile.jpg` 400×400 平铺（默认主题一部分）。
  */
 
 .workbench {
   position: relative;
   overflow: hidden;
-  background-color: var(--yp-canvas-surface);
-  background-image: var(--yp-canvas-grid);
 }
 
-.workbench-gridlines {
+/* 背景层（四层堆叠）：永远显示，不受布局开合影响 */
+.workbench-backdrop {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 0;
+}
+
+.workbench-backdrop-ground {
+  position: absolute;
+  inset: 0;
+  background: #f9f8f5; /* 宣纸白，硬编码防玻璃模式覆盖 */
+}
+
+.workbench-backdrop-texture {
+  position: absolute;
+  inset: 0;
+  background-image: url('../../themes/assets/xuan-paper-tile.jpg');
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  opacity: 0.14; /* yuanpu2.0 实测值 */
+}
+
+.workbench-backdrop-wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(0, 58, 121, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(227, 186, 83, 0.08) 0%, transparent 50%);
+  opacity: 0.09; /* yuanpu2.0 实测值 */
+}
+
+.workbench-backdrop-grid {
+  position: absolute;
+  inset: 0;
   background-image:
-    linear-gradient(to right, var(--yp-border-subtle) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--yp-border-subtle) 1px, transparent 1px);
-  background-size: var(--grid-cell-w) var(--grid-cell-h);
+    linear-gradient(to right, rgba(0, 123, 255, 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 123, 255, 0.15) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.55; /* yuanpu2.0 注释里的值 */
+}
+
+.workbench-backdrop-grid[data-edit-mode='false'] {
+  display: none; /* 非编辑模式不显示网格 */
 }
 
 .workbench-widget {
@@ -49,15 +85,62 @@
   opacity: 0.7;
 }
 
-.workbench-empty,
-.workbench-error {
+/* 品牌字标（空态时显示，z-index 1，叠在背景上方） */
+.workbench-brand {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  margin: 0;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem 1.5rem;
+  text-align: center;
   color: var(--yp-text-muted);
-  font-size: 0.875rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.workbench-brand-wordmark {
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.workbench-brand-seal {
+  margin: 0 auto 2rem;
+  display: block;
+  width: 13.2%;
+  user-select: none;
+}
+
+/* 中文字标：思源宋体子集 + .fit-text 自适应字号 */
+.workbench-brand-zh {
+  margin: 0 auto 1.25rem;
+  width: 40%;
+  font-family: var(--yp-font-brand-song);
+  font-weight: bold;
+  line-height: 0.9;
+  letter-spacing: 0.08em;
+  color: var(--yp-brand-ink);
+}
+
+/* 英文字标：Cormorant，逐字母 span，justify-between 撑到同宽 */
+.workbench-brand-en {
+  margin: 0 auto;
+  width: 40%;
+  padding-left: 1.27cqi;
+  padding-right: 1.27cqi;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--yp-font-brand-cormorant);
+  font-weight: bold;
+  font-size: 3.3cqi;
+  line-height: 0.9;
+  color: var(--yp-brand-ink);
 }
 
 .workbench-error {
