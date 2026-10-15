@@ -228,7 +228,7 @@ tasks:
   # ───────────────────── 阶段 2：workbench 画布 ─────────────────────
   - id: UI-08
     title: "workbench 网格引擎：格坐标 + 基准 → 比例换算、吸附、背景色"
-    status: pending
+    status: in_progress
     goal: "把“5×5px 网格”实现为基准吸附粒度 + 比例布局，保证不同窗口尺寸下相对位置稳定。"
     scope:
       in: ["src/workbench/grid/：坐标换算、5px 基准吸附、resize 按比例重排、越界/最小尺寸处理", "网格背景色接入主题 token（复用现有 --yp-canvas-grid 语义）"]
@@ -243,10 +243,25 @@ tasks:
     dependencies: ["UI-02"]
     risk_level: L3
     touches: ["apps/app/src/workbench/grid/**", "apps/app/test/workbench-grid.test.mjs", "apps/app/src/workbench/styles.css"]
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "纯函数几何层 src/workbench/grid/geometry.ts：cellSize / rectToPixels / normalizeBox / fits / overlaps / clampRect / snapRect / snapStepGrid，函数签名里没有 devicePixelRatio 这一项"
+        - "apps/app/test/workbench-grid.test.mjs 7 条全绿：格尺寸与画布成正比、同一布局在 800x600 与 1920x1080 下相对位置一致（误差 < 1e-9）、吸附步长在基准宽度下正好 5px 且随画布翻倍、越界回收与最小尺寸、重叠判定边界、内置布局全部满足最小尺寸且不越界"
+        - "真机探针（真实 Electron）：点开 wiki 布局后 4 个 widget 在默认画布与 900x620 下相对位置一致（偏差 < 2%）；网格线单元格实测 10.52x12.85px = 画布 1010x694 ÷ 96x54，证明网格随画布等比缩放而不是写死 5px"
+        - "画布尺寸用 ResizeObserver 量（src/workbench/grid/use-canvas-size.ts），resize 只重算像素、不改写布局数据"
+      decisions:
+        - "5x5px 定义为**基准宽度（1440px）下的吸附粒度**：换算成'格'为单位时步长恒定（96 列时为 1/3 格），换算成像素时随画布等比缩放（1440 下 5px、2880 下 10px）"
+        - "网格线用 background-size 由 JS 按格尺寸设置，颜色走 token（--yp-border-subtle），主题级开关仍是 --yp-canvas-grid"
+        - "吸附步长下限 1/4 格：画布很大时避免拖动抖动（拖拽摆放本身留给 UI-16/UI-17）"
+      pitfalls:
+        - "探针读几何前必须等目标真的变化：Emulation 换尺寸后立刻读会拿到重渲染前的旧 DOM（widget 都在、只是还没按新尺寸重算），表现为'比例不一致'的假失败。要等画布 clientWidth 变了、再留一拍"
+      note: "未并入 main；拖拽摆放与自由调整尚未实现（属 UI-16/UI-17）"
 
   - id: UI-09
     title: "布局文件格式 + 加载器 + 只读渲染"
-    status: pending
+    status: in_progress
     goal: "换一份布局文件即换一页；非法布局被拒并给出可读错误。"
     scope:
       in: ["src/workbench/layouts/：格式定义、校验、内置布局、加载与切换", "只读渲染（用 2-3 个占位块验证）"]
@@ -258,7 +273,23 @@ tasks:
       - {type: assertion, expect: "非法布局（越界、未知 widget、缺字段）被拒并报错；合法布局按格坐标渲染"}
     dependencies: ["UI-08"]
     risk_level: L2
-    touches: ["apps/app/src/workbench/layouts/**", "apps/app/test/workbench-layout.test.mjs"]
+    touches: ["apps/app/src/workbench/layouts/**", "apps/app/src/workbench/index.tsx", "apps/app/src/workbench/widget-placeholder.tsx", "apps/app/test/workbench-layout.test.mjs"]
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "格式与校验 src/workbench/layouts/format.ts：grid 必须 12x8 以上正整数、widget 必须已登记、rect 必须落在画布内且不小于该 widget 的最小尺寸、实例 id 不重复、widget 之间不重叠 —— 不合法整份拒掉并给可读错误，不做半份容错"
+        - "apps/app/test/workbench-layout.test.mjs 4 条全绿：合法布局保序解析、9 类非法输入逐条被拒且错误可读、内置 3 份布局零错误加载、**workbench 全目录不得出现动态 import/eval**（守住'布局是数据不是代码'）"
+        - "真机探针：点开 wiki 布局 → 画布按格坐标渲染 4 个 widget（Conversations 0,0·22x54 / Notes 22,0·48x30 / Files 70,0·26x54 / Notes 22,30·48x24），截图见 .tasks/ui-rebuild/evidence/shell-and-workbench/workbench-layout.png"
+        - "没有布局时画布给空态（探针断言过）"
+      decisions:
+        - "widget 登记表 WIDGET_REGISTRY 是白名单：布局只能引用登记过的 id，能力只声明不授权（与 Runtime 逐请求授权的口径一致）"
+        - "内置布局与用户自建布局**同一格式、同一个校验器**（UI-17 只需换个来源）"
+        - "加载期只解析本地数据，不做动态 import：CSP 是 script-src 'self'，布局文件不许成为代码路径"
+      known_gaps:
+        - "布局标题与 widget 标题仍是占位文案（UI-15 抽语言包）"
+        - "布局的加载来源目前是内置常量；用户自建布局的读写与 pin 的持久化搬迁（Runtime）在 UI-17/UI-09 后续处理"
+      note: "未并入 main"
 
   # ───────────────────── 阶段 3：搬家（不动逻辑） ─────────────────────
   - id: UI-10

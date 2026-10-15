@@ -1,7 +1,9 @@
 /*
  * 画布外观。位置（grid-area）由 shell/layout.css 决定。
- * 网格背景走主题 token（--yp-canvas-grid），不硬编码颜色或图样；
- * token 为 none 时就是纯画布底色，等 UI-14 定网格样式。
+ *
+ * 网格线：单元格尺寸由 JS 按画布尺寸算出来（--grid-cell-w/h），
+ * 所以网格随窗口等比缩放；线的颜色走 token，不硬编码。
+ * --yp-canvas-grid 是主题级的开关（none 可关掉整层网格）。
  */
 
 .workbench {
@@ -9,4 +11,58 @@
   overflow: hidden;
   background-color: var(--yp-canvas-surface);
   background-image: var(--yp-canvas-grid);
+}
+
+.workbench-gridlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--yp-border-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--yp-border-subtle) 1px, transparent 1px);
+  background-size: var(--grid-cell-w) var(--grid-cell-h);
+}
+
+.workbench-widget {
+  position: absolute;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--yp-border-subtle);
+  border-radius: 10px;
+  background: var(--yp-surface);
+}
+
+.workbench-widget-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--yp-border-subtle);
+  color: var(--yp-text-muted);
+  font-size: 0.8125rem;
+}
+
+.workbench-widget-grid {
+  font-size: 0.6875rem;
+  opacity: 0.7;
+}
+
+.workbench-empty,
+.workbench-error {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  color: var(--yp-text-muted);
+  font-size: 0.875rem;
+}
+
+.workbench-error {
+  top: auto;
+  bottom: 12px;
+  transform: translateX(-50%);
+  color: var(--yp-text);
 }

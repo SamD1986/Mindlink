@@ -26,7 +26,7 @@ const require = createRequire(import.meta.url);
 const electron = require('electron');
 const desktopRoot = resolve(import.meta.dirname, '..');
 const appDist = resolve(desktopRoot, '../app/dist');
-const evidence = resolve(desktopRoot, '../../.tasks/ui-rebuild/evidence/stage-1-shell');
+const evidence = resolve(desktopRoot, '../../.tasks/ui-rebuild/evidence/shell-and-workbench');
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png' };
 
@@ -187,6 +187,10 @@ try {
   record('普通窗口', `${normal.outerWidth}x${normal.outerHeight}，屏幕可用 ${normal.availWidth}x${normal.availHeight}`);
 
   // 3.5) 四条栏的内容：左栏开标签、右栏开合对话、pin 落盘并在重载后仍在、LOGO 真的加载出来
+  await eventually(
+    async () => cdp.evaluate(`Boolean(document.querySelector('[data-workbench-empty]'))`),
+    '没有布局时画布应给出空态',
+  );
   await cdp.evaluate(`document.querySelector('[data-left-entry="wiki"]').click()`);
   await eventually(
     async () => cdp.evaluate(`Boolean(document.querySelector('[data-tab="wiki"][data-active="true"]'))`),
@@ -198,6 +202,72 @@ try {
     return ids.length === 2 ? ids : null;
   }, '第二个入口没有加出第二个标签');
   record('左栏开标签', `标签=${tabIds.join(' / ')}，点谁谁成为当前`);
+
+  // 3.6) 画布：按布局摆放，且换了画布尺寸后**相对位置一致**（比例换算的真凭据）
+  await cdp.evaluate(`document.querySelector('[data-left-entry="wiki"]').click()`);
+  const widgetBoxes = () => cdp.evaluate(`(() => {
+    const canvas = document.querySelector('[data-workbench-canvas]');
+    if (!canvas) return null;
+    const base = canvas.getBoundingClientRect();
+    if (base.width === 0 || base.height === 0) return null;
+    return [...document.querySelectorAll('[data-widget]')].map((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        widget: element.getAttribute('data-widget'),
+        x: (box.left - base.left) / base.width,
+        y: (box.top - base.top) / base.height,
+        w: box.width / base.width,
+        h: box.height / base.height,
+      };
+    });
+  })()`);
+  const atDefault = await eventually(async () => {
+    const value = await widgetBoxes();
+    return value && value.length > 0 ? value : null;
+  }, '画布没有按布局渲染出 widget');
+  const canvasWidth = () => cdp.evaluate(`document.querySelector('[data-workbench-canvas]')?.clientWidth ?? 0`);
+  const widthBefore = await canvasWidth();
+  await cdp.send('Emulation.setDeviceMetricsOverride', { width: 900, height: 620, deviceScaleFactor: 1, mobile: false });
+  // 必须等画布真的变小、再给 ResizeObserver → 状态 → 重渲染留一拍：
+  // 否则读到的还是旧 DOM（widget 都还在，只是还没按新尺寸重算）。
+  await eventually(async () => (await canvasWidth()) < widthBefore - 50, `画布没有随视口变小（${widthBefore} → ${await canvasWidth()}）`);
+  await wait(250);
+  const smaller = await eventually(widgetBoxes, '缩小画布后 widget 不见了');
+  assert.equal(smaller.length, atDefault.length, '换画布尺寸后 widget 数量变了');
+  for (let index = 0; index < smaller.length; index += 1) {
+    for (const key of ['x', 'y', 'w', 'h']) {
+      assert.ok(Math.abs(smaller[index][key] - atDefault[index][key]) < 0.02,
+        `${smaller[index].widget} 的 ${key} 随画布尺寸变了：${atDefault[index][key]} → ${smaller[index][key]}`);
+    }
+  }
+  await cdp.send('Emulation.clearDeviceMetricsOverride');
+  record('画布比例布局', `${atDefault.length} 个 widget：默认画布与 900x620 下相对位置一致（偏差 < 2%）`);
+
+  // 网格线按格尺寸铺设（不是固定 5px）：这份内置布局铺满了画布，肉眼看不到网格，
+  // 所以读 computed 样式作为证据 —— 并且要等它真的跟上画布尺寸，否则会读到切换瞬间的旧值。
+  const gridSample = () => cdp.evaluate(`(() => {
+    const element = document.querySelector('[data-workbench-gridlines]');
+    const canvas = document.querySelector('[data-workbench-canvas]');
+    if (!element || !canvas) return null;
+    const size = getComputedStyle(element).backgroundSize.split(',')[0].trim();
+    const [cellW, cellH] = size.split(/\\s+/).map((value) => parseFloat(value));
+    return { cellW, cellH, canvasW: canvas.clientWidth, canvasH: canvas.clientHeight };
+  })()`);
+  const followed = await eventually(async () => {
+    const value = await gridSample();
+    if (!value) return null;
+    // wiki 布局的基准是 96x54 格：单元格应当等于画布尺寸除以列数/行数
+    const matches = Math.abs(value.cellW - value.canvasW / 96) < 0.5 && Math.abs(value.cellH - value.canvasH / 54) < 0.5;
+    return matches ? value : null;
+  }, '网格单元格没有跟着画布尺寸重算');
+  record('网格线', `单元格 ${followed.cellW.toFixed(2)}x${followed.cellH.toFixed(2)}px = 画布 ${followed.canvasW}x${followed.canvasH} ÷ 96x54，随画布等比缩放`);
+
+  // 布局还开着的时候留一张画布证据图（后面 pin 测试会 reload，那时画布已回到空态）
+  await cdp.send('Page.enable');
+  await mkdir(evidence, { recursive: true });
+  const workbenchShot = await cdp.send('Page.captureScreenshot', { format: 'png' });
+  await writeFile(join(evidence, 'workbench-layout.png'), Buffer.from(workbenchShot.data, 'base64'));
+  record('画布截图', join(evidence, 'workbench-layout.png'));
 
   const conversations = `document.querySelector('[data-right-action="conversations"]')`;
   await cdp.evaluate(`${conversations}.click()`);
@@ -270,7 +340,7 @@ try {
 
   await mkdir(evidence, { recursive: true });
   await writeFile(join(evidence, 'results.md'),
-    `# 阶段 1（UI-03 ~ UI-07）真机探针结果\n\n命令：\`node apps/desktop/test/ui-rebuild-shell-probe.mjs\`\n\n`
+    `# 外壳与画布真机探针结果（UI-03 ~ UI-09）\n\n命令：\`node apps/desktop/test/ui-rebuild-shell-probe.mjs\`\n\n`
     + `环境：真实 Electron（apps/desktop/dist/main.cjs）+ 构建产物 apps/app/dist，\n`
     + `临时 MINDLINK_HOME 与独立 --user-data-dir。\n\n`
     + results.map((line) => `- ${line}`).join('\n') + '\n');
