@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { test } from 'node:test';
 import { register } from 'tsx/esm/api';
 
@@ -32,9 +32,11 @@ test('the brand wordmark fonts are bundled and OFL-licensed', async () => {
   for (const family of ['Cormorant', 'Noto Serif SC Brand']) {
     assert.ok(declarations.includes(`font-family: '${family}';`), `${family} 没有 @font-face 声明`);
   }
-  const tokens = await read('../themes/tokens.css');
+  // token 已按层级拆成 themes/tokens/*.css（UI-14）：品牌三项归 brand.css，这里扫全组
+  const dir = new URL('../themes/tokens/', import.meta.url);
+  const group = (await Promise.all((await readdir(dir)).map((name) => read(dir + name)))).join('\n');
   for (const token of ['--yp-font-brand-song', '--yp-font-brand-cormorant', '--yp-brand-ink']) {
-    assert.ok(tokens.includes(`${token}:`), `tokens.css 缺少 ${token}`);
+    assert.ok(group.includes(`${token}:`), `themes/tokens/ 缺少 ${token}`);
   }
 });
 

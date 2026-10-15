@@ -7,7 +7,8 @@ import {
   type HotkeyCommandId,
   type SaveHotkeyInput,
 } from '@mindlink-agent/protocol';
-import { bindingFromKeyEvent, hotkeyLabel } from '../shared/hotkeys.js';
+import { bindingFromKeyEvent, hotkeyLabel } from '../../components/composites/hotkeys.js';
+import { t } from '../../languages/index.js';
 
 export function HotkeySettingsPanel({ active }: { active: boolean }) {
   const desktop = window.mindlink;
@@ -48,19 +49,19 @@ export function HotkeySettingsPanel({ active }: { active: boolean }) {
       const binding = bindingFromKeyEvent(event);
       if (binding) void save({ id: recording, binding });
       else if (!/^(?:Meta|Control|Alt|Shift)(?:Left|Right)$/.test(event.code)) {
-        setError('请按下 Esc、功能键，或带 Command / Control / Option 的组合键。');
+        setError(t("请按下 Esc、功能键，或带 Command / Control / Option 的组合键。"));
       }
     };
     window.addEventListener('keydown', capture, true);
     return () => window.removeEventListener('keydown', capture, true);
   }, [active, recording, saving, desktop]);
 
-  return <section className="hotkey-settings" aria-label="快捷键设置">
-    <h2>快捷键</h2>
-    <p>快捷键只在桌面应用窗口内生效。点击按键可重新录入，也可以禁用或恢复默认值。</p>
-    {!desktop && <p>请在桌面应用中配置快捷键。</p>}
-    {query.isLoading && <p>正在读取快捷键…</p>}
-    {query.error && <p role="alert">读取失败：{String(query.error)}</p>}
+  return <section className="hotkey-settings" aria-label={t("快捷键设置")}>
+    <h2>{t("快捷键")}</h2>
+    <p>{t("快捷键只在桌面应用窗口内生效。点击按键可重新录入，也可以禁用或恢复默认值。")}</p>
+    {!desktop && <p>{t("请在桌面应用中配置快捷键。")}</p>}
+    {query.isLoading && <p>{t("正在读取快捷键…")}</p>}
+    {query.error && <p role="alert">{t("读取失败：")}{String(query.error)}</p>}
     {error && <p className="hotkey-error" role="alert">{error}</p>}
     {HOTKEY_CATEGORIES.map((category) => {
       const commands = HOTKEY_COMMANDS.filter((command) => command.category === category.id);
@@ -73,15 +74,15 @@ export function HotkeySettingsPanel({ active }: { active: boolean }) {
           return <div className="hotkey-row" key={command.id}>
             <div className="hotkey-description"><strong>{command.title}</strong><span>{command.description}</span></div>
             <div className="hotkey-controls">
-              <button type="button" className="hotkey-binding" aria-label={`修改${command.title}快捷键`}
+              <button type="button" className="hotkey-binding" aria-label={t("修改{0}快捷键", { 0: command.title })}
                 aria-pressed={isRecording} disabled={!desktop || Boolean(saving)}
                 onClick={() => { setError(''); setRecording(isRecording ? undefined : command.id); }}>
-                {isRecording ? '请按快捷键…' : hotkeyLabel(binding)}
+                {isRecording ? t("请按快捷键…") : hotkeyLabel(binding)}
               </button>
               <button type="button" disabled={!desktop || Boolean(saving) || binding === null}
-                onClick={() => void save({ id: command.id, binding: null })}>禁用</button>
+                onClick={() => void save({ id: command.id, binding: null })}>{t("禁用")}</button>
               <button type="button" disabled={!desktop || Boolean(saving) || query.data?.bindings[command.id] === undefined}
-                onClick={() => void save({ id: command.id, reset: true })}>恢复默认</button>
+                onClick={() => void save({ id: command.id, reset: true })}>{t("恢复默认")}</button>
             </div>
           </div>;
         })}

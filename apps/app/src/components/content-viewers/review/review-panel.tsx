@@ -5,6 +5,7 @@ import type { WorkFileChangeEntry } from '@mindlink-agent/protocol';
 import { AppIcon } from '../../composites/app-icon.js';
 import { FileDiffView } from '../preview/file-diff-view.js';
 import { countDiffChanges, createUnifiedDiff } from '../preview/text-diff.js';
+import { t } from '../../../languages/index.js';
 
 type ReviewScope = 'last-run' | 'conversation';
 
@@ -43,28 +44,28 @@ export function ReviewPanel({ conversationId, lastRunId, refreshKey, active }: {
     return { added, removed, oversized };
   }, [stats]);
 
-  const emptyHint = scope === 'last-run' ? '最近一轮没有文件修改。' : '本会话还没有文件修改。';
+  const emptyHint = scope === 'last-run' ? t("最近一轮没有文件修改。") : t("本会话还没有文件修改。");
   return <div className="review-panel">
     <div className="review-toolbar">
-      <div className="review-scope" role="group" aria-label="审查范围">
-        <button type="button" aria-pressed={scope === 'last-run'} title={lastRunId ? undefined : '运行结束后可查看'}
-          onClick={() => setScope('last-run')}>上一轮</button>
-        <button type="button" aria-pressed={scope === 'conversation'} onClick={() => setScope('conversation')}>本会话</button>
+      <div className="review-scope" role="group" aria-label={t("审查范围")}>
+        <button type="button" aria-pressed={scope === 'last-run'} title={lastRunId ? undefined : t("运行结束后可查看")}
+          onClick={() => setScope('last-run')}>{t("上一轮")}</button>
+        <button type="button" aria-pressed={scope === 'conversation'} onClick={() => setScope('conversation')}>{t("本会话")}</button>
       </div>
       {query.data && <span className="file-diff-stats review-summary">
         <b className="add">+{totals.added}</b> <b className="del">-{totals.removed}</b>
-        {totals.oversized > 0 && <span className="review-oversized-note">· {totals.oversized} 个大文件未计入</span>}
+        {totals.oversized > 0 && <span className="review-oversized-note">· {totals.oversized} {t("个大文件未计入")}</span>}
       </span>}
-      <button type="button" className="review-refresh" title="刷新审查数据" aria-label="刷新审查数据"
+      <button type="button" className="review-refresh" title={t("刷新审查数据")} aria-label={t("刷新审查数据")}
         onClick={() => void query.refetch()}><AppIcon name="refresh" /></button>
     </div>
     <div className="review-body">
-      {!desktop && <p className="review-note" role="note">请在桌面应用中查看审查数据。</p>}
-      {desktop && !conversationId && <p className="review-note" role="note">选择或新建工作后，这里会汇总文件修改。</p>}
+      {!desktop && <p className="review-note" role="note">{t("请在桌面应用中查看审查数据。")}</p>}
+      {desktop && !conversationId && <p className="review-note" role="note">{t("选择或新建工作后，这里会汇总文件修改。")}</p>}
       {desktop && conversationId && scope === 'last-run' && !lastRunId
-        && <p className="review-note" role="note">运行结束后可查看上一轮的文件修改。</p>}
-      {query.isLoading && <p className="review-note" role="status">正在读取文件变更…</p>}
-      {query.error && <p className="review-note" role="alert">文件变更读取失败：{String(query.error)}</p>}
+        && <p className="review-note" role="note">{t("运行结束后可查看上一轮的文件修改。")}</p>}
+      {query.isLoading && <p className="review-note" role="status">{t("正在读取文件变更…")}</p>}
+      {query.error && <p className="review-note" role="alert">{t("文件变更读取失败：")}{String(query.error)}</p>}
       {query.data && files.length === 0 && <p className="review-note" role="status">{emptyHint}</p>}
       {files.length > 0 && <ul className="review-list">
         {files.map((entry) => <ReviewItem key={`${entry.path}:${entry.updatedAt}`} entry={entry}
@@ -87,19 +88,19 @@ function ReviewItem({ entry, stat, expanded, onToggle }: {
     <button type="button" className="review-item-row" aria-expanded={expanded} onClick={onToggle}>
       <AppIcon name={entry.before ? 'edit' : 'file'} />
       <span className="review-item-path" title={entry.path}>{entry.path}</span>
-      {entry.before === null && <span className="review-tag">新建</span>}
-      {oversized && <span className="review-tag">内容过大</span>}
-      {!oversized && unchanged && <span className="review-tag">无净变化</span>}
+      {entry.before === null && <span className="review-tag">{t("新建")}</span>}
+      {oversized && <span className="review-tag">{t("内容过大")}</span>}
+      {!oversized && unchanged && <span className="review-tag">{t("无净变化")}</span>}
       {!oversized && !unchanged && stat && <span className="file-diff-stats">
         <b className="add">+{stat.added}</b> <b className="del">-{stat.removed}</b>
       </span>}
-      {!oversized && !unchanged && !stat && <span className="review-tag">大改动</span>}
+      {!oversized && !unchanged && !stat && <span className="review-tag">{t("大改动")}</span>}
     </button>
     {expanded && <div className="review-file-diff">
       {oversized
-        ? <p className="review-note" role="note">文件内容超过快照上限，diff 不可用；请用「文件」标签查看当前内容。</p>
+        ? <p className="review-note" role="note">{t("文件内容超过快照上限，diff 不可用；请用「文件」标签查看当前内容。")}</p>
         : unchanged
-          ? <p className="review-note" role="note">此范围内编辑又被还原，文件内容没有净变化。</p>
+          ? <p className="review-note" role="note">{t("此范围内编辑又被还原，文件内容没有净变化。")}</p>
           : <FileDiffView fileName={entry.path} oldText={entry.before?.content ?? ''} newText={entry.after.content} />}
     </div>}
   </li>;

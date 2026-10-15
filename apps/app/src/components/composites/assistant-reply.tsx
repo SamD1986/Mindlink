@@ -6,6 +6,7 @@ import type { ImagePreview } from './message-image.js';
 import type { ReplyRunInfo } from './reply-run-cache.js';
 import { ReplyRunDetails } from './reply-run-details.js';
 import { isSavedContent, readSavedContent, removeSavedContent, saveContent, savedContentEvent, type SavedContentKind } from './saved-content.js';
+import { t } from '../../languages/index.js';
 
 export function AssistantReply({
   text,
@@ -40,7 +41,7 @@ export function AssistantReply({
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setErrorNotice('');
-    } catch { setErrorNotice('复制失败，请检查剪贴板权限'); }
+    } catch { setErrorNotice(t("复制失败，请检查剪贴板权限")); }
   }
 
   function toggleSaved(kind: SavedContentKind) {
@@ -49,19 +50,19 @@ export function AssistantReply({
       if (existing) removeSavedContent(existing.id);
       else saveContent(kind, surface, text);
       setErrorNotice('');
-    } catch { setErrorNotice('保存状态更新失败，请检查本地存储空间'); }
+    } catch { setErrorNotice(t("保存状态更新失败，请检查本地存储空间")); }
   }
 
   return <div className="assistant-reply">
     {run && <ReplyRunDetails run={run} />}
     <MessageContent text={text} onOpenFilePath={onOpenFilePath} onAddToConversation={onAddToConversation}
       onOpenImageInSidebar={onOpenImageInSidebar} resolveWorkspaceImage={resolveWorkspaceImage} />
-    <div className="reply-toolbar" role="toolbar" aria-label="回复操作">
-      <button type="button" className={copied ? 'copied' : ''} aria-label={copied ? '已复制' : '复制'} data-tooltip={copied ? '已复制' : '复制'} onClick={() => void copy()}><AppIcon name={copied ? 'check' : 'copy'} /></button>
-      <button type="button" className={savedMemory ? 'saved' : ''} aria-label={savedMemory ? '取消保存到记忆' : '保存到记忆'} aria-pressed={savedMemory}
-        data-tooltip={savedMemory ? '取消保存到记忆' : '保存到记忆'} onClick={() => toggleSaved('memory')}><AppIcon name={savedMemory ? 'bookmark-filled' : 'bookmark'} /></button>
-      <button type="button" className={savedKnowledge ? 'saved' : ''} aria-label={savedKnowledge ? '取消保存到知识库' : '保存到知识库'} aria-pressed={savedKnowledge}
-        data-tooltip={savedKnowledge ? '取消保存到知识库' : '保存到知识库'} onClick={() => toggleSaved('knowledge')}><AppIcon name={savedKnowledge ? 'knowledge-filled' : 'knowledge'} /></button>
+    <div className="reply-toolbar" role="toolbar" aria-label={t("回复操作")}>
+      <button type="button" className={copied ? 'copied' : ''} aria-label={copied ? t("已复制") : t("复制")} data-tooltip={copied ? t("已复制") : t("复制")} onClick={() => void copy()}><AppIcon name={copied ? 'check' : 'copy'} /></button>
+      <button type="button" className={savedMemory ? 'saved' : ''} aria-label={savedMemory ? t("取消保存到记忆") : t("保存到记忆")} aria-pressed={savedMemory}
+        data-tooltip={savedMemory ? t("取消保存到记忆") : t("保存到记忆")} onClick={() => toggleSaved('memory')}><AppIcon name={savedMemory ? 'bookmark-filled' : 'bookmark'} /></button>
+      <button type="button" className={savedKnowledge ? 'saved' : ''} aria-label={savedKnowledge ? t("取消保存到知识库") : t("保存到知识库")} aria-pressed={savedKnowledge}
+        data-tooltip={savedKnowledge ? t("取消保存到知识库") : t("保存到知识库")} onClick={() => toggleSaved('knowledge')}><AppIcon name={savedKnowledge ? 'knowledge-filled' : 'knowledge'} /></button>
       {errorNotice && <span className="reply-action-notice" role="alert">{errorNotice}</span>}
     </div>
   </div>;

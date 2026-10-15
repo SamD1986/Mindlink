@@ -6,13 +6,14 @@ import { AppIcon } from '../../components/composites/app-icon.js';
 import { WorkNodeIcon, workIconChoices } from './work-node-icons.js';
 import { folderPath, isFolderDescendant, reorderedVisibleSiblingIds, visibleWorkTree, type WorkTreeNode } from '../../components/widgets/work-tree/work-tree-model.js';
 import './work-tree.css';
+import { t } from '../../languages/index.js';
 
 type NodeRef = { kind: 'folder' | 'conversation'; id: string };
 type DialogState = { kind: 'move' | 'icon' | 'tags'; node: NodeRef };
 type MenuState = { node: NodeRef; top: number; left: number };
 
 function nodeName(node: WorkTreeNode): string {
-  return node.kind === 'folder' ? node.item.name : node.item.title || '未命名会话';
+  return node.kind === 'folder' ? node.item.name : node.item.title || t("未命名会话");
 }
 
 function messageFor(error: unknown): string {
@@ -150,8 +151,8 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
 
   async function saveFolder(): Promise<void> {
     const name = draftName.trim();
-    if (!name) { setError('请输入文件夹名称。'); return; }
-    if (creationDepth > 5) { setError('工作文件夹最多支持五级。'); return; }
+    if (!name) { setError(t("请输入文件夹名称。")); return; }
+    if (creationDepth > 5) { setError(t("工作文件夹最多支持五级。")); return; }
     const requestId = createRequestId.current ?? crypto.randomUUID();
     createRequestId.current = requestId;
     await perform(() => desktop.createWorkFolder(creationParent, name, 'folder', requestId), () => {
@@ -191,7 +192,7 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
   async function saveRename(): Promise<void> {
     if (!editing) return;
     const name = editingName.trim();
-    if (!name) { setError('名称不能为空。'); return; }
+    if (!name) { setError(t("名称不能为空。")); return; }
     const node = editing;
     await perform(() => node.kind === 'folder'
       ? desktop.updateWorkFolder(node.id, { name })
@@ -199,9 +200,9 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
   }
 
   async function moveNode(node: NodeRef, targetId: string | null): Promise<void> {
-    if (searching) { setError('请先清除搜索，再移动文件夹或会话。'); return; }
+    if (searching) { setError(t("请先清除搜索，再移动文件夹或会话。")); return; }
     const target = folderFor(targetId);
-    if (!canPlace(node, target)) { setError('无法移动到此位置：文件夹不能包含自身，且最多支持五级。'); return; }
+    if (!canPlace(node, target)) { setError(t("无法移动到此位置：文件夹不能包含自身，且最多支持五级。")); return; }
     const currentParent = node.kind === 'folder' ? folders.find((folder) => folder.id === node.id)?.parentId
       : conversations.find((conversation) => conversation.id === node.id)?.folderId;
     if (currentParent === target) { setDialog(undefined); return; }
@@ -322,43 +323,43 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
   }
 
   return <div className="work-tree-shell">
-    <div className="work-tree-actions" aria-label="工作管理工具">
-      <button type="button" title="新建会话" aria-label="新建会话" disabled={disabled || archiveView || searching}
+    <div className="work-tree-actions" aria-label={t("工作管理工具")}>
+      <button type="button" title={t("新建会话")} aria-label={t("新建会话")} disabled={disabled || archiveView || searching}
         onClick={() => void onCreate(folderFor(selectedFolder) ?? undefined)}><AppIcon name="plus" /></button>
-      <button type="button" title="新建文件夹" aria-label="新建文件夹" disabled={disabled || archiveView || searching}
+      <button type="button" title={t("新建文件夹")} aria-label={t("新建文件夹")} disabled={disabled || archiveView || searching}
         onClick={beginFolderCreation}><AppIcon name="folder-plus" /></button>
-      <button type="button" title={archiveView ? '查看工作' : '查看已归档'} aria-label={archiveView ? '查看工作' : '查看已归档'}
+      <button type="button" title={archiveView ? t("查看工作") : t("查看已归档")} aria-label={archiveView ? t("查看工作") : t("查看已归档")}
         aria-pressed={archiveView} onClick={() => { setArchiveView((value) => !value); setMenu(undefined); }}><AppIcon name="archive" /></button>
-      <button type="button" title="刷新工作列表" aria-label="刷新工作列表" onClick={refresh}><AppIcon name="refresh" /></button>
+      <button type="button" title={t("刷新工作列表")} aria-label={t("刷新工作列表")} onClick={refresh}><AppIcon name="refresh" /></button>
       <span className="work-tree-actions-spacer" />
-      <button type="button" title={maximized ? '退出工作列表全屏' : '工作列表全屏'} aria-label={maximized ? '退出工作列表全屏' : '工作列表全屏'}
+      <button type="button" title={maximized ? t("退出工作列表全屏") : t("工作列表全屏")} aria-label={maximized ? t("退出工作列表全屏") : t("工作列表全屏")}
         aria-pressed={maximized} onClick={onToggleMaximized}><AppIcon name={maximized ? 'collapse' : 'expand'} /></button>
-      <button type="button" title={viewMode === 'tree' ? '切换到文件管理器视图' : '切换到树状列表视图'}
-        aria-label={viewMode === 'tree' ? '切换到文件管理器视图' : '切换到树状列表视图'}
+      <button type="button" title={viewMode === 'tree' ? t("切换到文件管理器视图") : t("切换到树状列表视图")}
+        aria-label={viewMode === 'tree' ? t("切换到文件管理器视图") : t("切换到树状列表视图")}
         aria-pressed={viewMode === 'explorer'} onClick={() => { setViewMode((value) => value === 'tree' ? 'explorer' : 'tree'); setMenu(undefined); }}>
         <AppIcon name={viewMode === 'tree' ? 'folder' : 'layers'} /></button>
     </div>
     <label className="work-tree-search">
-      <input type="search" aria-label="搜索工作会话" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索文件夹、会话、标签和消息" />
+      <input type="search" aria-label={t("搜索工作会话")} value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("搜索文件夹、会话、标签和消息")} />
     </label>
-    {error && <div className="work-tree-error" role="alert">{error}<button type="button" onClick={() => setError('')}>关闭</button></div>}
-    {locked && <p className="work-tree-hint" role="status">当前任务或授权处理期间，暂不能切换或移动会话。</p>}
-    {searching ? <div className="work-tree-results" aria-label="搜索结果">
-      {searchQuery.isFetching && <p>正在搜索…</p>}
-      {searchQuery.error && <p role="alert">搜索失败：{messageFor(searchQuery.error)} <button type="button" onClick={() => void searchQuery.refetch()}>重试</button></p>}
+    {error && <div className="work-tree-error" role="alert">{error}<button type="button" onClick={() => setError('')}>{t("关闭")}</button></div>}
+    {locked && <p className="work-tree-hint" role="status">{t("当前任务或授权处理期间，暂不能切换或移动会话。")}</p>}
+    {searching ? <div className="work-tree-results" aria-label={t("搜索结果")}>
+      {searchQuery.isFetching && <p>{t("正在搜索…")}</p>}
+      {searchQuery.error && <p role="alert">{t("搜索失败：")}{messageFor(searchQuery.error)} <button type="button" onClick={() => void searchQuery.refetch()}>{t("重试")}</button></p>}
       {searchItems.map((item, index) => <button type="button" key={`${item.conversationId}:${item.messageEntryId ?? item.matchedField}:${index}`}
         className="work-tree-result" disabled={disabled} onClick={() => void onSearchHit(item)}>
-        <strong>{item.title || '未命名会话'}</strong>
-        <small>{[...item.folderPath.map((part) => part.name), item.title || '未命名会话'].join(' / ')}</small>
-        <span>{item.matchedField === 'message' ? '消息' : item.matchedField === 'folder' ? '文件夹' : item.matchedField === 'tag' ? '标签' : '标题'} · {item.snippet}</span>
+        <strong>{item.title || t("未命名会话")}</strong>
+        <small>{[...item.folderPath.map((part) => part.name), item.title || t("未命名会话")].join(' / ')}</small>
+        <span>{item.matchedField === 'message' ? t("消息") : item.matchedField === 'folder' ? t("文件夹") : item.matchedField === 'tag' ? t("标签") : t("标题")} · {item.snippet}</span>
       </button>)}
       {searchQuery.hasNextPage && <button className="work-tree-load-more" type="button" disabled={searchQuery.isFetchingNextPage}
-        onClick={() => void searchQuery.fetchNextPage()}>{searchQuery.isFetchingNextPage ? '正在加载…' : '加载更多结果'}</button>}
-      {searchQuery.data && searchItems.length === 0 && <p>没有找到匹配的工作。</p>}
-      {searchFailures.length > 0 && <p role="status">部分历史消息暂不可搜索；仍可按标题和标签查找。</p>}
-    </div> : viewMode === 'explorer' ? <div ref={treeRef} className="work-explorer" aria-label={archiveView ? '已归档工作文件管理器' : '工作文件管理器'}>
-      <nav className="work-explorer-breadcrumb" aria-label="当前文件夹">
-        <button type="button" onClick={() => { setExplorerFolder(null); setSelectedFolder(null); }}>未分类</button>
+        onClick={() => void searchQuery.fetchNextPage()}>{searchQuery.isFetchingNextPage ? t("正在加载…") : t("加载更多结果")}</button>}
+      {searchQuery.data && searchItems.length === 0 && <p>{t("没有找到匹配的工作。")}</p>}
+      {searchFailures.length > 0 && <p role="status">{t("部分历史消息暂不可搜索；仍可按标题和标签查找。")}</p>}
+    </div> : viewMode === 'explorer' ? <div ref={treeRef} className="work-explorer" aria-label={archiveView ? t("已归档工作文件管理器") : t("工作文件管理器")}>
+      <nav className="work-explorer-breadcrumb" aria-label={t("当前文件夹")}>
+        <button type="button" onClick={() => { setExplorerFolder(null); setSelectedFolder(null); }}>{t("未分类")}</button>
         {explorerPath.map((folder) => <span key={folder.id}><AppIcon name="chevron" /><button type="button"
           onClick={() => { setExplorerFolder(folder.id); setSelectedFolder(folder.id); }}>{folder.name}</button></span>)}
       </nav>
@@ -369,28 +370,28 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
           onDragEnd={() => { setDragging(undefined); setDropTarget(undefined); }}
           onDragOver={(event) => { event.stopPropagation(); onDragOver(event, folder.id); }}
           onDrop={(event) => { event.stopPropagation(); onDrop(event, folder.id); }}>
-          <button type="button" className="work-explorer-open" title={`打开${folder.name}`} onClick={() => { setExplorerFolder(folder.id); setSelectedFolder(folder.id); }}>
+          <button type="button" className="work-explorer-open" title={t("打开{0}", { 0: folder.name })} onClick={() => { setExplorerFolder(folder.id); setSelectedFolder(folder.id); }}>
             <span className="work-tree-icon"><WorkNodeIcon iconId={folder.iconId} /></span><span>{folder.name}</span></button>
-          <button type="button" className="work-tree-more" aria-label={`${folder.name}的操作`} disabled={disabled}
+          <button type="button" className="work-tree-more" aria-label={t("{0}的操作", { 0: folder.name })} disabled={disabled}
             onClick={(event) => openMenu(event, { kind: 'folder', id: folder.id })}>···</button>
         </div>)}
         {explorerConversations.map((conversation) => <div key={conversation.id} className={`work-explorer-item ${currentId === conversation.id ? 'active' : ''}`}
           draggable={!disabled} onDragStart={(event) => onDragStart(event, { kind: 'conversation', id: conversation.id })}
           onDragEnd={() => { setDragging(undefined); setDropTarget(undefined); }}>
-          <button type="button" className="work-explorer-open" title={conversation.title || '未命名会话'} disabled={disabled}
+          <button type="button" className="work-explorer-open" title={conversation.title || t("未命名会话")} disabled={disabled}
             onClick={() => void onOpen(conversation)}><span className="work-tree-icon"><WorkNodeIcon iconId={conversation.iconId} /></span>
-            <span>{conversation.title || '未命名会话'}</span></button>
-          <button type="button" className="work-tree-more" aria-label={`${conversation.title || '未命名会话'}的操作`} disabled={disabled}
+            <span>{conversation.title || t("未命名会话")}</span></button>
+          <button type="button" className="work-tree-more" aria-label={t("{0}的操作", { 0: conversation.title || t("未命名会话") })} disabled={disabled}
             onClick={(event) => openMenu(event, { kind: 'conversation', id: conversation.id })}>···</button>
         </div>)}
-        {!explorerFolders.length && !explorerConversations.length && <p>{archiveView ? '这里没有归档会话。' : '这里还没有文件夹或会话。'}</p>}
+        {!explorerFolders.length && !explorerConversations.length && <p>{archiveView ? t("这里没有归档会话。") : t("这里还没有文件夹或会话。")}</p>}
       </div>
-    </div> : <div ref={treeRef} className="work-tree-nodes" role="tree" aria-label={archiveView ? '已归档工作文件树' : '工作文件树'} onKeyDown={onTreeKeyDown}>
+    </div> : <div ref={treeRef} className="work-tree-nodes" role="tree" aria-label={archiveView ? t("已归档工作文件树") : t("工作文件树")} onKeyDown={onTreeKeyDown}>
       <div role="treeitem" tabIndex={focusKey === 'root' ? 0 : -1} data-tree-key="root" aria-level={1}
         className={`work-tree-row work-tree-root ${dropTarget === null ? 'drop-target' : ''} ${selectedFolder === null ? 'selected-folder' : ''}`}
         onFocus={() => setFocusKey('root')} onClick={() => setSelectedFolder(null)}
         onDragOver={(event) => onDragOver(event, null)} onDrop={(event) => onDrop(event, null)}>
-        <AppIcon name="folder" /><span>未分类</span>
+        <AppIcon name="folder" /><span>{t("未分类")}</span>
       </div>
       {nodes.map((node) => {
         const ref: NodeRef = { kind: node.kind, id: node.item.id };
@@ -411,16 +412,16 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
               if (event.key === 'Enter' && node.kind === 'conversation') { event.preventDefault(); void onOpen(node.item); } }}
             className={`work-tree-row ${active ? 'active' : ''} ${selected ? 'selected-folder' : ''} ${dropTarget === node.item.id ? 'drop-target' : ''}`}
             style={{ paddingLeft: `${10 + node.depth * 18}px` }} title={nodeName(node)}>
-            {node.kind === 'folder' ? <button type="button" className="work-tree-disclosure" aria-label={expanded.has(node.item.id) ? `收起${node.item.name}` : `展开${node.item.name}`}
+            {node.kind === 'folder' ? <button type="button" className="work-tree-disclosure" aria-label={expanded.has(node.item.id) ? t("收起{0}", { 0: node.item.name }) : t("展开{0}", { 0: node.item.name })}
               onClick={(event) => { event.stopPropagation(); setExpanded((value) => { const next = new Set(value); next.has(node.item.id) ? next.delete(node.item.id) : next.add(node.item.id); return next; }); }}>
               <AppIcon name="chevron" /></button> : <span className="work-tree-disclosure-spacer" />}
             <span className="work-tree-icon" aria-hidden="true"><WorkNodeIcon iconId={node.item.iconId} /></span>
-            {editing?.id === node.item.id ? <input ref={renameInput} className="work-tree-rename" aria-label="重命名" value={editingName}
+            {editing?.id === node.item.id ? <input ref={renameInput} className="work-tree-rename" aria-label={t("重命名")} value={editingName}
               onClick={(event) => event.stopPropagation()} onChange={(event) => setEditingName(event.target.value)}
               onKeyDown={(event) => { event.stopPropagation(); if (event.key === 'Enter') void saveRename(); if (event.key === 'Escape') setEditing(undefined); }} />
               : <span className="work-tree-name">{nodeName(node)}</span>}
             {node.kind === 'conversation' && node.item.tagIds.length > 0 && <span className="work-tree-tag-count" title={node.item.tagIds.map((id) => tags.find((tag) => tag.id === id)?.name).filter(Boolean).join('、')}>{node.item.tagIds.length}</span>}
-            <button ref={menu?.node.id === node.item.id ? menuAnchorRef : undefined} type="button" className="work-tree-more" aria-label={`${nodeName(node)}的操作`} aria-expanded={menu?.node.id === node.item.id}
+            <button ref={menu?.node.id === node.item.id ? menuAnchorRef : undefined} type="button" className="work-tree-more" aria-label={t("{0}的操作", { 0: nodeName(node) })} aria-expanded={menu?.node.id === node.item.id}
               disabled={disabled} onClick={(event) => openMenu(event, ref)}>···</button>
           </div>
         </div>;
@@ -428,69 +429,69 @@ export function WorkTree({ desktop, conversations, folders, tags, currentId, loc
       {archiveView && conversations.some((item) => item.id === 'default') && <div role="treeitem" tabIndex={focusKey === 'legacy' ? 0 : -1} data-tree-key="legacy" aria-level={1}
         className={`work-tree-row ${currentId === 'default' ? 'active' : ''}`} onFocus={() => setFocusKey('legacy')}
         onClick={() => { const legacy = conversations.find((item) => item.id === 'default'); if (legacy) void onOpen(legacy); }}>
-        <span className="work-tree-disclosure-spacer" /><span className="work-tree-icon"><AppIcon name="archive" /></span><span className="work-tree-name">旧工作（只读）</span>
+        <span className="work-tree-disclosure-spacer" /><span className="work-tree-icon"><AppIcon name="archive" /></span><span className="work-tree-name">{t("旧工作（只读）")}</span>
       </div>}
-      {nodes.length === 0 && <p>{archiveView ? '还没有归档会话。' : '新建会话或文件夹，开始整理工作。'}</p>}
+      {nodes.length === 0 && <p>{archiveView ? t("还没有归档会话。") : t("新建会话或文件夹，开始整理工作。")}</p>}
     </div>}
     {menu && createPortal(<div ref={menuRef} className="work-tree-menu" role="menu"
-      aria-label="会话操作" style={{ top: menu.top, left: menu.left }} onClick={(event) => event.stopPropagation()}>
-      <button type="button" role="menuitem" onClick={() => beginRename(menu.node)}><AppIcon name="edit" />重命名</button>
-      <button type="button" role="menuitem" onClick={() => openDetails(menu.node, 'icon')}><AppIcon name="image" />修改图标</button>
-      {menu.node.kind === 'conversation' && <button type="button" role="menuitem" onClick={() => openDetails(menu.node, 'tags')}><AppIcon name="tag" />修改标签</button>}
+      aria-label={t("会话操作")} style={{ top: menu.top, left: menu.left }} onClick={(event) => event.stopPropagation()}>
+      <button type="button" role="menuitem" onClick={() => beginRename(menu.node)}><AppIcon name="edit" />{t("重命名")}</button>
+      <button type="button" role="menuitem" onClick={() => openDetails(menu.node, 'icon')}><AppIcon name="image" />{t("修改图标")}</button>
+      {menu.node.kind === 'conversation' && <button type="button" role="menuitem" onClick={() => openDetails(menu.node, 'tags')}><AppIcon name="tag" />{t("修改标签")}</button>}
       <button type="button" role="menuitem" onClick={() => {
         const parentId = menu.node.kind === 'folder' ? folders.find((folder) => folder.id === menu.node.id)?.parentId
           : conversations.find((conversation) => conversation.id === menu.node.id)?.folderId;
         setMoveTarget(parentId ?? null);
         setDialog({ kind: 'move', node: menu.node }); setMenu(undefined);
-      }}><AppIcon name="folder" />移动到…</button>
-      <button type="button" role="menuitem" onClick={() => void reorder(menu.node, -1)}><AppIcon name="arrow-up" />上移</button>
-      <button type="button" role="menuitem" onClick={() => void reorder(menu.node, 1)}><AppIcon name="arrow-down" />下移</button>
+      }}><AppIcon name="folder" />{t("移动到…")}</button>
+      <button type="button" role="menuitem" onClick={() => void reorder(menu.node, -1)}><AppIcon name="arrow-up" />{t("上移")}</button>
+      <button type="button" role="menuitem" onClick={() => void reorder(menu.node, 1)}><AppIcon name="arrow-down" />{t("下移")}</button>
       {menu.node.kind === 'conversation' && <button type="button" role="menuitem" onClick={() => {
         const item = conversations.find((conversation) => conversation.id === menu.node.id);
         if (item) void perform(() => desktop.updateWorkConversation(item.id, { archived: !item.archived }), () => setMenu(undefined));
-      }}><AppIcon name="archive" />{conversations.find((conversation) => conversation.id === menu.node.id)?.archived ? '恢复会话' : '归档会话'}</button>}
+      }}><AppIcon name="archive" />{conversations.find((conversation) => conversation.id === menu.node.id)?.archived ? t("恢复会话") : t("归档会话")}</button>}
     </div>, document.body)}
     {dialog && <div className="work-tree-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(undefined); }}>
-      <section role="dialog" aria-modal="true" aria-label={dialog.kind === 'move' ? '移动到文件夹' : dialog.kind === 'icon' ? '修改图标' : '修改标签'} className="work-tree-dialog">
-        <div className="work-tree-dialog-heading"><strong>{dialog.kind === 'move' ? '移动到文件夹' : dialog.kind === 'icon' ? '修改图标' : '修改标签'}</strong><button type="button" onClick={() => setDialog(undefined)} aria-label="关闭">×</button></div>
+      <section role="dialog" aria-modal="true" aria-label={dialog.kind === 'move' ? t("移动到文件夹") : dialog.kind === 'icon' ? t("修改图标") : t("修改标签")} className="work-tree-dialog">
+        <div className="work-tree-dialog-heading"><strong>{dialog.kind === 'move' ? t("移动到文件夹") : dialog.kind === 'icon' ? t("修改图标") : t("修改标签")}</strong><button type="button" onClick={() => setDialog(undefined)} aria-label={t("关闭")}>×</button></div>
         {dialog.kind === 'move' ? <>
-          <p>移动会同时搬迁磁盘上的工作目录。运行中或外部工作目录会被服务端拒绝。</p>
-          <label>目标文件夹<select value={moveTarget ?? ''} onChange={(event) => setMoveTarget(event.target.value || null)}>
-            <option value="">未分类（根目录）</option>
+          <p>{t("移动会同时搬迁磁盘上的工作目录。运行中或外部工作目录会被服务端拒绝。")}</p>
+          <label>{t("目标文件夹")}<select value={moveTarget ?? ''} onChange={(event) => setMoveTarget(event.target.value || null)}>
+            <option value="">{t("未分类（根目录）")}</option>
             {folders.filter((folder) => !folder.system && canPlace(dialog.node, folder.id))
               .map((folder) => <option key={folder.id} value={folder.id}>{[...folderPath(folders, folder.parentId).map((part) => part.name), folder.name].join(' / ')}</option>)}
           </select></label>
-          <div className="work-tree-dialog-actions"><button type="button" onClick={() => setDialog(undefined)}>取消</button><button type="button" disabled={disabled} onClick={() => void moveNode(dialog.node, moveTarget)}>移动</button></div>
+          <div className="work-tree-dialog-actions"><button type="button" onClick={() => setDialog(undefined)}>{t("取消")}</button><button type="button" disabled={disabled} onClick={() => void moveNode(dialog.node, moveTarget)}>{t("移动")}</button></div>
         </> : dialog.kind === 'icon' ? <>
-          <div className="work-tree-icon-options" role="group" aria-label="选择图标">
+          <div className="work-tree-icon-options" role="group" aria-label={t("选择图标")}>
             {workIconChoices.slice(iconPage * 36, iconPage * 36 + 36).map((icon) => <button key={icon.id} type="button" title={icon.label} aria-label={icon.label} aria-pressed={detailIcon === icon.id}
               onClick={() => setDetailIcon(icon.id)}><WorkNodeIcon iconId={icon.id} /><span>{icon.label}</span></button>)}
           </div>
-          <div className="work-tree-icon-pages"><button type="button" disabled={iconPage === 0} onClick={() => setIconPage(0)}>上一页</button>
-            <span>{iconPage + 1} / 2</span><button type="button" disabled={iconPage === 1} onClick={() => setIconPage(1)}>下一页</button></div>
-          <div className="work-tree-dialog-actions"><button type="button" onClick={() => setDialog(undefined)}>取消</button><button type="button" disabled={disabled} onClick={() => void saveDetails()}>保存</button></div>
+          <div className="work-tree-icon-pages"><button type="button" disabled={iconPage === 0} onClick={() => setIconPage(0)}>{t("上一页")}</button>
+            <span>{iconPage + 1} / 2</span><button type="button" disabled={iconPage === 1} onClick={() => setIconPage(1)}>{t("下一页")}</button></div>
+          <div className="work-tree-dialog-actions"><button type="button" onClick={() => setDialog(undefined)}>{t("取消")}</button><button type="button" disabled={disabled} onClick={() => void saveDetails()}>{t("保存")}</button></div>
         </> : <>
           <div className="work-tree-tag-options">{tags.map((tag) => <label key={tag.id}><input type="checkbox" checked={detailTagIds.includes(tag.id)}
             onChange={(event) => setDetailTagIds((value) => event.target.checked ? [...value, tag.id] : value.filter((id) => id !== tag.id))} /><span style={{ backgroundColor: tag.color }} />{tag.name}</label>)}</div>
-          <label>新标签<input value={newTagName} onChange={(event) => setNewTagName(event.target.value)} placeholder="输入新标签名称（可选）" /></label>
-          <div className="work-tree-dialog-actions"><button type="button" onClick={() => setDialog(undefined)}>取消</button><button type="button" disabled={disabled} onClick={() => void saveDetails()}>保存</button></div>
+          <label>{t("新标签")}<input value={newTagName} onChange={(event) => setNewTagName(event.target.value)} placeholder={t("输入新标签名称（可选）")} /></label>
+          <div className="work-tree-dialog-actions"><button type="button" onClick={() => setDialog(undefined)}>{t("取消")}</button><button type="button" disabled={disabled} onClick={() => void saveDetails()}>{t("保存")}</button></div>
         </>}
       </section>
     </div>}
     {draftFolder && <div className="work-tree-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDraftFolder(false); }}>
-      <section role="dialog" aria-modal="true" aria-label="新建文件夹" className="work-tree-dialog">
-        <div className="work-tree-dialog-heading"><strong>新建文件夹</strong><button type="button" onClick={() => setDraftFolder(false)} aria-label="关闭">×</button></div>
-        <label>文件夹名称<input ref={draftInput} aria-label="新文件夹名称" value={draftName} onChange={(event) => setDraftName(event.target.value)}
+      <section role="dialog" aria-modal="true" aria-label={t("新建文件夹")} className="work-tree-dialog">
+        <div className="work-tree-dialog-heading"><strong>{t("新建文件夹")}</strong><button type="button" onClick={() => setDraftFolder(false)} aria-label={t("关闭")}>×</button></div>
+        <label>{t("文件夹名称")}<input ref={draftInput} aria-label={t("新文件夹名称")} value={draftName} onChange={(event) => setDraftName(event.target.value)}
           onKeyDown={(event) => { if (event.key === 'Enter') void saveFolder(); if (event.key === 'Escape') setDraftFolder(false); }} /></label>
-        <div className="work-tree-placement" role="group" aria-label="创建位置">
+        <div className="work-tree-placement" role="group" aria-label={t("创建位置")}>
           <label><input type="radio" name="folder-placement" checked={folderPlacement === 'sibling'} onChange={() => setFolderPlacement('sibling')} />
-            <span>同级{selected ? ` · ${selected.parentId ? folders.find((folder) => folder.id === selected.parentId)?.name ?? '上级' : '未分类'}` : ' · 未分类'}</span></label>
+            <span>{t("同级")}{selected ? ` · ${selected.parentId ? folders.find((folder) => folder.id === selected.parentId)?.name ?? t("上级") : t("未分类")}` : t(" · 未分类")}</span></label>
           <label><input type="radio" name="folder-placement" checked={folderPlacement === 'child'} disabled={!selected || folderPath(folders, selectedFolder).length >= 5}
-            onChange={() => setFolderPlacement('child')} /><span>子级{selected ? ` · ${selected.name}` : ''}</span></label>
+            onChange={() => setFolderPlacement('child')} /><span>{t("子级")}{selected ? ` · ${selected.name}` : ''}</span></label>
         </div>
-        <p>目标位置：{creationParent ? folderPath(folders, creationParent).map((folder) => folder.name).join(' / ') : '未分类'} · 第 {creationDepth} 级（最多 5 级）</p>
-        <div className="work-tree-dialog-actions"><button type="button" onClick={() => setDraftFolder(false)}>取消</button>
-          <button type="button" disabled={disabled || !draftName.trim() || creationDepth > 5} onClick={() => void saveFolder()}>创建</button></div>
+        <p>{t("目标位置：")}{creationParent ? folderPath(folders, creationParent).map((folder) => folder.name).join(' / ') : t("未分类")} {t("· 第")} {creationDepth} {t("级（最多 5 级）")}</p>
+        <div className="work-tree-dialog-actions"><button type="button" onClick={() => setDraftFolder(false)}>{t("取消")}</button>
+          <button type="button" disabled={disabled || !draftName.trim() || creationDepth > 5} onClick={() => void saveFolder()}>{t("创建")}</button></div>
       </section>
     </div>}
   </div>;

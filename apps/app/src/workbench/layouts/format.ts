@@ -1,4 +1,5 @@
 import { fits, overlaps, type GridRect, type GridSpec } from '../grid/geometry.js';
+import { t } from '../../languages/index.js';
 
 /**
  * 布局文件的格式与校验（见 ARCHITECTURE「三份数据格式」之一）。
@@ -44,24 +45,24 @@ const isRect = (value: unknown): value is GridRect =>
 
 export function parseLayout(input: unknown, registry: readonly WidgetSpec[]): ParseResult {
   const errors: string[] = [];
-  if (!isObject(input)) return { ok: false, errors: ['布局必须是对象'] };
+  if (!isObject(input)) return { ok: false, errors: [t("布局必须是对象")] };
 
   const id = input.id;
   const titleKey = input.titleKey;
-  if (typeof id !== 'string' || id.trim() === '') errors.push('缺少 id');
-  if (typeof titleKey !== 'string' || titleKey.trim() === '') errors.push('缺少 titleKey（文案要走语言包，不写死）');
+  if (typeof id !== 'string' || id.trim() === '') errors.push(t("缺少 id"));
+  if (typeof titleKey !== 'string' || titleKey.trim() === '') errors.push(t("缺少 titleKey（文案要走语言包，不写死）"));
 
   const grid = input.grid;
   if (!isObject(grid) || !isPositiveInt(grid.columns) || !isPositiveInt(grid.rows)) {
-    errors.push('grid 必须是 { columns, rows } 正整数');
+    errors.push(t("grid 必须是 { columns, rows } 正整数"));
   } else {
-    if (grid.columns < MIN_COLUMNS) errors.push(`grid.columns 至少 ${MIN_COLUMNS}`);
-    if (grid.rows < MIN_ROWS) errors.push(`grid.rows 至少 ${MIN_ROWS}`);
+    if (grid.columns < MIN_COLUMNS) errors.push(t("grid.columns 至少 {0}", { 0: MIN_COLUMNS }));
+    if (grid.rows < MIN_ROWS) errors.push(t("grid.rows 至少 {0}", { 0: MIN_ROWS }));
   }
 
   const widgets = input.widgets;
   if (!Array.isArray(widgets) || widgets.length === 0) {
-    errors.push('widgets 必须是非空数组');
+    errors.push(t("widgets 必须是非空数组"));
     return { ok: false, errors };
   }
 
@@ -72,29 +73,29 @@ export function parseLayout(input: unknown, registry: readonly WidgetSpec[]): Pa
 
   widgets.forEach((entry, index) => {
     const where = `widgets[${index}]`;
-    if (!isObject(entry)) { errors.push(`${where} 必须是对象`); return; }
+    if (!isObject(entry)) { errors.push(t("{0} 必须是对象", { 0: where })); return; }
     const instanceId = entry.id;
     const widgetId = entry.widget;
-    if (typeof instanceId !== 'string' || instanceId.trim() === '') { errors.push(`${where} 缺少 id`); return; }
-    if (seen.has(instanceId)) { errors.push(`${where} 的 id "${instanceId}" 重复`); return; }
+    if (typeof instanceId !== 'string' || instanceId.trim() === '') { errors.push(t("{0} 缺少 id", { 0: where })); return; }
+    if (seen.has(instanceId)) { errors.push(t("{0} 的 id \"{1}\" 重复", { 0: where, 1: instanceId })); return; }
     seen.add(instanceId);
     if (typeof widgetId !== 'string' || !byId.has(widgetId)) {
-      errors.push(`${where} 引用了未登记的 widget："${String(widgetId)}"`);
+      errors.push(t("{0} 引用了未登记的 widget：\"{1}\"", { 0: where, 1: String(widgetId) }));
       return;
     }
-    if (!isRect(entry.rect)) { errors.push(`${where} 的 rect 必须是 { x, y, w, h } 数字`); return; }
+    if (!isRect(entry.rect)) { errors.push(t("{0} 的 rect 必须是 { x, y, w, h } 数字", { 0: where })); return; }
     const rect = entry.rect;
     const spec = byId.get(widgetId) as WidgetSpec;
     if (!fits(rect, grid as unknown as GridSpec)) {
-      errors.push(`${where} 越出画布（${rect.x},${rect.y} ${rect.w}x${rect.h} > ${(grid as GridSpec).columns}x${(grid as GridSpec).rows}）`);
+      errors.push(t("{0} 越出画布（{1},{2} {3}x{4} > {5}x{6}）", { 0: where, 1: rect.x, 2: rect.y, 3: rect.w, 4: rect.h, 5: (grid as GridSpec).columns, 6: (grid as GridSpec).rows }));
       return;
     }
     if (rect.w < spec.size.min.w || rect.h < spec.size.min.h) {
-      errors.push(`${where} 小于 ${widgetId} 的最小尺寸 ${spec.size.min.w}x${spec.size.min.h}`);
+      errors.push(t("{0} 小于 {1} 的最小尺寸 {2}x{3}", { 0: where, 1: widgetId, 2: spec.size.min.w, 3: spec.size.min.h }));
       return;
     }
     if (placed.some((other) => overlaps(other, rect))) {
-      errors.push(`${where} 与已放置的 widget 重叠`);
+      errors.push(t("{0} 与已放置的 widget 重叠", { 0: where }));
       return;
     }
     placed.push(rect);

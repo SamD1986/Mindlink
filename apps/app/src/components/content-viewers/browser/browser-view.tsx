@@ -17,6 +17,7 @@ interface WebviewTagElement extends HTMLElement {
 import type { ViewerBrowserHost } from '../host/browser-host.js';
 import { initialBrowserState, normalizeAddressInput, type BrowserViewState } from './browser-state.js';
 import { BrowserToolbar } from './browser-toolbar.js';
+import { t } from '../../../languages/index.js';
 
 const WebView = 'webview' as unknown as React.FC<Record<string, unknown>>;
 
@@ -62,7 +63,7 @@ export function BrowserView({ host, scopeKey, hidden, onTitleChange }: {
     setState((current) => ({ ...current, url, isLoading: Boolean(webview), errorMessage: '' }));
     if (webview && state.isReady) void webview.loadURL(url).catch((error: unknown) => {
       setState((current) => ({ ...current, isLoading: false,
-        errorMessage: error instanceof Error ? error.message : '页面加载失败。' }));
+        errorMessage: error instanceof Error ? error.message : t("页面加载失败。") }));
     });
     else pendingUrl.current = url;
   }, [scopeKey, state.isReady]);
@@ -104,7 +105,7 @@ export function BrowserView({ host, scopeKey, hidden, onTitleChange }: {
           guestRegistered = false;
           if (!disposed) setState((current) => ({
             ...current,
-            errorMessage: error instanceof Error ? error.message : '浏览器会话连接失败。',
+            errorMessage: error instanceof Error ? error.message : t("浏览器会话连接失败。"),
           }));
         });
     };
@@ -116,7 +117,7 @@ export function BrowserView({ host, scopeKey, hidden, onTitleChange }: {
         pendingUrl.current = undefined;
         void webview.loadURL(url).catch((error: unknown) => {
           if (!disposed) setState((current) => ({ ...current, isLoading: false,
-            errorMessage: error instanceof Error ? error.message : '页面加载失败。' }));
+            errorMessage: error instanceof Error ? error.message : t("页面加载失败。") }));
         });
       }
     };
@@ -124,7 +125,7 @@ export function BrowserView({ host, scopeKey, hidden, onTitleChange }: {
       detail?: { errorCode?: number; errorDescription?: string } }) => {
       const failure = event.detail ?? event;
       if (disposed || failure.errorCode === -3) return;
-      setState((current) => ({ ...current, isLoading: false, errorMessage: failure.errorDescription || '页面加载失败。' }));
+      setState((current) => ({ ...current, isLoading: false, errorMessage: failure.errorDescription || t("页面加载失败。") }));
     };
     const handleGone = () => {
       if (disposed) return;
@@ -181,7 +182,7 @@ export function BrowserView({ host, scopeKey, hidden, onTitleChange }: {
         style={{ backgroundColor: '#ffffff' } as CSSProperties}
         className="browser-guest" />
       {state.errorMessage && <p className="file-preview-error browser-error" role="alert">{state.errorMessage}</p>}
-      {state.url === '' && !state.isLoading && <p className="file-preview-loading browser-empty">在地址栏输入网址开始浏览。</p>}
+      {state.url === '' && !state.isLoading && <p className="file-preview-loading browser-empty">{t("在地址栏输入网址开始浏览。")}</p>}
     </div>
   </div>;
 }

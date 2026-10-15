@@ -1,3 +1,4 @@
+import { t } from '../../languages/index.js';
 /**
  * Widget 清单：白名单注册表
  * 
@@ -61,7 +62,7 @@ export const WIDGET_REGISTRY: ReadonlyMap<string, WidgetRegistration> = new Map(
     {
       id: 'skills',
       title: 'Skills',
-      description: '技能列表与管理',
+      description: t("技能列表与管理"),
       size: {
         minWidth: 2,
         minHeight: 2,
@@ -79,7 +80,7 @@ export const WIDGET_REGISTRY: ReadonlyMap<string, WidgetRegistration> = new Map(
     {
       id: 'work-tree',
       title: 'Work Tree',
-      description: '工作树：文件夹与对话',
+      description: t("工作树：文件夹与对话"),
       size: {
         minWidth: 2,
         minHeight: 3,
@@ -97,7 +98,7 @@ export const WIDGET_REGISTRY: ReadonlyMap<string, WidgetRegistration> = new Map(
     {
       id: 'scheduled-tasks',
       title: 'Scheduled Tasks',
-      description: '定时任务列表',
+      description: t("定时任务列表"),
       size: {
         minWidth: 2,
         minHeight: 2,
@@ -115,7 +116,7 @@ export const WIDGET_REGISTRY: ReadonlyMap<string, WidgetRegistration> = new Map(
     {
       id: 'settings',
       title: 'Settings',
-      description: '设置面板',
+      description: t("设置面板"),
       size: {
         minWidth: 2,
         minHeight: 2,

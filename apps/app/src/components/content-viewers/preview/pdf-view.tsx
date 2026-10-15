@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { GlobalWorkerOptions, getDocument, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { t } from '../../../languages/index.js';
 
 GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -33,8 +34,8 @@ function PdfPage({ doc, pageNumber }: { doc: PDFDocumentProxy; pageNumber: numbe
   }, [doc, pageNumber]);
 
   return <div className="file-pdf-page">
-    {error ? <p className="file-preview-error">第 {pageNumber} 页渲染失败。</p>
-      : <canvas ref={canvasRef} aria-label={`PDF 第 ${pageNumber} 页`} />}
+    {error ? <p className="file-preview-error">{t("第")} {pageNumber} {t("页渲染失败。")}</p>
+      : <canvas ref={canvasRef} aria-label={t("PDF 第 {0} 页", { 0: pageNumber })} />}
   </div>;
 }
 
@@ -66,15 +67,15 @@ export function PdfView({ base64 }: { base64: string }) {
 
   useEffect(() => { setVisiblePages(INITIAL_PAGES); }, [base64]);
 
-  if (error) return <p className="file-preview-error" role="alert">PDF 无法打开：{error}</p>;
-  if (!doc) return <p className="file-preview-loading">正在解析 PDF…</p>;
+  if (error) return <p className="file-preview-error" role="alert">{t("PDF 无法打开：")}{error}</p>;
+  if (!doc) return <p className="file-preview-loading">{t("正在解析 PDF…")}</p>;
   const total = doc.numPages;
-  return <div className="file-pdf" aria-label={`PDF 共 ${total} 页`}>
+  return <div className="file-pdf" aria-label={t("PDF 共 {0} 页", { 0: total })}>
     {Array.from({ length: Math.min(visiblePages, total) }, (_, index) =>
       <PdfPage key={index + 1} doc={doc} pageNumber={index + 1} />)}
     {visiblePages < total && <button type="button" className="file-pdf-more"
       onClick={() => setVisiblePages((current) => current + RENDER_BATCH)}>
-      继续渲染（已显示 {Math.min(visiblePages, total)}/{total} 页）
+      {t("继续渲染（已显示")} {Math.min(visiblePages, total)}/{total} {t("页）")}
     </button>}
   </div>;
 }

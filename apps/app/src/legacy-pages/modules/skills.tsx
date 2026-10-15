@@ -11,6 +11,7 @@ import type {
   PluginConfigScope,
   PluginSearchResult,
 } from '@mindlink-agent/protocol';
+import { t } from '../../languages/index.js';
 
 
 type SkillTab = 'marketplace' | 'installed' | 'local' | 'updates';
@@ -18,9 +19,9 @@ type SkillTab = 'marketplace' | 'installed' | 'local' | 'updates';
 const previewPlugins: PluginSearchResult[] = [
   {
     name: '@quintinshaw/pi-dynamic-workflows',
-    displayName: '工作流编排',
+    displayName: t("工作流编排"),
     version: '3.12.0',
-    description: '可组合的工作流、任务拆解与自动化执行能力。',
+    description: t("可组合的工作流、任务拆解与自动化执行能力。"),
     publisher: 'quintinshaw',
     source: 'npm:@quintinshaw/pi-dynamic-workflows@3.12.0',
     components: ['agent', 'workflow', 'extension'],
@@ -28,9 +29,9 @@ const previewPlugins: PluginSearchResult[] = [
   },
   {
     name: 'pi-hermes-memory',
-    displayName: '长期记忆',
+    displayName: t("长期记忆"),
     version: '0.9.9',
-    description: '为 Pi 提供跨会话的长期记忆、存储和检索能力。',
+    description: t("为 Pi 提供跨会话的长期记忆、存储和检索能力。"),
     publisher: 'community',
     source: 'npm:pi-hermes-memory@0.9.9',
     components: ['skill', 'extension'],
@@ -38,9 +39,9 @@ const previewPlugins: PluginSearchResult[] = [
   },
   {
     name: 'pi-mcp-adapter',
-    displayName: 'MCP 服务连接',
+    displayName: t("MCP 服务连接"),
     version: '2.34.0',
-    description: '连接外部 MCP 服务，扩展更多工具和数据源。',
+    description: t("连接外部 MCP 服务，扩展更多工具和数据源。"),
     publisher: 'community',
     source: 'npm:pi-mcp-adapter@2.34.0',
     components: ['connector', 'extension'],
@@ -51,7 +52,7 @@ const previewPlugins: PluginSearchResult[] = [
 const previewInstalled: InstalledPlugin[] = [{
   name: 'pi-mcp-adapter',
   version: '2.34.0',
-  description: '连接外部 MCP 服务，扩展更多工具和数据源。',
+  description: t("连接外部 MCP 服务，扩展更多工具和数据源。"),
   source: 'npm:pi-mcp-adapter@2.34.0',
   installPath: '~/.mindlink/packages/installed/pi-mcp-adapter',
   enabled: true,
@@ -64,8 +65,8 @@ function previewConfig(scope: PluginConfigScope): PluginConfigDocument {
   return {
     pluginName: 'pi-mcp-adapter',
     kind: 'mcp',
-    title: 'MCP 服务',
-    description: '配置外部 MCP 服务；服务器会在实际使用工具时按需连接。',
+    title: t("MCP 服务"),
+    description: t("配置外部 MCP 服务；服务器会在实际使用工具时按需连接。"),
     scope,
     path: scope === 'user' ? '~/.mindlink/agent/mcp.json' : '<workspace>/.pi/mcp.json',
     supportsWorkspace: true,
@@ -191,7 +192,7 @@ function PluginConfigPage({
       if (document.kind === 'schema') {
         const parsed = JSON.parse(rawDraft) as unknown;
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-          throw new Error('技能配置必须是 JSON 对象。');
+          throw new Error(t("技能配置必须是 JSON 对象。"));
         }
         value = parsed as Record<string, unknown>;
       }
@@ -214,7 +215,7 @@ function PluginConfigPage({
   }
 
   async function reset() {
-    if (!document || !window.confirm(`重置 ${scope === 'user' ? '用户' : '当前工作区'}配置？`)) return;
+    if (!document || !window.confirm(t("重置 {0}配置？", { 0: scope === 'user' ? t("用户") : t("当前工作区") }))) return;
     setBusy(true);
     setError(undefined);
     try {
@@ -236,48 +237,48 @@ function PluginConfigPage({
   return (
     <section className={`plugin-panel plugin-config-panel ${active ? '' : 'view-hidden'}`} aria-hidden={!active}>
       <header className="config-topbar">
-        <button type="button" className="back-button" onClick={onBack}>← 返回技能列表</button>
+        <button type="button" className="back-button" onClick={onBack}>{t("← 返回技能列表")}</button>
       </header>
       <div className="config-layout">
         <aside className="config-plugin-summary">
           <div className="installed-title">
             <h1>{plugin.name}</h1>
-            <span className={plugin.enabled ? 'enabled' : 'disabled'}>{plugin.enabled ? '已启用' : '已停用'}</span>
+            <span className={plugin.enabled ? 'enabled' : 'disabled'}>{plugin.enabled ? t("已启用") : t("已停用")}</span>
           </div>
           <p>{plugin.description}</p>
           <dl>
-            <div><dt>版本</dt><dd>v{plugin.version}</dd></div>
-            <div><dt>来源</dt><dd>{plugin.source.startsWith('npm:') ? 'npm' : 'Git'}</dd></div>
-            <div><dt>配置状态</dt><dd>{plugin.configStatus === 'invalid' ? '需要修复' : '有效'}</dd></div>
+            <div><dt>{t("版本")}</dt><dd>v{plugin.version}</dd></div>
+            <div><dt>{t("来源")}</dt><dd>{plugin.source.startsWith('npm:') ? 'npm' : 'Git'}</dd></div>
+            <div><dt>{t("配置状态")}</dt><dd>{plugin.configStatus === 'invalid' ? t("需要修复") : t("有效")}</dd></div>
           </dl>
-          <p className="config-summary-note">配置独立于安装目录保存，升级技能时不会丢失。</p>
+          <p className="config-summary-note">{t("配置独立于安装目录保存，升级技能时不会丢失。")}</p>
         </aside>
 
         <div className="config-editor">
           <header className="config-editor-header">
             <div>
-              <h2>{document?.title ?? '技能配置'}</h2>
-              <p>{document?.description ?? '正在读取配置…'}</p>
+              <h2>{document?.title ?? t("技能配置")}</h2>
+              <p>{document?.description ?? t("正在读取配置…")}</p>
               {document && <code title={document.path}>{document.path}</code>}
             </div>
-            <div className="scope-switch" role="group" aria-label="配置作用域">
-              <button type="button" className={scope === 'user' ? 'active' : ''} onClick={() => setScope('user')}>用户</button>
+            <div className="scope-switch" role="group" aria-label={t("配置作用域")}>
+              <button type="button" className={scope === 'user' ? 'active' : ''} onClick={() => setScope('user')}>{t("用户")}</button>
               <button
                 type="button"
                 className={scope === 'workspace' ? 'active' : ''}
                 disabled={!document?.supportsWorkspace}
                 onClick={() => setScope('workspace')}
-              >当前工作区</button>
+              >{t("当前工作区")}</button>
             </div>
           </header>
 
           <div className="secret-notice">
             <span aria-hidden="true">◆</span>
-            API Key、Token 等敏感值必须写成环境变量引用，例如 <code>{'${MCP_API_KEY}'}</code>。
+            {t("API Key、Token 等敏感值必须写成环境变量引用，例如")} <code>{'${MCP_API_KEY}'}</code>。
           </div>
 
           {error && <div className="plugin-error" role="alert">{error}</div>}
-          {saved && <div className="config-success" role="status">配置已保存，将在下一次对话中生效。</div>}
+          {saved && <div className="config-success" role="status">{t("配置已保存，将在下一次对话中生效。")}</div>}
 
           <div className="config-editor-body">
             {document?.kind === 'mcp' && Object.entries(mcpServers).map(([name, value]) => {
@@ -287,17 +288,17 @@ function PluginConfigPage({
               return (
                 <article className="mcp-server-card" key={name}>
                   <div className="mcp-server-title">
-                    <input aria-label="MCP 服务名称" defaultValue={name} onBlur={(event) => renameServer(name, event.target.value.trim())} />
+                    <input aria-label={t("MCP 服务名称")} defaultValue={name} onBlur={(event) => renameServer(name, event.target.value.trim())} />
                     <span>{http ? 'http' : 'stdio'}</span>
-                    <label><input type="checkbox" checked={server.disabled !== true} onChange={(event) => updateServer(name, { ...server, disabled: !event.target.checked })} /> 启用</label>
-                    <button type="button" className="icon-danger" aria-label={`删除 ${name}`} onClick={() => removeServer(name)}>×</button>
+                    <label><input type="checkbox" checked={server.disabled !== true} onChange={(event) => updateServer(name, { ...server, disabled: !event.target.checked })} /> {t("启用")}</label>
+                    <button type="button" className="icon-danger" aria-label={t("删除 {0}", { 0: name })} onClick={() => removeServer(name)}>×</button>
                   </div>
                   <div className="transport-switch">
                     <button type="button" className={!http ? 'active' : ''} onClick={() => {
                       const next: Record<string, unknown> = { ...server, command: typeof server.command === 'string' ? server.command : 'npx' };
                       delete next.url;
                       updateServer(name, next);
-                    }}>本地命令</button>
+                    }}>{t("本地命令")}</button>
                     <button type="button" className={http ? 'active' : ''} onClick={() => {
                       const next: Record<string, unknown> = { ...server, url: typeof server.url === 'string' ? server.url : 'https://' };
                       delete next.command;
@@ -306,11 +307,11 @@ function PluginConfigPage({
                     }}>HTTP</button>
                   </div>
                   {http ? (
-                    <label className="config-field"><span>服务地址</span><input value={String(server.url ?? '')} onChange={(event) => updateServer(name, { ...server, url: event.target.value })} /></label>
+                    <label className="config-field"><span>{t("服务地址")}</span><input value={String(server.url ?? '')} onChange={(event) => updateServer(name, { ...server, url: event.target.value })} /></label>
                   ) : (
                     <>
-                      <label className="config-field"><span>命令</span><input value={String(server.command ?? '')} onChange={(event) => updateServer(name, { ...server, command: event.target.value })} /></label>
-                      <label className="config-field"><span>参数</span><textarea value={args.join('\n')} onChange={(event) => updateServer(name, { ...server, args: event.target.value.split('\n').filter(Boolean) })} placeholder="每行一个参数" /></label>
+                      <label className="config-field"><span>{t("命令")}</span><input value={String(server.command ?? '')} onChange={(event) => updateServer(name, { ...server, command: event.target.value })} /></label>
+                      <label className="config-field"><span>{t("参数")}</span><textarea value={args.join('\n')} onChange={(event) => updateServer(name, { ...server, args: event.target.value.split('\n').filter(Boolean) })} placeholder={t("每行一个参数")} /></label>
                     </>
                   )}
                 </article>
@@ -318,24 +319,24 @@ function PluginConfigPage({
             })}
 
             {document?.kind === 'mcp' && (
-              <button type="button" className="add-server-button" onClick={addServer}>＋ 添加 MCP 服务</button>
+              <button type="button" className="add-server-button" onClick={addServer}>{t("＋ 添加 MCP 服务")}</button>
             )}
 
             {document?.kind === 'schema' && (
               <label className="raw-config-field">
-                <span>JSON 配置</span>
+                <span>{t("JSON 配置")}</span>
                 <textarea value={rawDraft} onChange={(event) => { setRawDraft(event.target.value); setSaved(false); }} spellCheck={false} />
               </label>
             )}
 
-            {!document && !error && <div className="plugin-empty">正在读取技能配置…</div>}
+            {!document && !error && <div className="plugin-empty">{t("正在读取技能配置…")}</div>}
           </div>
 
           <footer className="config-actions">
-            <span>保存后将在下一次对话中生效</span>
+            <span>{t("保存后将在下一次对话中生效")}</span>
             <div>
-              <button type="button" onClick={() => void reset()} disabled={busy || !document}>重置</button>
-              <button type="button" className="primary" onClick={() => void save()} disabled={busy || !document}>{busy ? '处理中…' : '保存并应用'}</button>
+              <button type="button" onClick={() => void reset()} disabled={busy || !document}>{t("重置")}</button>
+              <button type="button" className="primary" onClick={() => void save()} disabled={busy || !document}>{busy ? t("处理中…") : t("保存并应用")}</button>
             </div>
           </footer>
         </div>
@@ -345,23 +346,23 @@ function PluginConfigPage({
 }
 
 const componentLabels: Record<NonNullable<PluginSearchResult['components']>[number], string> = {
-  skill: '使用指南',
-  agent: '专家角色',
-  workflow: '工作流',
-  extension: '运行扩展',
-  prompt: '提示模板',
-  theme: '界面主题',
-  connector: '服务连接',
+  skill: t("使用指南"),
+  agent: t("专家角色"),
+  workflow: t("工作流"),
+  extension: t("运行扩展"),
+  prompt: t("提示模板"),
+  theme: t("界面主题"),
+  connector: t("服务连接"),
 };
 
 const permissionLabels: Record<NonNullable<PluginSearchResult['permissions']>[number], string> = {
-  instructions: '包含指令',
-  scripts: '可执行脚本',
-  filesystem: '访问本地文件',
-  network: '访问网络',
-  credentials: '需要密钥',
-  notifications: '显示系统弹窗',
-  background: '后台运行',
+  instructions: t("包含指令"),
+  scripts: t("可执行脚本"),
+  filesystem: t("访问本地文件"),
+  network: t("访问网络"),
+  credentials: t("需要密钥"),
+  notifications: t("显示系统弹窗"),
+  background: t("后台运行"),
 };
 
 export function SkillPage({ active }: { active: boolean }) {
@@ -432,7 +433,7 @@ export function SkillPage({ active }: { active: boolean }) {
   async function install(candidate: PluginSearchResult) {
     const source = candidate.source;
     if (!desktop) {
-      setError('浏览器预览模式不会执行技能安装。请通过 Electron 启动 MindLink。');
+      setError(t("浏览器预览模式不会执行技能安装。请通过 Electron 启动 MindLink。"));
       return;
     }
     setTrustCandidate(undefined);
@@ -442,7 +443,7 @@ export function SkillPage({ active }: { active: boolean }) {
     let legacyDisabled = false;
     try {
       if (isArtifactSource(source) && !candidate.artifactManifestDigest) {
-        throw new Error('能力清单快照缺失，请重新搜索并确认权限。');
+        throw new Error(t("能力清单快照缺失，请重新搜索并确认权限。"));
       }
       if (isArtifactSource(source) && legacyAdapter?.enabled) {
         const conflicts = await desktop.listMcpOwnershipConflicts(
@@ -452,7 +453,7 @@ export function SkillPage({ active }: { active: boolean }) {
         if (conflicts.length > 0) {
           const names = conflicts.map((conflict) => conflict.name).join('、');
           const useMindlink = window.confirm(
-            `检测到旧 pi-mcp-adapter 正在托管同名连接：${names}。\n\n选择“确定”将停用旧适配器并由 MindLink 托管；旧配置会完整保留，但旧适配器中的其他连接也会暂停。选择“取消”则保持旧适配器且不安装。`,
+            t("检测到旧 pi-mcp-adapter 正在托管同名连接：{0}。\n\n选择“确定”将停用旧适配器并由 MindLink 托管；旧配置会完整保留，但旧适配器中的其他连接也会暂停。选择“取消”则保持旧适配器且不安装。", { 0: names }),
           );
           if (!useMindlink) return;
           await desktop.setPluginEnabled(legacyAdapter.name, false);
@@ -474,7 +475,7 @@ export function SkillPage({ active }: { active: boolean }) {
       }
       setError(message);
       setInstallFailures((current) => ({ ...current, [source]: message }));
-      if (message.includes('能力清单已变化')) {
+      if (message.includes(t("能力清单已变化"))) {
         const refreshed = await desktop.searchPlugins(query.trim()).catch(() => undefined);
         if (refreshed) setResults(refreshed);
       }
@@ -491,8 +492,8 @@ export function SkillPage({ active }: { active: boolean }) {
     if (isDirectPluginSource(term)) {
       setTrustCandidate({
         name: term,
-        version: '固定来源',
-        description: '手动输入的固定版本插件来源。',
+        version: t("固定来源"),
+        description: t("手动输入的固定版本插件来源。"),
         source: term,
       });
       return;
@@ -515,7 +516,7 @@ export function SkillPage({ active }: { active: boolean }) {
   }
 
   async function uninstall(plugin: InstalledPlugin) {
-    if (!desktop || !window.confirm(`卸载 ${plugin.name}？\n\n能力包会被删除，但不会删除 ~/.mindlink/agent/skills 中的本地技能。`)) return;
+    if (!desktop || !window.confirm(t("卸载 {0}？\n\n能力包会被删除，但不会删除 ~/.mindlink/agent/skills 中的本地技能。", { 0: plugin.name }))) return;
     setPending(plugin.name);
     setError(undefined);
     try {
@@ -536,7 +537,7 @@ export function SkillPage({ active }: { active: boolean }) {
       await desktop.rollbackPlugin(plugin.name, version);
       await refreshInstalled();
     } catch (rollbackError) {
-      setError(`回滚失败，仍在使用 v${plugin.activeVersion ?? plugin.version}：${formatError(rollbackError)}`);
+      setError(t("回滚失败，仍在使用 v{0}：{1}", { 0: plugin.activeVersion ?? plugin.version, 1: formatError(rollbackError) }));
     } finally {
       setPending(undefined);
     }
@@ -564,44 +565,44 @@ export function SkillPage({ active }: { active: boolean }) {
     <section className={`plugin-panel ${active ? '' : 'view-hidden'}`} aria-hidden={!active}>
       <header className="plugin-header">
         <div>
-          <h1>技能</h1>
-          <p>为 MindLink 添加工作能力</p>
+          <h1>{t("技能")}</h1>
+          <p>{t("为 MindLink 添加工作能力")}</p>
         </div>
-        <span>已安装 {installed.length}</span>
+        <span>{t("已安装")} {installed.length}</span>
       </header>
 
       <div className="plugin-content">
         <form className="plugin-search" onSubmit={(event) => void submitSearch(event)}>
           <span className="search-icon" aria-hidden="true" />
           <input
-            aria-label="搜索技能"
+            aria-label={t("搜索技能")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索技能、服务或工作场景"
+            placeholder={t("搜索技能、服务或工作场景")}
           />
           <button type="submit" disabled={searching || Boolean(pending)}>
-            {searching ? '搜索中…' : isDirectPluginSource(query.trim()) ? '安装来源' : '搜索'}
+            {searching ? t("搜索中…") : isDirectPluginSource(query.trim()) ? t("安装来源") : t("搜索")}
           </button>
         </form>
 
-        <div className="plugin-tabs" role="tablist" aria-label="技能视图">
+        <div className="plugin-tabs" role="tablist" aria-label={t("技能视图")}>
           <button type="button" role="tab" aria-selected={tab === 'marketplace'} onClick={() => setTab('marketplace')}>
-            技能市场
+            {t("技能市场")}
           </button>
           <button type="button" role="tab" aria-selected={tab === 'installed'} onClick={() => setTab('installed')}>
-            已安装
+            {t("已安装")}
           </button>
           <button type="button" role="tab" aria-selected={tab === 'local'} onClick={() => setTab('local')}>
-            本地技能
+            {t("本地技能")}
           </button>
           <button type="button" role="tab" aria-selected={tab === 'updates'} onClick={() => setTab('updates')}>
-            更新
+            {t("更新")}
           </button>
         </div>
 
         <div className="security-notice">
           <span aria-hidden="true">!</span>
-          技能可能包含操作指令、运行扩展、工作流或外部服务连接。安装前请查看权限并确认来源可信。
+          {t("技能可能包含操作指令、运行扩展、工作流或外部服务连接。安装前请查看权限并确认来源可信。")}
         </div>
 
         {error && <div className="plugin-error" role="alert">{error}</div>}
@@ -635,12 +636,12 @@ export function SkillPage({ active }: { active: boolean }) {
                   disabled={Boolean(pending) || current?.version === plugin.version}
                   onClick={() => setTrustCandidate(plugin)}
                 >
-                  {isPending ? '安装中…' : current?.version === plugin.version ? '已安装' : current ? '更新' : '安装'}
+                  {isPending ? t("安装中…") : current?.version === plugin.version ? t("已安装") : current ? t("更新") : t("安装")}
                 </button>
                 {installFailures[plugin.source] && (
                   <div className="install-recovery" role="alert">
-                    <span>更新失败，仍在使用 v{current?.activeVersion ?? current?.version ?? '—'}</span>
-                    <button type="button" disabled={Boolean(pending)} onClick={() => setTrustCandidate(plugin)}>重试</button>
+                    <span>{t("更新失败，仍在使用 v")}{current?.activeVersion ?? current?.version ?? '—'}</span>
+                    <button type="button" disabled={Boolean(pending)} onClick={() => setTrustCandidate(plugin)}>{t("重试")}</button>
                   </div>
                 )}
               </article>
@@ -653,37 +654,37 @@ export function SkillPage({ active }: { active: boolean }) {
                 <div className="installed-title">
                   <h2>{plugin.name}</h2>
                   <span className={plugin.enabled ? 'enabled' : 'disabled'}>
-                    {plugin.enabled ? '已启用' : '已停用'}
+                    {plugin.enabled ? t("已启用") : t("已停用")}
                   </span>
                 </div>
                 <p>{plugin.description}</p>
-                {plugin.loadError && <div className="plugin-load-error">加载失败：{plugin.loadError}</div>}
+                {plugin.loadError && <div className="plugin-load-error">{t("加载失败：")}{plugin.loadError}</div>}
                 <div className="plugin-meta">
                   <span>v{plugin.version}</span>
-                  <span title={plugin.source}>{plugin.source.startsWith('npm:') ? 'npm' : plugin.kind === 'python-mcp' ? '能力制品' : 'Git'}</span>
+                  <span title={plugin.source}>{plugin.source.startsWith('npm:') ? 'npm' : plugin.kind === 'python-mcp' ? t("能力制品") : 'Git'}</span>
                 </div>
               </div>
               <div className="plugin-actions">
                 {plugin.configurable && (
                   <button type="button" disabled={Boolean(pending)} onClick={() => setEditingPlugin(plugin)}>
-                    配置
+                    {t("配置")}
                   </button>
                 )}
                 {plugin.kind !== 'python-mcp' && (
                   <button type="button" disabled={Boolean(pending)} onClick={() => void setEnabled(plugin, !plugin.enabled)}>
-                    {pending === plugin.name ? '处理中…' : plugin.enabled ? '停用' : '启用'}
+                    {pending === plugin.name ? t("处理中…") : plugin.enabled ? t("停用") : t("启用")}
                   </button>
                 )}
                 {plugin.kind === 'python-mcp' && plugin.availableVersions
                   ?.filter((version) => version !== plugin.activeVersion)
                   .map((version) => (
                     <button type="button" disabled={Boolean(pending)} key={version} onClick={() => void rollback(plugin, version)}>
-                      回滚到 v{version}
+                      {t("回滚到 v")}{version}
                     </button>
                   ))}
                 {plugin.kind !== 'python-mcp' && (
                   <button type="button" className="danger" disabled={Boolean(pending)} onClick={() => void uninstall(plugin)}>
-                    卸载
+                    {t("卸载")}
                   </button>
                 )}
               </div>
@@ -695,12 +696,12 @@ export function SkillPage({ active }: { active: boolean }) {
               <div className="plugin-card-main">
                 <div className="installed-title">
                   <h2>{skill.name}</h2>
-                  <span className="enabled">已加载</span>
+                  <span className="enabled">{t("已加载")}</span>
                 </div>
                 <p>{skill.description}</p>
                 <div className="plugin-meta">
-                  <span title={skill.filePath}>本地 SKILL.md</span>
-                  {skill.disableModelInvocation && <span>仅手动调用</span>}
+                  <span title={skill.filePath}>{t("本地 SKILL.md")}</span>
+                  {skill.disableModelInvocation && <span>{t("仅手动调用")}</span>}
                 </div>
               </div>
             </article>
@@ -714,9 +715,9 @@ export function SkillPage({ active }: { active: boolean }) {
 
           {tab === 'local' && localSkills.length === 0 && localDiagnostics.length === 0 && (
             <div className="plugin-empty skill-directory-empty">
-              <strong>还没有本地技能</strong>
+              <strong>{t("还没有本地技能")}</strong>
               <code>~/.mindlink/agent/skills</code>
-              <span>将包含 SKILL.md 的技能目录放到这里，刷新页面或下次启动后自动加载。</span>
+              <span>{t("将包含 SKILL.md 的技能目录放到这里，刷新页面或下次启动后自动加载。")}</span>
             </div>
           )}
 
@@ -731,17 +732,17 @@ export function SkillPage({ active }: { active: boolean }) {
                   <h2>{plugin.displayName ?? plugin.name}</h2>
                   <p>{plugin.description}</p>
                   <div className="plugin-meta">
-                    <span>当前 v{current.activeVersion ?? current.version}</span>
-                    <span>可更新至 v{plugin.version}</span>
+                    <span>{t("当前 v")}{current.activeVersion ?? current.version}</span>
+                    <span>{t("可更新至 v")}{plugin.version}</span>
                   </div>
                 </div>
                 <button type="button" className="install-button" disabled={Boolean(pending)} onClick={() => setTrustCandidate(plugin)}>
-                  {pending === plugin.source ? '更新中…' : '更新'}
+                  {pending === plugin.source ? t("更新中…") : t("更新")}
                 </button>
                 {installFailures[plugin.source] && (
                   <div className="install-recovery" role="alert">
-                    <span>更新失败，仍在使用 v{current.activeVersion ?? current.version}</span>
-                    <button type="button" disabled={Boolean(pending)} onClick={() => setTrustCandidate(plugin)}>重试</button>
+                    <span>{t("更新失败，仍在使用 v")}{current.activeVersion ?? current.version}</span>
+                    <button type="button" disabled={Boolean(pending)} onClick={() => setTrustCandidate(plugin)}>{t("重试")}</button>
                   </div>
                 )}
               </article>
@@ -752,29 +753,29 @@ export function SkillPage({ active }: { active: boolean }) {
             const current = installedFor(plugin);
             return !current || current.version === plugin.version;
           }) && (
-            <div className="plugin-empty">当前没有待更新的技能。能力包更新会保留独立配置。</div>
+            <div className="plugin-empty">{t("当前没有待更新的技能。能力包更新会保留独立配置。")}</div>
           )}
 
           {tab === 'marketplace' && !searching && results.length === 0 && (
-            <div className="plugin-empty">没有找到匹配的技能。也可以输入固定版本的 npm 或 Git 来源。</div>
+            <div className="plugin-empty">{t("没有找到匹配的技能。也可以输入固定版本的 npm 或 Git 来源。")}</div>
           )}
           {tab === 'installed' && installed.length === 0 && (
-            <div className="plugin-empty">还没有安装技能。前往“技能市场”搜索工作能力。</div>
+            <div className="plugin-empty">{t("还没有安装技能。前往“技能市场”搜索工作能力。")}</div>
           )}
         </div>
       </div>
       {trustCandidate && (
         <div className="modal-backdrop" role="presentation" onMouseDown={() => setTrustCandidate(undefined)}>
           <section className="trust-dialog" role="dialog" aria-modal="true" aria-labelledby="trust-title" onMouseDown={(event) => event.stopPropagation()}>
-            <span className="dialog-kicker">安装确认</span>
-            <h2 id="trust-title">信任并安装 {trustCandidate.displayName ?? trustCandidate.name}？</h2>
+            <span className="dialog-kicker">{t("安装确认")}</span>
+            <h2 id="trust-title">{t("信任并安装")} {trustCandidate.displayName ?? trustCandidate.name}？</h2>
             <p>{trustCandidate.description}</p>
             <dl>
-              <div><dt>版本</dt><dd>{trustCandidate.version}</dd></div>
-              <div><dt>来源</dt><dd>{trustCandidate.source}</dd></div>
-              <div><dt>发布者</dt><dd>{trustCandidate.publisher ?? '未知发布者'}</dd></div>
+              <div><dt>{t("版本")}</dt><dd>{trustCandidate.version}</dd></div>
+              <div><dt>{t("来源")}</dt><dd>{trustCandidate.source}</dd></div>
+              <div><dt>{t("发布者")}</dt><dd>{trustCandidate.publisher ?? t("未知发布者")}</dd></div>
               {trustCandidate.artifactManifestDigest && (
-                <div><dt>清单摘要</dt><dd>{trustCandidate.artifactManifestDigest.slice(0, 16)}…</dd></div>
+                <div><dt>{t("清单摘要")}</dt><dd>{trustCandidate.artifactManifestDigest.slice(0, 16)}…</dd></div>
               )}
             </dl>
             <div className="skill-badges">
@@ -783,11 +784,11 @@ export function SkillPage({ active }: { active: boolean }) {
               ))}
             </div>
             {isArtifactSource(trustCandidate.source) && (
-              <p className="trust-boundary">此能力在独立进程中运行，不会作为 Pi extension 加载；安装仍会验证签名、平台、哈希和兼容版本。</p>
+              <p className="trust-boundary">{t("此能力在独立进程中运行，不会作为 Pi extension 加载；安装仍会验证签名、平台、哈希和兼容版本。")}</p>
             )}
             <footer>
-              <button type="button" onClick={() => setTrustCandidate(undefined)}>取消</button>
-              <button type="button" className="primary" onClick={() => void install(trustCandidate)}>信任并安装</button>
+              <button type="button" onClick={() => setTrustCandidate(undefined)}>{t("取消")}</button>
+              <button type="button" className="primary" onClick={() => void install(trustCandidate)}>{t("信任并安装")}</button>
             </footer>
           </section>
         </div>

@@ -5,6 +5,7 @@ import { FileTree as PierreFileTree, useFileTree } from '@pierre/trees/react';
 import { AppIcon } from '../../composites/app-icon.js';
 import type { WorkFileEntry } from '@mindlink-agent/protocol';
 import type { ViewerFileHost } from '../host/file-host.js';
+import { t } from '../../../languages/index.js';
 
 /** Shared recursive-listing query; the tree tab toolbar reuses it for refresh. */
 export function useWorkspaceTree(host: ViewerFileHost, scopeKey: string, directoryPath = '') {
@@ -92,19 +93,19 @@ export function FileTree({ host, scopeKey, selectedPath, onOpenFile, rootName, d
     ? selectedPath.slice(directoryPath.length + 1) : directoryPath ? undefined : selectedPath;
   const directories = workspaceTree.data?.entries.filter((entry) => entry.kind === 'directory') ?? [];
   return <div className={hidden ? 'file-tree hidden' : 'file-tree'} aria-hidden={hidden || undefined}>
-    <label className="file-tree-root" title={directoryPath || rootName || '工作区'}><AppIcon name="folder" />
-      <select aria-label="切换工作区目录" value={directoryPath} onChange={(event) => { setFilter(''); onDirectoryChange?.(event.target.value); }}>
-        <option value="">{rootName ?? '工作区'}</option>
+    <label className="file-tree-root" title={directoryPath || rootName || t("工作区")}><AppIcon name="folder" />
+      <select aria-label={t("切换工作区目录")} value={directoryPath} onChange={(event) => { setFilter(''); onDirectoryChange?.(event.target.value); }}>
+        <option value="">{rootName ?? t("工作区")}</option>
         {directories.map((directory) => <option key={directory.path} value={directory.path}>{directory.path}</option>)}
       </select>
     </label>
-    <label className="file-tree-filter"><input aria-label="筛选文件"
-      type="search" value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="筛选文件…" /></label>
-    {tree.isLoading && <p className="file-tree-status">正在读取工作区…</p>}
-    {tree.error && <p className="file-tree-status" role="alert">工作区读取失败：{formatError(tree.error)}</p>}
-    {tree.data?.truncated && <p className="file-tree-status" role="status">文件较多，仅显示前一部分。</p>}
-    {tree.data && entries.length === 0 && <p className="file-tree-status">工作区还没有文件。</p>}
-    {tree.data && entries.length > 0 && paths.length === 0 && <p className="file-tree-status">没有匹配的文件。</p>}
+    <label className="file-tree-filter"><input aria-label={t("筛选文件")}
+      type="search" value={filter} onChange={(event) => setFilter(event.target.value)} placeholder={t("筛选文件…")} /></label>
+    {tree.isLoading && <p className="file-tree-status">{t("正在读取工作区…")}</p>}
+    {tree.error && <p className="file-tree-status" role="alert">{t("工作区读取失败：")}{formatError(tree.error)}</p>}
+    {tree.data?.truncated && <p className="file-tree-status" role="status">{t("文件较多，仅显示前一部分。")}</p>}
+    {tree.data && entries.length === 0 && <p className="file-tree-status">{t("工作区还没有文件。")}</p>}
+    {tree.data && entries.length > 0 && paths.length === 0 && <p className="file-tree-status">{t("没有匹配的文件。")}</p>}
     {paths.length > 0 && <TreeBody key={`${directoryPath}:${filter}`} filePaths={paths} fileSet={fileSet}
       selectedPath={relativeSelection} onOpenFile={(path) => onOpenFile(directoryPath ? `${directoryPath}/${path}` : path)} />}
   </div>;

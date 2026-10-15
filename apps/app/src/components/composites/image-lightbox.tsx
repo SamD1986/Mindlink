@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { t } from '../../languages/index.js';
 
 /** Shared frosted full-screen image preview for messages and workspace files. */
 export function ImageLightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
@@ -10,9 +11,9 @@ export function ImageLightbox({ src, alt, onClose }: { src: string; alt: string;
     if (element && !element.open) element.showModal();
   }, []);
 
-  return createPortal(<dialog ref={dialog} className="message-image-dialog" aria-label="全屏预览图片"
+  return createPortal(<dialog ref={dialog} className="message-image-dialog" aria-label={t("全屏预览图片")}
     onClose={onClose} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <button type="button" className="message-image-dialog-close" onClick={onClose} aria-label="关闭图片预览">×</button>
+    <button type="button" className="message-image-dialog-close" onClick={onClose} aria-label={t("关闭图片预览")}>×</button>
     <img src={src} alt={alt} referrerPolicy="no-referrer" />
   </dialog>, document.body);
 }
