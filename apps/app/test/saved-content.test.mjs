@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { register } from 'tsx/esm/api';
 
 register();
-const { isSavedContent, readSavedContent, removeSavedContent, saveContent } = await import('../src/shared/saved-content.ts');
+const { isSavedContent, readSavedContent, removeSavedContent, saveContent } = await import('../src/components/composites/saved-content.ts');
 
 test('saved replies persist locally without duplicate entries and can be removed', () => {
   const values = new Map();

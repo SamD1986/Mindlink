@@ -10,7 +10,7 @@ const {
   normalizeWorkspacePath,
   splitTextByFilePaths,
   workspaceFileHref,
-} = await import('../src/shared/work-file-links.ts');
+} = await import('../src/components/composites/work-file-links.ts');
 
 test('extractFilePathCandidates finds separated paths and previewable bare names', () => {
   assert.deepEqual(

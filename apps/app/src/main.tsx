@@ -3,9 +3,9 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Shell } from './shell/index.js';
-import { applyFontPreference, readFontPreference } from './shared/font-preference.js';
+import { applyFontPreference, readFontPreference } from './components/composites/font-preference.js';
 import { applyPlatformAttribute } from './shared/platform.js';
-import { applyThemePreference, readThemePreference } from './shared/theme-preference.js';
+import { applyThemePreference, readThemePreference } from './components/composites/theme-preference.js';
 import '../themes/tokens.css';
 import '../themes/brand-fonts.css';
 

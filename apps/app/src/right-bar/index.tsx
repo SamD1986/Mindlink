@@ -1,4 +1,4 @@
-import { AppIcon } from '../shared/app-icon.js';
+import { AppIcon } from '../components/composites/app-icon.js';
 import { useWorkspace } from '../shell/workspace.js';
 import { PROJECT_SLOGAN, PROJECT_SLOGAN_EN, PROJECT_SLOGAN_ZH } from '../shared/brand.js';
 import yuanpuSeal from '../../themes/assets/yuanpu-seal.png';

@@ -6,7 +6,7 @@ import { register } from 'tsx/esm/api';
 
 register();
 const { DelegationApprovalDetails, isVisibleAssistantDelegationApproval } =
-  await import('../src/shared/delegation-approval-details.tsx');
+  await import('../src/components/composites/delegation-approval-details.tsx');
 
 test('professional approval displays the bounded task and only the Assistant surface can approve it', () => {
   const approval = { requestId: 'approval-one', sessionId: 'session-one',

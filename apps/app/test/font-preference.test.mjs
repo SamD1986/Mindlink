@@ -9,7 +9,7 @@ const {
   resolveFontFamily,
   FONT_PREFERENCE_DEFAULTS,
   FONT_FAMILY_PRESETS,
-} = await import('../src/shared/font-preference.ts');
+} = await import('../src/components/composites/font-preference.ts');
 
 test('normalize falls back to defaults for invalid, out-of-range, or missing fields', () => {
   assert.deepEqual(normalizeFontPreference(undefined), FONT_PREFERENCE_DEFAULTS);

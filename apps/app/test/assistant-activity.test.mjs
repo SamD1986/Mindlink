@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { register } from 'tsx/esm/api';
 register();
-const { taskAction, executionAction, completedNow } = await import('../src/shared/assistant-activity.ts');
+const { taskAction, executionAction, completedNow } = await import('../src/components/composites/assistant-activity.ts');
 
 test('task content selects the four execution animations', () => {
   for (const [task, expected] of [

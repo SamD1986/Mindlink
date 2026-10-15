@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 
-import { AppIcon } from '../../shared/app-icon.js';
+import { AppIcon } from '../../components/composites/app-icon.js';
 import { normalizeAddressInput, type BrowserViewState } from './browser-state.js';
 
 /** Address bar and navigation controls; drives the webview directly (zcode BrowserToolbar port). */

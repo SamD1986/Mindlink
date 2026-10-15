@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { register } from 'tsx/esm/api';
 
 register();
-const { bindingFromKeyEvent, hotkeyLabel } = await import('../src/shared/hotkeys.ts');
+const { bindingFromKeyEvent, hotkeyLabel } = await import('../src/components/composites/hotkeys.ts');
 
 const key = (code, overrides = {}) => ({ code, metaKey: false, ctrlKey: false, altKey: false, shiftKey: false, ...overrides });
 

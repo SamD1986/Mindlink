@@ -1,9 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
-import { AppIcon } from '../../shared/app-icon.js';
-import { ImageLightbox } from '../../shared/image-lightbox.js';
-import type { ImagePreview } from '../../shared/message-image.js';
+import { AppIcon } from '../../components/composites/app-icon.js';
+import { ImageLightbox } from '../../components/composites/image-lightbox.js';
+import type { ImagePreview } from '../../components/composites/message-image.js';
 import { BrowserView } from '../browser/browser-view.js';
 import type { ViewerBrowserHost } from '../host/browser-host.js';
 import type { ViewerFileHost } from '../host/file-host.js';

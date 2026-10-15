@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AppIcon } from '../shared/app-icon.js';
+import { AppIcon } from '../components/composites/app-icon.js';
 import { useWorkspace } from '../shell/workspace.js';
 import {
   FIXED_ENTRIES,

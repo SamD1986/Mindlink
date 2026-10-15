@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { UiDestination } from './ui-destination.js';
+import type { UiDestination } from '../../shared/ui-destination.js';
 
 type AppView = UiDestination;
 

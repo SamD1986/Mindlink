@@ -4,11 +4,15 @@ import { test } from 'node:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { marked } from 'marked';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { register } from 'tsx/esm/api';
 
-register({ tsconfig: new URL('../tsconfig.json', import.meta.url).pathname });
-const { MessageContent } = await import('../src/shared/message-content.tsx');
-const { completeHtmlPreview, completePreviewFence, htmlPreviewDocument, safeImageSource, wrappedHtmlPreview } = await import('../src/shared/preview-content.ts');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+register({ tsconfig: join(__dirname, '..', 'tsconfig.json') });
+const { MessageContent } = await import('../src/components/composites/message-content.tsx');
+const { completeHtmlPreview, completePreviewFence, htmlPreviewDocument, safeImageSource, wrappedHtmlPreview } = await import('../src/components/composites/preview-content.ts');
 
 test('assistant messages render Markdown structure without executing raw HTML', () => {
   const html = renderToStaticMarkup(createElement(MessageContent, {

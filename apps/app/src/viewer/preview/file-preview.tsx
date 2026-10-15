@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { WorkFilePreview } from '@mindlink-agent/protocol';
 
-import { AppIcon } from '../../shared/app-icon.js';
-import { ImageLightbox } from '../../shared/image-lightbox.js';
-import { MessageContent } from '../../shared/message-content.js';
+import { AppIcon } from '../../components/composites/app-icon.js';
+import { ImageLightbox } from '../../components/composites/image-lightbox.js';
+import { MessageContent } from '../../components/composites/message-content.js';
 import { classifyWorkFile } from '../core/content-kind.js';
 import { formatFileSize, formatFileTime } from '../core/format.js';
 import type { ViewerFileHost } from '../host/file-host.js';

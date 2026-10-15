@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FileTree as PierreFileTree, useFileTree } from '@pierre/trees/react';
 
-import { AppIcon } from '../../shared/app-icon.js';
+import { AppIcon } from '../../components/composites/app-icon.js';
 import type { WorkFileEntry } from '@mindlink-agent/protocol';
 import type { ViewerFileHost } from '../host/file-host.js';
 

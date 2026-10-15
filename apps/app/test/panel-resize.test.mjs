@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { register } from 'tsx/esm/api';
 
 register();
-const { resizePanel } = await import('../src/shared/panel-resize.ts');
+const { resizePanel } = await import('../src/components/composites/panel-resize.ts');
 
 test('a continuous drag stops at 70%, even after reversing or dragging further', () => {
   const limit = resizePanel(900, 700, false, false);

@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { register } from 'tsx/esm/api';
 
 register();
-const { cacheReplyRun, findReplyRun } = await import('../src/shared/reply-run-cache.ts');
+const { cacheReplyRun, findReplyRun } = await import('../src/components/composites/reply-run-cache.ts');
 
 test('a completed reply keeps its own run details after transcript refresh', () => {
   const values = new Map();
