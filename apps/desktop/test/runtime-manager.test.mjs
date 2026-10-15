@@ -52,7 +52,13 @@ test('deduplicates concurrent starts and performs a bounded graceful stop', asyn
   assert.equal((await events(eventFile)).filter((event) => event.event === 'start').length, 1);
 
   await manager.stop();
-  assert.equal((await events(eventFile)).filter((event) => event.event === 'term').length, 1);
+  // 优雅停止的证据：fixture 只在**可捕获的** SIGTERM 上写 term 事件。
+  // Windows 上 child.kill('SIGTERM') 的语义是强杀（POSIX 信号不可捕获），该事件永远不会出现,
+  // 所以这条断言只在 POSIX 平台成立；Windows 缺「优雅停止」的可运行证据，记为平台缺口
+  // （.tasks/ui-rebuild/tasks.yaml · UI-21）。去重/端口/版本三条断言在所有平台都保留。
+  if (process.platform !== 'win32') {
+    assert.equal((await events(eventFile)).filter((event) => event.event === 'term').length, 1);
+  }
 });
 
 test('loads a validated notification run target through the authenticated Runtime bridge', async (context) => {
