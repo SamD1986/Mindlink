@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { WorkFileChangeEntry } from '@mindlink-agent/protocol';
 
-import { AppIcon } from '../../components/composites/app-icon.js';
+import { AppIcon } from '../../composites/app-icon.js';
 import { FileDiffView } from '../preview/file-diff-view.js';
 import { countDiffChanges, createUnifiedDiff } from '../preview/text-diff.js';
 

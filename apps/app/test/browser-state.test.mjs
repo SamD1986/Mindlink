@@ -5,7 +5,7 @@ import { register } from 'tsx/esm/api';
 
 register();
 
-const { createBrowserMemoryStore, initialBrowserState, normalizeAddressInput } = await import('../src/viewer/browser/browser-state.ts');
+const { createBrowserMemoryStore, initialBrowserState, normalizeAddressInput } = await import('../src/components/content-viewers/browser/browser-state.ts');
 
 test('normalizeAddressInput accepts urls, adds https to domains and rejects junk', () => {
   assert.equal(normalizeAddressInput('https://example.com/a?b=1'), 'https://example.com/a?b=1');

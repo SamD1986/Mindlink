@@ -1,0 +1,83 @@
+/**
+ * Chatbox 浮层样式：悬浮窗口 + 拖拽 + 缩放
+ */
+
+.chatbox-overlay {
+  position: fixed;
+  z-index: 1000; /* 在 workbench 之上 */
+  background: var(--yp-surface-1);
+  border: 1px solid var(--yp-border-1);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+}
+
+.chatbox-overlay.dragging {
+  cursor: move;
+}
+
+.chatbox-overlay.resizing {
+  user-select: none;
+}
+
+.chatbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--yp-surface-2);
+  border-bottom: 1px solid var(--yp-border-1);
+  cursor: move;
+  flex-shrink: 0;
+}
+
+.chatbox-title {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--yp-text-1);
+}
+
+.chatbox-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.chatbox-resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 40%,
+    var(--yp-border-1) 40%,
+    var(--yp-border-1) 45%,
+    transparent 45%,
+    transparent 55%,
+    var(--yp-border-1) 55%,
+    var(--yp-border-1) 60%,
+    transparent 60%
+  );
+}
+
+.chatbox-resize-handle:hover {
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 40%,
+    var(--yp-accent-1) 40%,
+    var(--yp-accent-1) 45%,
+    transparent 45%,
+    transparent 55%,
+    var(--yp-accent-1) 55%,
+    var(--yp-accent-1) 60%,
+    transparent 60%
+  );
+}

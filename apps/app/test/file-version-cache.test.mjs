@@ -5,7 +5,7 @@ import { register } from 'tsx/esm/api';
 
 register();
 
-const { clearFileVersions, getKnownFileVersion, rememberFileVersion } = await import('../src/viewer/preview/file-version-cache.ts');
+const { clearFileVersions, getKnownFileVersion, rememberFileVersion } = await import('../src/components/content-viewers/preview/file-version-cache.ts');
 
 test('file version cache stores, detects and clears per conversation scope', () => {
   clearFileVersions('work:a');

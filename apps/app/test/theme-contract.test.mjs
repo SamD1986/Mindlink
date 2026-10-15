@@ -28,8 +28,15 @@ const liveStylesheets = async () => [
 ];
 
 test('every token referenced by live stylesheets is declared by the built-in theme', async () => {
-  const tokens = await readFile(new URL('tokens.css', THEMES), 'utf8');
-  const declared = new Set([...tokens.matchAll(/(--yp-[a-z0-9-]+)\s*:/g)].map((match) => match[1]));
+  // tokens.css 现在是聚合层，需要扫描 tokens/ 目录下的所有分组文件
+  const tokenFiles = await cssFiles(new URL('tokens/', THEMES));
+  const declared = new Set();
+  for (const url of tokenFiles) {
+    const css = await readFile(url, 'utf8');
+    for (const [, name] of css.matchAll(/(--yp-[a-z0-9-]+)\s*:/g)) {
+      declared.add(name);
+    }
+  }
 
   let referenced = 0;
   for (const url of await liveStylesheets()) {
@@ -43,14 +50,20 @@ test('every token referenced by live stylesheets is declared by the built-in the
 });
 
 test('live stylesheets scale text through rem and declare the font tokens', async () => {
-  const tokens = await readFile(new URL('tokens.css', THEMES), 'utf8');
+  // 扫描 tokens/ 目录下的所有文件
+  const tokenFiles = await cssFiles(new URL('tokens/', THEMES));
+  let allTokens = '';
+  for (const url of tokenFiles) {
+    allTokens += await readFile(url, 'utf8');
+  }
+  
   for (const token of ['--yp-font-family', '--yp-font-scale-ui', '--yp-font-size-content']) {
-    assert.ok(tokens.includes(`${token}:`), `${token} is missing from the built-in theme tokens`);
+    assert.ok(allTokens.includes(`${token}:`), `${token} is missing from the built-in theme tokens`);
   }
 
   for (const url of await liveStylesheets()) {
-    // tokens.css 是声明文件，允许出现基准 px；其余样式表必须走 rem。
-    if (url.pathname.endsWith('/themes/tokens.css')) continue;
+    // tokens/ 目录下的文件是声明文件，允许出现基准 px；其余样式表必须走 rem。
+    if (url.pathname.includes('/themes/tokens/')) continue;
     const css = await readFile(url, 'utf8');
     const hardcoded = css.match(/(?:font-size|line-height):\s*\d+(?:\.\d+)?px/g) ?? [];
     assert.deepEqual(hardcoded, [], `${url.pathname} keeps hardcoded px text sizes: ${hardcoded.join(', ')}`);

@@ -5,7 +5,7 @@ import { register } from 'tsx/esm/api';
 
 register();
 
-const { highlightLines, shikiLanguageForFile } = await import('../src/viewer/preview/code-highlight.ts');
+const { highlightLines, shikiLanguageForFile } = await import('../src/components/content-viewers/preview/code-highlight.ts');
 
 test('shikiLanguageForFile maps extensions and skips markdown/plain files', () => {
   assert.equal(shikiLanguageForFile('src/index.ts'), 'typescript');

@@ -1,4 +1,5 @@
 import { BottomBar } from '../bottom-bar/index.js';
+import { Chatbox } from '../chatbox/index.js';
 import { LeftBar } from '../left-bar/index.js';
 import { RightBar } from '../right-bar/index.js';
 import { TopBar } from '../top-bar/index.js';
@@ -22,6 +23,7 @@ export function Shell() {
         <Workbench />
         <RightBar />
         <BottomBar />
+        <Chatbox />
       </div>
     </WorkspaceProvider>
   );

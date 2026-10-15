@@ -1,4 +1,4 @@
-import config from '../emo.json';
+import config from '../../emo.json';
 import type { UiDestination } from './ui-registry.js';
 
 type NavigationDestination = Exclude<UiDestination, 'settings'>;
