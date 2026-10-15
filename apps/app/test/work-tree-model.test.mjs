@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { register } from 'tsx/esm/api';
 
 register();
-const { folderPath, isFolderDescendant, reorderedSiblingIds, reorderedVisibleSiblingIds, visibleWorkTree } = await import('../src/modules/work-tree-model.ts');
+const { folderPath, isFolderDescendant, reorderedSiblingIds, reorderedVisibleSiblingIds, visibleWorkTree } = await import('../src/components/widgets/work-tree/work-tree-model.ts');
 
 const folders = [
   { id: 'a', name: '研发', parentId: null, sortOrder: 1 },

@@ -1,0 +1,10 @@
+/*
+ * 上栏外观。位置（grid-area）由 shell/layout.css 决定。
+ * 拖拽区（-webkit-app-region: drag）在无边框窗口改造时随 UI-03 一起加。
+ */
+
+.top-bar {
+  min-height: 40px;
+  background: var(--yp-surface);
+  border-bottom: 1px solid var(--yp-border-subtle);
+}

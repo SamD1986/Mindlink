@@ -9,11 +9,16 @@ tasks:
   # ───────────────────────── 阶段 1：地基 ─────────────────────────
   - id: UI-01
     title: "归档旧 UI 到 src/_legacy-ui 并隔离出构建"
-    status: pending
+    status: in_progress
     goal: "把旧 UI（shell/composition/modules 外壳/样式/调色板）整体移入归档区，保证随时可回看，且不影响构建与类型检查。"
     scope:
       in:
-        - "git mv 移入 src/_legacy-ui/：src/shell、src/composition、src/ui-registry.ts、src/modules、src/management.tsx、src/management.css、src/styles.css、src/muse-theme.css、src/emo.ts、themes/mindlink.css、themes/dark.css"
+        - "git mv 移入 src/_legacy-ui/：src/shell、src/composition、src/ui-registry.ts、src/modules（除下方例外）、src/shared/brand-showcase.tsx、src/management.tsx、src/management.css、src/styles.css、src/muse-theme.css、src/emo.ts"
+        - "实施修正：themes/mindlink.css、themes/dark.css **暂不归档** —— export-theme.mjs 读 mindlink.css、theme-contract 也守这两个调色板，收编留到 UI-14"
+        - "实施修正：src/modules/work-tree-model.ts **不归档**，移到 src/components/widgets/work-tree/（被 test/work-tree-model.test.mjs 覆盖的纯模型，属资产）"
+        - "实施修正：apps/app/emo.json **不删** —— apps/desktop 三处跨包消费它（main.ts 的窗口标题/应用名/图标、scripts/prepare-emo-icon.mjs、electron-builder.yml），删除必须与桌面壳协同，不能算 UI 一处的事"
+        - "实施修正：src/shared/brand-showcase.tsx 一并归档（唯一消费者是旧 shell，但它 import 已归档的 emo.ts，留着会断类型检查）"
+        - "实施修正：theme-contract.test.mjs 必须在本卡内重写（它硬编码了 muse-theme.css / modules/assistant-home.css 等已归档路径，归档即报错）—— 改为递归扫描活样式表，不再写死文件路径"
         - "src/_legacy-ui/README.md：写明这是旧 UI 快照、不参与构建、IDE 报红属正常"
         - "apps/app/tsconfig.json exclude src/_legacy-ui"
         - "归档只测旧结构关系的测试：test/composition-boundary.test.mjs、test/ui-registry.test.mjs"
@@ -31,12 +36,24 @@ tasks:
     touches:
       - "apps/app/src/_legacy-ui/**"
       - "apps/app/tsconfig.json"
-      - "apps/app/test/composition-boundary.test.mjs"
-      - "apps/app/test/ui-registry.test.mjs"
+      - "apps/app/test/_legacy/**"
+      - "apps/app/test/theme-contract.test.mjs"
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "git 识别为一批重命名（R），归档件历史保留，可随时 git show 查阅"
+        - "pnpm run typecheck:mindlink 全 8 包 Done；apps/app 归档后不再出现 ../emo.js 之类断链"
+        - "pnpm -F @mindlink-agent/app build 通过：162 模块 / 265 kB（旧 UI 已不在 bundle 内）"
+        - "新增 test/no-legacy-imports.test.mjs：断言活代码不引用归档区、且 tsconfig 已 exclude"
+        - "独立脚本核过活代码 113 个相对导入全部可解析（grep 会漏，见 pitfall）"
+      pitfalls:
+        - "按模块名 grep 找'谁引用了被搬走的文件'会漏：shared/brand-showcase.tsx 引用 ../emo.js 就是漏网的第一例。改用导入说明符逐条解析（脚本 check-imports.py）"
+      note: "未并入 main，按仓库口径不标 done"
 
   - id: UI-02
     title: "立起新骨架：shell 容器 + 上下左右四栏 + workbench 槽位"
-    status: pending
+    status: in_progress
     goal: "只搭结构，不含任何业务内容；四栏之间互不影响，窗口任意缩放不破版。"
     scope:
       in:
@@ -54,7 +71,19 @@ tasks:
       - {type: assertion, expect: "pnpm dev 起得来；四栏与中槽可见；窗口从最小尺寸拉到最大不出现重叠/裁切"}
     dependencies: []
     risk_level: L2
-    touches: ["apps/app/src/main.tsx", "apps/app/src/shell/**", "apps/app/src/{top,bottom,left,right}-bar/**", "apps/app/src/workbench/**", "apps/app/test/shell-layout.test.mjs", "apps/app/test/no-legacy-imports.test.mjs"]
+    touches: ["apps/app/src/main.tsx", "apps/app/src/shell/**", "apps/app/src/{top,bottom,left,right}-bar/**", "apps/app/src/workbench/**", "apps/app/src/shared/ui-destination.ts", "apps/app/test/shell-layout.test.mjs", "apps/app/test/no-legacy-imports.test.mjs"]
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "test/shell-layout.test.mjs 5 条断言全绿：舞台声明 grid-template-areas、四条栏与画布互不 import、各自持有样式表、画布背景走 --yp-canvas-grid、shell 挂齐五个槽位"
+        - "真机几何（Electron 探针，非浏览器模拟）：1426x838 / 1010x638 / 466x538 / 2546x1378 四种视口下，四栏四边贴齐、与画布无缝、无重叠、无滚动条，全部通过"
+        - "截图 1338x786 采样到 6 种颜色（含分隔线灰），确认是真绘制而非空页"
+        - "apps/app 测试 48 用例 / 47 通过 / 1 失败：失败项与改前基线同为 message-content（既有问题，与本次无关）"
+      pitfalls:
+        - "height:100vh 叠加 body 默认外边距会让页面高出视口 16px、冒出滚动条并把四栏整体内缩 8px —— 必须用 html/body/#root height:100% + margin:0 + overflow:hidden，并补 box-sizing:border-box"
+        - "Electron 探针会复用磁盘缓存的旧 index.html/CSS，量到的是修复前的假象 —— 探针必须用内存分区（partition 不带 persist: 前缀）并加缓存穿透参数，否则结论是假的"
+      note: "未并入 main，按仓库口径不标 done"
 
   - id: UI-03
     title: "窗口控制桥与无边框窗口（唯一改动桌面壳的一刀）"

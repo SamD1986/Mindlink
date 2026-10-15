@@ -1,0 +1,11 @@
+/*
+ * 下栏外观。位置（grid-area）由 shell/layout.css 决定。
+ * 占位阶段只画一条分隔线，不拦截指针事件。
+ */
+
+.bottom-bar {
+  min-height: 28px;
+  background: var(--yp-surface-subtle);
+  border-top: 1px solid var(--yp-border-subtle);
+  pointer-events: none;
+}

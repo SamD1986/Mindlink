@@ -1,0 +1,10 @@
+/*
+ * 左栏外观。位置（grid-area）由 shell/layout.css 决定。
+ * 宽度属窗口几何，不随界面字号缩放。
+ */
+
+.left-bar {
+  width: 56px;
+  background: var(--yp-sidebar-surface);
+  border-right: 1px solid var(--yp-border-subtle);
+}

@@ -1,0 +1,12 @@
+/*
+ * 画布外观。位置（grid-area）由 shell/layout.css 决定。
+ * 网格背景走主题 token（--yp-canvas-grid），不硬编码颜色或图样；
+ * token 为 none 时就是纯画布底色，等 UI-14 定网格样式。
+ */
+
+.workbench {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--yp-canvas-surface);
+  background-image: var(--yp-canvas-grid);
+}

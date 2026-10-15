@@ -1,0 +1,57 @@
+/*
+ * 舞台：四条栏与画布的位置关系。
+ * 栏自身只管外观（各自的 styles.css），位置一律由这里决定 —— 栏不知道自己在哪。
+ */
+
+/* 窗口盒：让舞台正好占满窗口，不留外边距、不产生滚动条。
+   注意用 height: 100% 而不是 100vh —— 100vh 会把 body 的默认外边距算进去，
+   结果页面比视口高出一截、冒出滚动条（Electron 探针实测：四栏整体内缩 8px）。 */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.shell {
+  display: grid;
+  grid-template-areas:
+    'top    top       top'
+    'left   workbench right'
+    'bottom bottom    bottom';
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  background: var(--yp-app-backdrop);
+  color: var(--yp-text);
+  font-family: var(--yp-font-family);
+  font-size: 1rem;
+}
+
+.top-bar {
+  grid-area: top;
+}
+
+.left-bar {
+  grid-area: left;
+}
+
+.workbench {
+  grid-area: workbench;
+}
+
+.right-bar {
+  grid-area: right;
+}
+
+.bottom-bar {
+  grid-area: bottom;
+}

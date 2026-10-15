@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { UiDestination } from '../ui-registry.js';
+import type { UiDestination } from './ui-destination.js';
 
 type AppView = UiDestination;
 
