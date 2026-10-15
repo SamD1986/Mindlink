@@ -1,0 +1,28 @@
+/*
+ * 组件 token：强调色、用户气泡、助手渐变与状态色
+ * 这些 token 定义了特定组件的视觉样式。
+ */
+
+:root {
+  --yp-accent: #51866a;
+  --yp-accent-ink: #183a2b;
+  --yp-accent-text: #4d7860;
+  --yp-accent-soft: #eaf6ee;
+  --yp-accent-fill: #e3f3e8;
+  --yp-accent-icon: #b9dfc4;
+  
+  --yp-success: #38a867;
+  --yp-redaction-active: #2d9362;
+  
+  --yp-user-bubble: #eaf4ff;
+  --yp-user-text: #1e2c3d;
+  --yp-on-accent: #fff;
+  
+  --yp-assistant-gradient-start: #c8ded2;
+  --yp-assistant-gradient-middle: #e7eee7;
+  --yp-assistant-gradient-end: #f7e6d3;
+  --yp-assistant-card-surface: rgb(255 255 255 / 76%);
+  
+  /* 浮层按钮等组件短名别名 */
+  --yp-accent-1: var(--yp-accent);
+}

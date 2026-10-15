@@ -1,0 +1,25 @@
+/*
+ * 页面 token：表面、文本与交互状态
+ * 这些 token 定义了页面内容区域的基础视觉层次。
+ * 
+ * 别名（--yp-surface-1/2、--yp-text-1）指向语义 token，不在组件里重复字面量。
+ */
+
+:root {
+  --yp-surface: #fff;
+  --yp-surface-subtle: #fcfcfc;
+  --yp-surface-tinted: #f5f7f5;
+  
+  --yp-text: #0f1115;
+  --yp-text-muted: #61666b;
+  --yp-text-action: #77828d;
+  --yp-text-subtle: #818b95;
+  --yp-text-tinted: #66746c;
+  
+  --yp-action-hover: #f0f3f6;
+  
+  /* 浮层短名别名 */
+  --yp-surface-1: var(--yp-surface);
+  --yp-surface-2: var(--yp-surface-subtle);
+  --yp-text-1: var(--yp-text);
+}

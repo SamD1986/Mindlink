@@ -1,0 +1,23 @@
+/*
+ * 骨架 token：应用外壳、侧边栏、画布表面与边框
+ * 这些 token 定义了界面的基本结构层次。
+ * 
+ * 网格线颜色走 --yp-canvas-grid-color，由主题覆盖（深色主题改成深灰）；
+ * --yp-canvas-grid 是整层网格的开关（none 可关掉）。
+ * workbench/styles.css 不得硬编码网格颜色。
+ */
+
+:root {
+  --yp-app-backdrop: #fff;
+  --yp-sidebar-surface: #fff;
+  --yp-canvas-surface: #fff;
+  --yp-canvas-grid: none;
+  --yp-canvas-grid-color: #e7ebef;
+  
+  --yp-border: #e7e9ed;
+  --yp-border-control: #e5e9ed;
+  --yp-border-subtle: #e7ebef;
+  --yp-border-tinted: #e0e6e2;
+  /* chatbox 等浮层用的短名别名；改一处即可，勿在组件里写死颜色。 */
+  --yp-border-1: var(--yp-border);
+}

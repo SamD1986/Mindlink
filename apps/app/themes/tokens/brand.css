@@ -1,0 +1,40 @@
+/*
+ * 品牌 token：品牌专用字体与墨色
+ * **这些 token 不可被主题覆盖** —— 它们定义了元朴思联的品牌标识。
+ * 
+ * 品牌专用字体（两枚都是 SIL OFL，授权文本随字体放在 assets/fonts/ 里）。
+ * 只用于"字标"这类显式品牌文字，**不要用于正文**。
+ */
+
+@font-face {
+  /* 内部族名其实是 "Cormorant Light"（上游拿它当 400 字重用），这里显式别名成我们
+     CSS 里用的 'Cormorant'，免得以后依赖上游的内部命名。 */
+  font-family: 'Cormorant';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/Cormorant-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  /* 思源宋体**子集**：只含「元朴思联账户登录」8 个字形（SIL OFL 1.1）。
+     改字标必须重新 subset（python -m fontTools.subset）并同步
+     src/shared/brand.ts 的 BRAND_SUBSET_GLYPHS —— 缺字形会静默回退到系统宋体，
+     品牌观感就悄悄变了。机核见 test/brand.test.mjs 与 test/tools/verify-brand-font.py。 */
+  font-family: 'Noto Serif SC Brand';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/NotoSerifSC-Brand.woff2') format('woff2');
+}
+
+:root {
+  /* 品牌字标字体（详见上方 @font-face）：
+     中文走思源宋体子集（元朴思联），拉丁走 Cormorant。 */
+  --yp-font-brand-song: 'Noto Serif SC Brand', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
+  --yp-font-brand-cormorant: 'Cormorant', 'Cormorant Garamond', 'Times New Roman', serif;
+  
+  /* 品牌字标墨色：深炭黑，与界面正文色分开（品牌有自己的"印刷黑"）。 */
+  --yp-brand-ink: #181818;
+  --yp-brand-text: #818b95;
+}

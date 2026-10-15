@@ -1,0 +1,10 @@
+/*
+ * 字体排印 token：字体族、界面缩放与内容字号
+ * 这些 token 定义了全局字体偏好，运行时由 font-preference 以内联样式覆盖。
+ */
+
+:root {
+  --yp-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --yp-font-scale-ui: 1;
+  --yp-font-size-content: 14px;
+}

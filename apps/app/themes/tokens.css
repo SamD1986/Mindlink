@@ -1,79 +1,23 @@
 /*
- * 品牌专用字体（两枚都是 SIL OFL，授权文本随字体放在 assets/fonts/ 里）。
- * 只用于"字标"这类显式品牌文字，**不要用于正文**。
+ * MindLink 主题 token 聚合层
+ * 
+ * 这个文件不再直接声明 token，而是聚合五个分组文件：
+ * - skeleton.css：骨架层（app-backdrop, sidebar-surface, canvas-surface, border）
+ * - page.css：页面层（surface, text, action）
+ * - component.css：组件层（accent, user-bubble, assistant-gradient）
+ * - brand.css：品牌层（brand-ink, font-brand-*，不可被主题覆盖）
+ * - typography.css：字体层（font-family, font-scale-ui, font-size-content）
+ * 
+ * 组件使用语义 token（var(--yp-*)），不直接使用调色板字面量。
  */
 
-@font-face {
-  /* 内部族名其实是 "Cormorant Light"（上游拿它当 400 字重用），这里显式别名成我们
-     CSS 里用的 'Cormorant'，免得以后依赖上游的内部命名。 */
-  font-family: 'Cormorant';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('./assets/fonts/Cormorant-Regular.woff2') format('woff2');
-}
+@import './tokens/skeleton.css';
+@import './tokens/page.css';
+@import './tokens/component.css';
+@import './tokens/brand.css';
+@import './tokens/typography.css';
 
-@font-face {
-  /* 思源宋体**子集**：只含「元朴思联账户登录」8 个字形（SIL OFL 1.1）。
-     改字标必须重新 subset（python -m fontTools.subset）并同步
-     src/shared/brand.ts 的 BRAND_SUBSET_GLYPHS —— 缺字形会静默回退到系统宋体，
-     品牌观感就悄悄变了。机核见 test/brand.test.mjs 与 test/tools/verify-brand-font.py。 */
-  font-family: 'Noto Serif SC Brand';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('./assets/fonts/NotoSerifSC-Brand.woff2') format('woff2');
-}
-
-/* MindLink's light palette. Components use semantic tokens, not palette literals. */
+/* 浅色主题配色方案声明 */
 :root {
   color-scheme: light;
-
-  --yp-app-backdrop: #fff;
-  --yp-sidebar-surface: #fff;
-  --yp-canvas-surface: #fff;
-  --yp-canvas-grid: none;
-  --yp-brand-text: #818b95;
-  --yp-surface: #fff;
-  --yp-surface-subtle: #fcfcfc;
-  --yp-surface-tinted: #f5f7f5;
-  --yp-text: #0f1115;
-  --yp-text-muted: #61666b;
-  --yp-text-action: #77828d;
-  --yp-text-subtle: #818b95;
-  --yp-text-tinted: #66746c;
-  --yp-border: #e7e9ed;
-  --yp-border-control: #e5e9ed;
-  --yp-border-subtle: #e7ebef;
-  --yp-border-tinted: #e0e6e2;
-  --yp-action-hover: #f0f3f6;
-
-  --yp-accent: #51866a;
-  --yp-accent-ink: #183a2b;
-
-  /* 品牌字标字体（详见 brand-fonts.css）：
-     中文走思源宋体子集（元朴思联），拉丁走 Cormorant。 */
-  --yp-font-brand-song: 'Noto Serif SC Brand', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
-  --yp-font-brand-cormorant: 'Cormorant', 'Cormorant Garamond', 'Times New Roman', serif;
-  /* 品牌字标墨色：深炭黑，与界面正文色分开（品牌有自己的"印刷黑"）。 */
-  --yp-brand-ink: #181818;
-  --yp-accent-text: #4d7860;
-  --yp-accent-soft: #eaf6ee;
-  --yp-accent-fill: #e3f3e8;
-  --yp-accent-icon: #b9dfc4;
-  --yp-success: #38a867;
-  --yp-redaction-active: #2d9362;
-
-  --yp-user-bubble: #eaf4ff;
-  --yp-user-text: #1e2c3d;
-  --yp-on-accent: #fff;
-  --yp-assistant-gradient-start: #c8ded2;
-  --yp-assistant-gradient-middle: #e7eee7;
-  --yp-assistant-gradient-end: #f7e6d3;
-  --yp-assistant-card-surface: rgb(255 255 255 / 76%);
-
-  /* 全局字体偏好：三套主题共享默认值，运行时由 font-preference 以内联样式覆盖。 */
-  --yp-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --yp-font-scale-ui: 1;
-  --yp-font-size-content: 14px;
 }
