@@ -1,9 +1,55 @@
 /*
  * 右栏外观。位置（grid-area）由 shell/layout.css 决定。
+ * 品牌（LOGO）贴在底部常驻，会话按钮在上方 —— 将来会话相关按钮都在这一列。
  */
 
 .right-bar {
   width: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
   background: var(--yp-sidebar-surface);
   border-left: 1px solid var(--yp-border-subtle);
+}
+
+.right-bar-button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--yp-text-muted);
+  cursor: pointer;
+}
+
+.right-bar-button:hover,
+.right-bar-button[aria-pressed='true'] {
+  background: var(--yp-action-hover);
+  color: var(--yp-text);
+}
+
+.right-bar-brand {
+  margin-top: auto;
+  padding-bottom: 4px;
+}
+
+.right-bar-brand img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+.right-bar-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

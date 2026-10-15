@@ -1,11 +1,20 @@
 /*
  * 下栏外观。位置（grid-area）由 shell/layout.css 决定。
- * 占位阶段只画一条分隔线，不拦截指针事件。
+ * 占位阶段只画一条分隔线，且不拦截指针事件（槽位内部可显式开启）。
  */
 
 .bottom-bar {
   min-height: 28px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
   background: var(--yp-surface-subtle);
   border-top: 1px solid var(--yp-border-subtle);
   pointer-events: none;
+}
+
+.bottom-bar-slot {
+  flex: 1;
+  min-width: 0;
+  pointer-events: auto;
 }

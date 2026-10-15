@@ -26,7 +26,7 @@ const require = createRequire(import.meta.url);
 const electron = require('electron');
 const desktopRoot = resolve(import.meta.dirname, '..');
 const appDist = resolve(desktopRoot, '../app/dist');
-const evidence = resolve(desktopRoot, '../../.tasks/ui-rebuild/evidence/UI-03');
+const evidence = resolve(desktopRoot, '../../.tasks/ui-rebuild/evidence/stage-1-shell');
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png' };
 
@@ -186,6 +186,44 @@ try {
   assert.ok(normal.outerWidth < normal.availWidth, '普通窗口的外框宽度不该等于屏幕可用宽度');
   record('普通窗口', `${normal.outerWidth}x${normal.outerHeight}，屏幕可用 ${normal.availWidth}x${normal.availHeight}`);
 
+  // 3.5) 四条栏的内容：左栏开标签、右栏开合对话、pin 落盘并在重载后仍在、LOGO 真的加载出来
+  await cdp.evaluate(`document.querySelector('[data-left-entry="wiki"]').click()`);
+  await eventually(
+    async () => cdp.evaluate(`Boolean(document.querySelector('[data-tab="wiki"][data-active="true"]'))`),
+    '左栏点入口没有开出标签',
+  );
+  await cdp.evaluate(`document.querySelector('[data-left-entry="skills"]').click()`);
+  const tabIds = await eventually(async () => {
+    const ids = await cdp.evaluate(`[...document.querySelectorAll('[data-tab]')].map((el) => el.getAttribute('data-tab'))`);
+    return ids.length === 2 ? ids : null;
+  }, '第二个入口没有加出第二个标签');
+  record('左栏开标签', `标签=${tabIds.join(' / ')}，点谁谁成为当前`);
+
+  const conversations = `document.querySelector('[data-right-action="conversations"]')`;
+  await cdp.evaluate(`${conversations}.click()`);
+  assert.equal(await cdp.evaluate(`${conversations}.getAttribute('aria-pressed')`), 'true');
+  await cdp.evaluate(`${conversations}.click()`);
+  assert.equal(await cdp.evaluate(`${conversations}.getAttribute('aria-pressed')`), 'false');
+  record('右栏会话按钮', 'aria-pressed 随开合切换');
+
+  const logo = await cdp.evaluate(`(() => {
+    const image = document.querySelector('[data-brand-logo] img');
+    return image ? { src: image.getAttribute('src'), loaded: image.complete && image.naturalWidth > 0 } : null;
+  })()`);
+  assert.ok(logo?.loaded, `常驻 LOGO 没有加载成功：${JSON.stringify(logo)}`);
+  assert.ok(await cdp.evaluate(`Boolean(document.querySelector('[data-bottom-slot]'))`), '下栏没有预留槽位');
+  record('常驻 LOGO 与下栏槽位', `logo=${logo.src}，naturalWidth>0`);
+
+  await cdp.evaluate(`document.querySelector('[data-left-action="pin-current"]').click()`);
+  const stored = await eventually(async () => cdp.evaluate(`localStorage.getItem('mindlink.pinned-layouts')`), 'pin 没有落盘');
+  await cdp.send('Page.reload');
+  await eventually(async () => cdp.evaluate(`Boolean(window.mindlink?.isWindowMaximized)`), '重载后 preload 没回来');
+  const pinnedAfterReload = await eventually(
+    async () => cdp.evaluate(`document.querySelectorAll('[data-left-pin]').length`),
+    '重载后左栏的 pin 丢了',
+  );
+  record('pin 持久化', `localStorage=${stored}，重载后 pin 数=${pinnedAfterReload}`);
+
   // 4) 点最大化 → 外框铺满屏幕可用区，且按钮图标跟着换（证明事件也通了）
   await cdp.click('toggle-maximize');
   const maximized = await eventually(async () => {
@@ -222,8 +260,8 @@ try {
   await cdp.send('Page.enable');
   const shot = await cdp.send('Page.captureScreenshot', { format: 'png' });
   await mkdir(evidence, { recursive: true });
-  await writeFile(join(evidence, 'ui-03-window-controls.png'), Buffer.from(shot.data, 'base64'));
-  record('截图', join(evidence, 'ui-03-window-controls.png'));
+  await writeFile(join(evidence, 'shell-window.png'), Buffer.from(shot.data, 'base64'));
+  record('截图', join(evidence, 'shell-window.png'));
 
   // 8) 点关闭 → 应用进程退出
   await cdp.click('close');
@@ -231,8 +269,8 @@ try {
   record('关闭', `应用已退出（exitCode=${child.exitCode}）`);
 
   await mkdir(evidence, { recursive: true });
-  await writeFile(join(evidence, 'ui-03-results.md'),
-    `# UI-03 真机探针结果\n\n命令：\`node apps/desktop/test/ui-rebuild-shell-probe.mjs\`\n\n`
+  await writeFile(join(evidence, 'results.md'),
+    `# 阶段 1（UI-03 ~ UI-07）真机探针结果\n\n命令：\`node apps/desktop/test/ui-rebuild-shell-probe.mjs\`\n\n`
     + `环境：真实 Electron（apps/desktop/dist/main.cjs）+ 构建产物 apps/app/dist，\n`
     + `临时 MINDLINK_HOME 与独立 --user-data-dir。\n\n`
     + results.map((line) => `- ${line}`).join('\n') + '\n');

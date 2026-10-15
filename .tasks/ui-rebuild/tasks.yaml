@@ -150,7 +150,7 @@ tasks:
 
   - id: UI-05
     title: "左栏内容：Wiki / 技能与工具 / 设置 + pin 区"
-    status: pending
+    status: in_progress
     goal: "左栏放固定入口与用户 pin 的 dashboard 入口；点击切换的是 workbench 布局，不是整页。"
     scope:
       in: ["src/left-bar/：固定入口按钮、pin 区渲染、pin 的增删排序", "pin/布局的存储接口（渲染层只调接口，不直接读写 localStorage）"]
@@ -162,11 +162,26 @@ tasks:
       - {type: assertion, expect: "pin 一条后重启仍存在；点击入口切换的是布局标识（可在 UI-09 接入后验证）"}
     dependencies: ["UI-02"]
     risk_level: L2
-    touches: ["apps/app/src/left-bar/**", "apps/app/test/left-bar.test.mjs"]
+    touches: ["apps/app/src/left-bar/**", "apps/app/src/shell/workspace.tsx", "apps/app/src/shell/workspace-model.ts", "apps/app/test/left-bar.test.mjs", "apps/app/test/workspace.test.mjs"]
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "左栏三项固定入口（wiki / skills / settings）+ pin 区 + 「固定当前布局」；pin 支持增、删、上移、下移"
+        - "apps/app/test/left-bar.test.mjs 4 条 + workspace.test.mjs 7 条全绿（含布局去重/关当前标签取右邻再取左邻、pin 越界不动、存储损坏退化成空列表）"
+        - "真机探针：点左栏 wiki/skills → 上栏真的开出两个标签且点谁谁成为当前；pin 落盘 localStorage=[\"skills\"]，**重载后 pin 区仍在（pin 数=1）**"
+        - "机核守住'组件不碰存储'：断言 index.tsx 里不出现 localStorage，存储只实现在 entries.ts 的接缝里"
+      decisions:
+        - "pin/布局是**用户资产**，最终要跨设备，因此存储做成接缝 `LayoutPinStore`；当前是 localStorage 过渡实现，UI-09/UI-17 换成经桥走 Runtime（MINDLINK_HOME）时只替换实现，组件与模型不动"
+        - "跨栏协作（左栏开标签）走 shell 的窗口状态通道，左栏不 import 上栏 —— 为此把标签模型从 top-bar 迁到 shell/workspace-model.ts"
+      known_gaps:
+        - "重载后 pin 项的显示名会回落到布局 id（如 'skills'），因为布局标题要等 UI-09 的布局登记表提供；UI-09 接入时一并解决"
+        - "pin 项统一用书签图标，尚未按布局各自的图标显示（同 UI-09）"
+      note: "未并入 main"
 
   - id: UI-06
     title: "右栏内容：会话相关按钮 + 常驻 LOGO"
-    status: pending
+    status: in_progress
     goal: "右栏承载会话入口与常驻品牌位。"
     scope:
       in: ["src/right-bar/：会话按钮（开合 chatbox、打开会话列表的入口位）、常驻 LOGO 区"]
@@ -178,11 +193,19 @@ tasks:
       - {type: assertion, expect: "LOGO 常驻可见；会话按钮可触发（事件先打日志，UI-11 接入后生效）"}
     dependencies: ["UI-02"]
     risk_level: L1
-    touches: ["apps/app/src/right-bar/**"]
+    touches: ["apps/app/src/right-bar/**", "apps/app/test/right-bar.test.mjs"]
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "会话按钮经 shell 窗口状态开合对话浮层（aria-pressed 反映 chatboxOpen，浮层本体留给 UI-11）"
+        - "常驻 LOGO 用品牌印章图（themes/assets/mindlink-seal.png），真机探针断言 img.naturalWidth>0 —— 即真的加载出来了，不是空图框"
+        - "apps/app/test/right-bar.test.mjs 3 条全绿（含'LOGO 不随布局/主题消失'与'右栏不 import 别的栏'）"
+      note: "未并入 main；品牌名与图标目前仍从 emo.json 链路来，UI-06 只保证 LOGO 常驻，品牌配置收编见 UI-14/UI-15"
 
   - id: UI-07
     title: "下栏占位"
-    status: pending
+    status: in_progress
     goal: "预留底部栏位，参与布局但不吞事件。"
     scope:
       in: ["src/bottom-bar/：占位块 + 未来扩展位注释"]
@@ -193,7 +216,14 @@ tasks:
       - {type: assertion, expect: "占位栏可见；画布区域不被遮挡；点击画布不被下栏吞掉"}
     dependencies: ["UI-02"]
     risk_level: L1
-    touches: ["apps/app/src/bottom-bar/**"]
+    touches: ["apps/app/src/bottom-bar/**", "apps/app/test/right-bar.test.mjs"]
+    result:
+      branch: "ui/rebuild"
+      verified_at: "2026-10-14"
+      evidence:
+        - "下栏保留槽位 data-bottom-slot；整条栏 pointer-events: none、槽位内 auto —— 空着时不挡画布，将来放状态/进度条又能点"
+        - "机核断言这两条 CSS 规矩，防止后续把下栏改成会吞事件的高条（right-bar.test.mjs 第 3 条）"
+      note: "未并入 main；下栏的功能仍是占位，具体放什么等需求"
 
   # ───────────────────── 阶段 2：workbench 画布 ─────────────────────
   - id: UI-08
