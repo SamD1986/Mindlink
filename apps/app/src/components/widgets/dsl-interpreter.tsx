@@ -197,13 +197,15 @@ function renderAtomic(atomic: AtomicProps | string, index: number): ReactNode {
 
 /**
  * 解释并渲染 Widget DSL
- * 
+ *
+ * @param allowedWidgetIds 额外放行的 widget id 集合（用户自建 widget 不在内置注册表里，
+ *   由调用方显式放行它自己的 id）。不传则只认内置注册表。
  * @throws {DSLInterpreterError} 当 DSL 格式无效时
  */
-export function interpretDSL(dsl: WidgetDSL): ReactNode {
-  // 1. 校验 widget 是否注册
-  const registration = WIDGET_REGISTRY.get(dsl.widgetId);
-  if (!registration) {
+export function interpretDSL(dsl: WidgetDSL, allowedWidgetIds?: ReadonlySet<string>): ReactNode {
+  // 1. 校验 widget 是否被放行（内置注册表 ∪ 调用方显式放行的 id）
+  const allowed = WIDGET_REGISTRY.has(dsl.widgetId) || (allowedWidgetIds?.has(dsl.widgetId) ?? false);
+  if (!allowed) {
     throw new DSLInterpreterError(`Unknown widget: ${dsl.widgetId}`, [
       { type: 'unknown-widget', widgetId: dsl.widgetId },
     ]);
@@ -224,6 +226,16 @@ export function interpretDSL(dsl: WidgetDSL): ReactNode {
       {renderAtomic(dsl.root, 0)}
     </div>
   );
+}
+
+/**
+ * 放行并渲染一份**用户自建** widget 的 DSL。
+ *
+ * 只放行它自己的 id —— 这是"数据不是代码"的落点：用户定义带来的只是一个 id 与一棵原子树，
+ * 没有可执行钩子，也没有第二个执行环境。
+ */
+export function interpretUserWidgetDSL(dsl: WidgetDSL): ReactNode {
+  return interpretDSL(dsl, new Set([dsl.widgetId]));
 }
 
 /**

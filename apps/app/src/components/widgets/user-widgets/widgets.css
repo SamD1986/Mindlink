@@ -1,0 +1,217 @@
+/*
+ * 自建 widget 的外观：创作台（studio）+ 画布宿主（host）。
+ * 颜色与字号全走主题 token / rem；组件里不出现颜色字面量。
+ * 位置由 shell/layout.css 决定，这里只管画布内部的绝对定位。
+ */
+
+/* ── 画布宿主：把用户 widget 渲染进一块面板 ── */
+.workbench-user-widget {
+  position: absolute;
+  inset: 1.5rem;
+  z-index: 2;
+  overflow: auto;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--yp-border-subtle);
+  border-radius: 12px;
+  background: var(--yp-surface);
+  color: var(--yp-text);
+}
+
+.workbench-user-widget-note {
+  margin: 0;
+  color: var(--yp-text-muted);
+}
+
+/* ── 创作台 ── */
+.widget-studio {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: var(--yp-text);
+}
+
+.widget-studio-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.widget-studio-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.widget-studio-hint {
+  margin: 0;
+  color: var(--yp-text-muted);
+  font-size: 0.875rem;
+}
+
+.widget-studio-section-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.widget-studio-create,
+.widget-studio-library,
+.widget-studio-io {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--yp-border-subtle);
+  border-radius: 12px;
+  background: var(--yp-surface);
+}
+
+.widget-studio-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  color: var(--yp-text-muted);
+  font-size: 0.875rem;
+}
+
+.widget-studio-dsl,
+.widget-studio-import {
+  width: 100%;
+  min-height: 8rem;
+  box-sizing: border-box;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--yp-border-subtle);
+  border-radius: 8px;
+  background: var(--yp-surface-subtle);
+  color: var(--yp-text);
+  font-family: var(--yp-font-family);
+  font-size: 0.8125rem;
+  resize: vertical;
+}
+
+.widget-studio-name {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--yp-border-subtle);
+  border-radius: 8px;
+  background: var(--yp-surface-subtle);
+  color: var(--yp-text);
+  font-size: 0.875rem;
+}
+
+.widget-studio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.widget-studio-actions button {
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--yp-border-subtle);
+  border-radius: 8px;
+  background: var(--yp-surface-subtle);
+  color: var(--yp-text);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.widget-studio-actions button:hover:not(:disabled) {
+  background: var(--yp-action-hover);
+}
+
+.widget-studio-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.widget-studio-errors {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--yp-text);
+  font-size: 0.8125rem;
+}
+
+.widget-studio-notice {
+  margin: 0;
+  color: var(--yp-accent);
+  font-size: 0.8125rem;
+}
+
+.widget-studio-preview {
+  padding: 0.75rem;
+  border: 1px dashed var(--yp-border-subtle);
+  border-radius: 8px;
+}
+
+.widget-studio-preview-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--yp-text-muted);
+  font-size: 0.75rem;
+}
+
+.widget-studio-empty {
+  margin: 0;
+  color: var(--yp-text-muted);
+  font-size: 0.8125rem;
+}
+
+.widget-studio-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.widget-studio-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--yp-border-subtle);
+  border-radius: 8px;
+  background: var(--yp-surface-subtle);
+}
+
+.widget-studio-item-name {
+  font-size: 0.875rem;
+}
+
+.widget-studio-item-version {
+  color: var(--yp-text-muted);
+  font-size: 0.75rem;
+}
+
+.widget-studio-item-actions {
+  display: flex;
+  gap: 0.375rem;
+  margin-left: auto;
+}
+
+.widget-studio-item-actions button {
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--yp-border-subtle);
+  border-radius: 6px;
+  background: var(--yp-surface);
+  color: var(--yp-text);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.widget-studio-item-actions button:hover {
+  background: var(--yp-action-hover);
+}
+
+.widget-studio-export {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: var(--yp-surface-subtle);
+  color: var(--yp-text-muted);
+  font-size: 0.75rem;
+  overflow: auto;
+}

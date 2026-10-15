@@ -96,7 +96,13 @@
   cursor: default;
 }
 
-.left-bar-pin-current {
+/* 底部动作区（打开自建 widget 创作台）：贴住左栏底部 */
+.left-bar-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
   margin-top: auto;
 }
 
