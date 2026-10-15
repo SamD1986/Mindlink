@@ -140,6 +140,31 @@ function ensureImport(file) {
   return true;
 }
 
+/** Collect the t() keys that live code actually references (used by --prune).
+ *  Mirrors test/languages.test.mjs: a Han string literal used as the first argument
+ *  of a t(...) call. Files skipped there (shared/brand.ts) are skipped here too. */
+function collectUsedKeys() {
+  const used = new Set();
+  for (const file of walk(SRC)) {
+    if (SKIP_FILES.has(file.replace(/\\/g, '/'))) continue;
+    const text = readFileSync(file, 'utf8');
+    const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+    const visit = (node) => {
+      if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+        const parent = node.parent;
+        if (HAN.test(node.text) && parent && ts.isCallExpression(parent)
+          && parent.arguments[0] === node && parent.expression.getText() === 't') used.add(node.text);
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sf);
+  }
+  return used;
+}
+
+const prune = process.argv.includes('--prune');
+const usedKeys = prune ? collectUsedKeys() : new Set();
+
 const files = walk(SRC).filter((f) => !SKIP_FILES.has(f.replace(/\\/g, '/')));
 let total = 0;
 let touched = 0;
@@ -154,10 +179,11 @@ console.log(`改文件: ${touched}  替换点: ${total}  补 import: ${imported}
 
 // 语言包由抽取结果生成：键 = 中文原串（消息即键），value 与 key 相同。
 const existing = existsSync(`${SRC}/languages/zh-CN.json`) ? JSON.parse(readFileSync(`${SRC}/languages/zh-CN.json`, 'utf8')) : {};
-const pack = { ...existing };
-for (const key of keys) pack[key] = key; // 并集：重跑不丢上一轮已抽取的键
+const pack = prune ? {} : { ...existing };
+for (const key of (prune ? usedKeys : keys)) pack[key] = key; // 并集：重跑不丢上一轮已抽取的键
 const ordered = {};
 for (const key of Object.keys(pack).sort((a, b) => a.localeCompare(b, 'zh'))) ordered[key] = key;
 writeFileSync(`${SRC}/languages/zh-CN.json`, `${JSON.stringify(ordered, null, 2)}\n`, 'utf8');
 writeFileSync('C:/Users/Blues/AppData/Local/Temp/l10n-keys.json', JSON.stringify([...keys].sort((a, b) => a.localeCompare(b, 'zh')), null, 2), 'utf8');
 console.log(`语言包已生成: languages/zh-CN.json（本轮 ${keys.size} 条，累计 ${Object.keys(ordered).length} 条）`);
+if (prune) console.log(`l10n prune: kept ${Object.keys(ordered).length} referenced keys, dropped ${Object.keys(existing).length - Object.keys(ordered).length} unreferenced keys`);

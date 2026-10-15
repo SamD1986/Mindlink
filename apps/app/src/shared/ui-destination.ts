@@ -5,4 +5,4 @@
  * （如 `shared/app-icon.tsx`）需要这个联合类型，因此单独留在 `shared/`。
  * 左栏的入口清单会在 UI-05 重新定义，届时以那里为准，本文件随之下线。
  */
-export type UiDestination = 'work' | 'assistant' | 'skills' | 'schedules' | 'knowledge' | 'settings';
+export type UiDestination = 'work' | 'skills' | 'schedules' | 'knowledge' | 'settings';

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ConnectionManagement } from '../management.js';
 import { ModelSettingsPanel } from './model-settings.js';
 import { HotkeySettingsPanel } from './hotkey-settings.js';
@@ -37,43 +36,6 @@ const FONT_FAMILY_OPTIONS: Array<{ id: FontFamilyPreset; label: string }> = [
 
 function formatError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-function AssistantLinkSettings({ active }: { active: boolean }) {
-  const desktop = window.mindlink;
-  const query = useQuery({ queryKey: ['assistant', 'link'], queryFn: () => desktop!.getAssistantLink(), enabled: active && Boolean(desktop) });
-  const contacts = useQuery({ queryKey: ['assistant', 'contacts'], queryFn: () => desktop!.listSchedulePrivateContacts(), enabled: active && Boolean(desktop) });
-  const client = useQueryClient();
-  const [selectedContact, setSelectedContact] = useState('');
-  const [operationError, setOperationError] = useState('');
-  const bind = useMutation({ mutationFn: (contactId: string) => desktop!.bindAssistantContact(contactId),
-    onSuccess: () => { setOperationError(''); void client.invalidateQueries({ queryKey: ['assistant'] }); },
-    onError: (error) => setOperationError(formatError(error)),
-  });
-  const unbind = useMutation({ mutationFn: () => desktop!.unbindAssistantContact(),
-    onSuccess: () => { setOperationError(''); void client.invalidateQueries({ queryKey: ['assistant'] }); },
-    onError: (error) => setOperationError(formatError(error)),
-  });
-  return <section className="assistant-link-settings" aria-label={t("助理企业微信会话绑定")}>
-    <h2>{t("助理会话")}</h2>
-    <p>{t("绑定一位已配对联系人后，桌面助理接续该私聊历史。桌面发出的消息与回复也会投递到该企业微信私聊。")}</p>
-    {!desktop && <p>{t("请在桌面应用中管理跨渠道会话。")}</p>}
-    {query.isLoading && <p>{t("正在读取绑定状态…")}</p>}
-    {query.error && <p role="alert">{formatError(query.error)}</p>}
-    {query.data?.linked ? <div className="assistant-link-row"><span>{t("已绑定 ·")} {query.data.connectionId} {t("· 联系人")} {query.data.contactId}</span>
-      <button type="button" disabled={unbind.isPending} onClick={() => unbind.mutate()}>{unbind.isPending ? t("解除中…") : t("解除绑定")}</button></div>
-      : desktop && <div className="assistant-link-row"><label htmlFor="assistant-contact">{t("选择已配对联系人")}</label>
-        <select id="assistant-contact" value={selectedContact} onChange={(event) => setSelectedContact(event.target.value)}>
-          <option value="">{t("请选择")}</option>
-          {contacts.data?.map((contact) => <option key={contact.contactId} value={contact.contactId}>
-            {contact.connectionId} {t("· 最近消息")} {new Date(contact.lastSeenAt).toLocaleString('zh-CN')}
-          </option>)}
-        </select><button type="button" disabled={!selectedContact || bind.isPending} onClick={() => bind.mutate(selectedContact)}>
-          {bind.isPending ? t("绑定中…") : t("绑定助理会话")}</button></div>}
-    {contacts.error && <p role="alert">{t("联系人读取失败：")}{formatError(contacts.error)}</p>}
-    {operationError && <p role="alert">{operationError}</p>}
-    <p className="assistant-link-note">{t("绑定时以企业微信原会话继续；桌面原会话保留，解除后恢复。正在运行的会话不能切换绑定。")}</p>
-  </section>;
 }
 
 export function SettingsPage({ active, configRoot }: { active: boolean; configRoot: string }) {
@@ -135,7 +97,6 @@ export function SettingsPage({ active, configRoot }: { active: boolean; configRo
         <p>{t("当前配置目录")}</p><code>{configRoot}</code>
         <p>{t("运行状态、更新与权限仍由桌面应用和 Runtime 管理。")}</p></div>
       <div className={`settings-connections ${section === 'connections' ? '' : 'view-hidden'}`} aria-hidden={section !== 'connections'}>
-        <AssistantLinkSettings active={active && section === 'connections'} />
         <ConnectionManagement active={active && section === 'connections'} />
       </div>
       <div className={`settings-models-view ${section === 'models' ? '' : 'view-hidden'}`} aria-hidden={section !== 'models'}>

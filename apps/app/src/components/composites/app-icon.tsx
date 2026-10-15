@@ -3,7 +3,7 @@ import type { UiDestination } from '../../shared/ui-destination.js';
 
 type AppView = UiDestination;
 
-type IconName = AppView | 'menu' | 'panel' | 'panel-left' | 'expand' | 'collapse' | 'send' | 'pause' | 'copy' | 'check' | 'bookmark' | 'bookmark-filled' | 'knowledge-filled' | 'folder' | 'folder-plus' | 'file' | 'image' | 'globe' | 'chevron' | 'plus' | 'shield' | 'shield-filled' | 'lock' | 'unlock' | 'edit' | 'refresh' | 'locate' | 'briefcase' | 'code' | 'eye' | 'external' | 'lightning' | 'archive' | 'review' | 'tag' | 'arrow-up' | 'arrow-down' | 'layers';
+type IconName = AppView | 'assistant' | 'menu' | 'panel' | 'panel-left' | 'expand' | 'collapse' | 'send' | 'pause' | 'copy' | 'check' | 'bookmark' | 'bookmark-filled' | 'knowledge-filled' | 'folder' | 'folder-plus' | 'file' | 'image' | 'globe' | 'chevron' | 'plus' | 'shield' | 'shield-filled' | 'lock' | 'unlock' | 'edit' | 'refresh' | 'locate' | 'briefcase' | 'code' | 'eye' | 'external' | 'lightning' | 'archive' | 'review' | 'tag' | 'arrow-up' | 'arrow-down' | 'layers';
 
 export function AppIcon({ name }: { name: IconName }) {  const paths = {
     work: <path d="M20 11.5c0 4.2-3.8 7.5-8.5 7.5-1.4 0-2.7-.3-3.8-.8L3 20l1.4-4.1A7.2 7.2 0 0 1 3 11.5C3 7.4 6.8 4 11.5 4S20 7.4 20 11.5Z" />,

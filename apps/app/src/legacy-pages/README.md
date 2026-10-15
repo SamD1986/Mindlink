@@ -7,7 +7,7 @@
 
 | 调用方（活代码） | 用到的毕业件 |
 |---|---|
-| `chatbox/chat.tsx` | `emo.ts`、`modules/assistant-home.tsx`、`modules/work-tree.tsx` |
+| `chatbox/chat.tsx` | `emo.ts`、`modules/work-tree.tsx` |
 | `components/widgets/settings/` | `modules/settings.tsx`（连带 model-settings / hotkey-settings / tailscale-settings） |
 | `components/widgets/skills/` | `modules/skills.tsx` |
 | `components/widgets/scheduled-tasks/` | `management.tsx` |
