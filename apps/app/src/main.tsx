@@ -7,6 +7,7 @@ import { applyFontPreference, readFontPreference } from './shared/font-preferenc
 import { applyPlatformAttribute } from './shared/platform.js';
 import { applyThemePreference, readThemePreference } from './shared/theme-preference.js';
 import '../themes/tokens.css';
+import '../themes/brand-fonts.css';
 
 // 主题与字体偏好仍在启动时应用一次：界面字号经 --yp-font-scale-ui 缩放根字号，
 // 因此网格与栏尺寸都不许按 px 写死（见 .tasks/ui-rebuild/tasks.yaml UI-08）。

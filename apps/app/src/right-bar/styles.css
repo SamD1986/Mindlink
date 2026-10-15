@@ -1,6 +1,8 @@
 /*
  * 右栏外观。位置（grid-area）由 shell/layout.css 决定。
- * 品牌（LOGO）贴在底部常驻，会话按钮在上方 —— 将来会话相关按钮都在这一列。
+ *
+ * 品牌字标竖排贴底（中文 → 英文 → 印章），做法沿用 yuanpu2.0 欢迎页右缘：
+ * writing-mode 竖排、字距拉开、品牌字体、品牌墨色；印章在输入框表面基线之上。
  */
 
 .right-bar {
@@ -34,12 +36,34 @@
 
 .right-bar-brand {
   margin-top: auto;
-  padding-bottom: 4px;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+/* 竖排的两行字标：一个汉字宽（text-sm 级），字距拉开 —— 与源实现一致 */
+.right-bar-brand-line {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--yp-brand-ink);
+  writing-mode: vertical-rl;
+}
+
+.right-bar-brand-zh {
+  font-family: var(--yp-font-brand-song);
+}
+
+.right-bar-brand-en {
+  font-family: var(--yp-font-brand-cormorant);
 }
 
 .right-bar-brand img {
-  width: 28px;
-  height: 28px;
+  width: 14px;
+  height: auto;
   object-fit: contain;
   display: block;
 }

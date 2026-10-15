@@ -1,0 +1,26 @@
+/*
+ * 品牌字体的字面定义。字体文件在 ../assets/fonts/（OFL 授权文本随文件分发）。
+ *
+ * - Cormorant：品牌拉丁字标（SIL OFL，随包分发）。
+ * - Noto Serif SC Brand：思源宋体**子集**，只含「元录思户朴登联账」8 个字形
+ *   （SIL OFL 1.1）—— 只用于品牌字标，禁止当正文用；改品牌文案要重新 subset。
+ *
+ * 这条声明必须与 themes/tokens.css 里的 --font-brand-* token 同步：
+ * theme-contract 机核会校验被引用的 token 都已声明。
+ */
+
+@font-face {
+  font-family: 'Cormorant';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/Cormorant-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Noto Serif SC Brand';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/NotoSerifSC-Brand.woff2') format('woff2');
+}

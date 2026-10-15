@@ -8,7 +8,7 @@ test('the right bar carries the conversation button and the permanent logo', asy
   const source = await read('../src/right-bar/index.tsx');
   assert.ok(source.includes('data-right-action="conversations"'), '缺少会话按钮');
   assert.ok(source.includes('data-brand-logo'), '缺少常驻 LOGO 槽位');
-  assert.ok(/<img[^>]*src=\{mindlinkSeal\}/.test(source), 'LOGO 没有真的渲染出来');
+  assert.ok(/<img[^>]*src=\{yuanpuSeal\}/.test(source), 'LOGO 没有真的渲染出来');
   assert.ok(!/data-brand-logo[^>]*\{\s*state\./.test(source), 'LOGO 不该随布局/主题消失');
 });
 

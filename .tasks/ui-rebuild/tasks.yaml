@@ -205,8 +205,14 @@ tasks:
       evidence:
         - "会话按钮经 shell 窗口状态开合对话浮层（aria-pressed 反映 chatboxOpen，浮层本体留给 UI-11）"
         - "常驻 LOGO 用品牌印章图（themes/assets/mindlink-seal.png），真机探针断言 img.naturalWidth>0 —— 即真的加载出来了，不是空图框"
-        - "apps/app/test/right-bar.test.mjs 3 条全绿（含'LOGO 不随布局/主题消失'与'右栏不 import 别的栏'）"
-      note: "未并入 main；品牌名与图标目前仍从 emo.json 链路来，UI-06 只保证 LOGO 常驻，品牌配置收编见 UI-14/UI-15"
+        - "2026-10-15 品牌层落地：右栏从'单印章'升级为 yuanpu2.0 同款**竖排品牌字标**（中文元朴思联 → 英文 MindLink → 印章）；真机实测中文走 Noto Serif SC Brand、英文走 Cormorant、writing-mode=vertical-rl、墨色 #181818、印章 154x229；会话按钮 DOM 复核在右栏顶部 40x40"
+      brand_layer:
+        - "品牌常量 src/shared/brand.ts（SLOGAN / SLOGAN_ZH / SLOGAN_EN），品牌串**不进语言包**（brand.test.mjs 守着这条）"
+        - "字体入 themes/assets/fonts/：Cormorant-Regular.woff2（35KB）、NotoSerifSC-Brand.woff2（4.2KB，仅 8 个品牌字形）、NotoSerifSC-OFL.txt（SIL OFL 授权随字体分发，缺了即违约）；@font-face 在 themes/brand-fonts.css"
+        - "新增 token：--yp-font-brand-song / --yp-font-brand-cormorant / --yp-brand-ink（theme-contract 机核已覆盖）"
+        - "印章换用 yuanpu2.0 的竖版 seal.png（154x229 RGBA），旧的 mindlink-seal.png 保留给归档区"
+        - "机核 brand.test.mjs 守三条：品牌串不进语言包、字体与 OFL 文本齐备、子集缺字即红（改了字标必须 fontTools.subset 重新生成子集）"
+      note: "未并入 main；欢迎页正中那块'印章+大字标'空态（intro.tsx 的 fit-text）仍待 UI-11/UI-13 一起做"
 
   - id: UI-07
     title: "下栏占位"

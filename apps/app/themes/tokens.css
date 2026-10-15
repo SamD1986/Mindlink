@@ -1,3 +1,30 @@
+/*
+ * 品牌专用字体（两枚都是 SIL OFL，授权文本随字体放在 assets/fonts/ 里）。
+ * 只用于"字标"这类显式品牌文字，**不要用于正文**。
+ */
+
+@font-face {
+  /* 内部族名其实是 "Cormorant Light"（上游拿它当 400 字重用），这里显式别名成我们
+     CSS 里用的 'Cormorant'，免得以后依赖上游的内部命名。 */
+  font-family: 'Cormorant';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/Cormorant-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  /* 思源宋体**子集**：只含「元朴思联账户登录」8 个字形（SIL OFL 1.1）。
+     改字标必须重新 subset（python -m fontTools.subset）并同步
+     src/shared/brand.ts 的 BRAND_SUBSET_GLYPHS —— 缺字形会静默回退到系统宋体，
+     品牌观感就悄悄变了。机核见 test/brand.test.mjs 与 test/tools/verify-brand-font.py。 */
+  font-family: 'Noto Serif SC Brand';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/NotoSerifSC-Brand.woff2') format('woff2');
+}
+
 /* MindLink's light palette. Components use semantic tokens, not palette literals. */
 :root {
   color-scheme: light;
@@ -23,6 +50,13 @@
 
   --yp-accent: #51866a;
   --yp-accent-ink: #183a2b;
+
+  /* 品牌字标字体（详见 brand-fonts.css）：
+     中文走思源宋体子集（元朴思联），拉丁走 Cormorant。 */
+  --yp-font-brand-song: 'Noto Serif SC Brand', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
+  --yp-font-brand-cormorant: 'Cormorant', 'Cormorant Garamond', 'Times New Roman', serif;
+  /* 品牌字标墨色：深炭黑，与界面正文色分开（品牌有自己的"印刷黑"）。 */
+  --yp-brand-ink: #181818;
   --yp-accent-text: #4d7860;
   --yp-accent-soft: #eaf6ee;
   --yp-accent-fill: #e3f3e8;
@@ -42,4 +76,10 @@
   --yp-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --yp-font-scale-ui: 1;
   --yp-font-size-content: 14px;
+
+  /* 品牌专用字体族与墨色：只给显式品牌文字用（字标、竖排 slogan、登录标题）。
+     字体由上面的 @font-face 声明；子集覆盖范围见 src/shared/brand.ts。 */
+  --yp-font-brand-song: 'Noto Serif SC Brand', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
+  --yp-font-brand-cormorant: 'Cormorant', 'Cormorant Garamond', 'Times New Roman', serif;
+  --yp-brand-ink: #181818;
 }
