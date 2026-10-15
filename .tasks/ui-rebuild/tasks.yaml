@@ -515,7 +515,7 @@ tasks:
 
   - id: UI-17
     title: "用户自建 widget 闭环：创作 → 校验 → 保存 → pin"
-    status: pending
+    status: done
     goal: "用户用原子/组合件创作自己的 dashboard 页并固定到左栏。"
     scope:
       in: ["创作流程（LLM 产出 JSON → 校验 → 预览 → 保存）、保存位置（用户资产）、pin 到左栏（对接 UI-05）"]
@@ -527,6 +527,25 @@ tasks:
     dependencies: ["UI-16", "UI-05"]
     risk_level: L3
     touches: ["apps/app/src/components/widgets/**", "apps/app/src/left-bar/**", "apps/app/src/workbench/**"]
+
+    result:
+      branch: "ui/user-widgets"
+      verified_at: "2026-10-15"
+      evidence:
+        - "新增 user-widget-format.ts（整份校验：白名单原子、拒函数/对象 props、节点数≤200、深度≤24、占用内置 id 拒收）、user-widget-model.ts（纯函数：构建/增删改/复制/导出导入）、user-widget-store.ts（与 UI-05 LayoutPinStore 同风格的存储接缝）"
+        - "user-widgets/{studio,host,use-user-widgets}.tsx + widgets.css：创作台（DSL 文本→校验→预览→命名保存→列表/删除/复制/导出/导入/固定到左栏）+ 画布宿主"
+        - "解释器增 interpretUserWidgetDSL（只放行该 widget 自身 id，仍是同一张静态原子表）；left-bar pin 区新增自建 widget 与「创作台」入口；workbench 识别 widget-studio 与 user-widget:<id>"
+        - "主 Agent 独立复核（非子 Agent 自报）：typecheck 8 包 Done、@mindlink-agent/app build 通过、apps/app 测试 117/117、红线 grep 无 eval/new Function/动态 import/iframe 的实际使用"
+        - "提交 0d2bd17，已并入 main（545f4ac）"
+      decisions:
+        - "红线写进文件头注释：DSL 是数据不是代码（永不 eval / new Function / 动态 import / 不引沙箱 iframe）"
+        - "校验失败整份拒掉；存储加载对单条坏记录只丢它自己（防御性存储容错，与交互式校验两回事，已在注释区分）"
+      known_gaps:
+        - "创作台的浏览器实跑未做（文件选择/Blob 下载/预览渲染未真机点过）；已验的是类型、构建、纯逻辑与组件接线"
+        - "「重启后仍在」在存储接缝层验证（同存储换 store 实例），未做桌面端真重启"
+        - "自建 widget 的 pin 只支持取消固定，不支持上移/下移排序"
+        - "创作台入口放在左栏底部动作区（test/workspace.test.mjs 把 FIXED_ENTRIES 钉死为 home/wiki/skills/settings）"
+      note: "已并入 main"
 
   - id: UI-18
     title: "迁移后整体回归验收"
@@ -542,3 +561,45 @@ tasks:
     dependencies: ["UI-15", "UI-17"]
     risk_level: L2
     touches: [".tasks/ui-rebuild/**"]
+
+  - id: UI-19
+    title: "界面侧「助理」下线（删助理模块与死分支、撤设置项、语言包去孤儿键）"
+    status: done
+    goal: "把助理从界面上彻底撤掉，后端 / Runtime / 协议 / 桌面壳一律不动（回退 = revert）。"
+    scope:
+      in:
+        - "删：legacy-pages/modules/assistant-home.{tsx,css}、components/composites/{assistant-companion.tsx,assistant-activity.ts,delegation-approval-details.tsx,saved-content.ts}、assets/assistant/**（17 文件，删前全库 0 引用）"
+        - "chat.tsx 去面化：surface 固定为 work，全库不再有 surface === 'assistant' / !== 'work' 比较"
+        - "撤设置项：legacy-pages/modules/settings.tsx 的「助理会话 / 绑定助理会话」整节"
+        - "assistant-reply.tsx 删「保存到记忆 / 保存到知识库」按钮与 saved-content 依赖"
+        - "emo.json 只删 navigation.assistant 与 welcome.assistant 两键（本体保留，apps/desktop 读 brand.name/icon）"
+        - "l10n-extract.mjs 增 --prune；语言包剔除孤儿键"
+      out: ["后端 / Runtime / 协议 / apps/desktop 的任何改动", "清归档区 src/_legacy-ui/** 里的旧助理代码"]
+    constraints: ["能力审批（工作面在用）、ProcessList、reply-run-details、content-viewers、chatbox 浮层、四栏与画布全部保留"]
+    forbidden: ["顺手改后端或协议", "把归档区的旧壳也一起清（那是另一张新卡的事）"]
+    acceptance:
+      - {type: command, run: "pnpm run typecheck:mindlink"}
+      - {type: command, run: "pnpm -F @mindlink-agent/app build"}
+      - {type: command, run: "pnpm -F @mindlink-agent/app test"}
+      - {type: assertion, expect: "活代码里不再引用被删模块；无 surface === 'assistant'；无「保存到记忆/保存到知识库/专业任务授权/助理会话」文案"}
+    dependencies: ["UI-11", "UI-15"]
+    risk_level: L2
+    touches: ["apps/app/src/chatbox/**", "apps/app/src/components/composites/**", "apps/app/src/legacy-pages/**", "apps/app/emo.json", "apps/app/src/languages/zh-CN.json", "apps/app/test/**"]
+    result:
+      branch: "ui/drop-assistant"
+      verified_at: "2026-10-15"
+      evidence:
+        - "主 Agent 独立复核（非子 Agent 自报）：typecheck 8 包 Done、build 通过、apps/app 测试 111/111（改前 117，删 6 个用例）"
+        - "残留检查三段空为空：活代码不引用 assistant-home/companion/activity/delegation-approval-details/saved-content；无 surface === 'assistant' / !== 'work'；无「保存到记忆/保存到知识库/专业任务授权/助理会话」文案（归档区 src/_legacy-ui/** 例外，按约定不动）"
+        - "工作面关键件在：{0}操作需要授权（能力审批）与 ProcessList 仍在 chat.tsx 内使用"
+        - "桌面壳安全：apps/desktop/src/main.ts 只读 emo.json 的 brand.name / brand.icon，删两个助理键不影响"
+        - "提交 df22ba1，已并入 main（53ce53f）"
+      decisions:
+        - "用户拍板：消息上的「保存到记忆 / 保存到知识库」按钮去掉（连带删 saved-content.ts 与其测试）；「专业任务授权」卡片去掉（连带删 delegation-approval-details.tsx 与其测试）"
+        - "语言包必须同步去孤儿键，否则 languages.test.mjs 的「无死条目」断言会红 —— 为此给抽取器加了 --prune"
+      known_gaps:
+        - "归档区 src/_legacy-ui/modules/chat.tsx 仍保留整套助理面代码（归档件，不参与构建与扫描；要清另开卡）"
+        - "助理后端 / Runtime / 协议原样保留，界面上无入口（可逆）"
+        - "界面交互未在真机点过（由 UI-18 覆盖）"
+      plan_doc: ".tasks/ui-rebuild/plan-drop-assistant.md"
+      note: "已并入 main"
