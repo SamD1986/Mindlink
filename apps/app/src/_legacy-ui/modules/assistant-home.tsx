@@ -3,11 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import type { AgentRunRecord, AssistantDelegationRecord, AssistantEvidenceRef, AssistantLinkStatus,
   AssistantReviewJudgment, AssistantSourceRevocationReceipt, ScheduleRecord } from '@mindlink-agent/protocol';
-import { AppIcon } from '../shared/app-icon.js';
-import { MessageContent } from '../shared/message-content.js';
-import { readSavedContent, removeSavedContent, savedContentEvent } from '../shared/saved-content.js';
-import { AssistantCompanion } from '../shared/assistant-companion.js';
-import type { AssistantActivity } from '../shared/assistant-activity.js';
+import { AppIcon } from '../../components/composites/app-icon.js';
+import { MessageContent } from '../../components/composites/message-content.js';
+import { readSavedContent, removeSavedContent, savedContentEvent } from '../../components/composites/saved-content.js';
+import { AssistantCompanion } from '../../components/composites/assistant-companion.js';
+import type { AssistantActivity } from '../../components/composites/assistant-activity.js';
 import './assistant-home.css';
 
 const tabs = ['今日', '任务', '记忆', '连接'] as const;

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { AppIcon } from '../shared/app-icon.js';
+import { AppIcon } from '../../components/composites/app-icon.js';
 
 export const workIconChoices = [
   { id: 'chat', label: '对话' }, { id: 'folder', label: '文件夹' }, { id: 'briefcase', label: '工作' },

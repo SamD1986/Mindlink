@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEven
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import type { DesktopBridge, WorkConversation, WorkFolder, WorkSearchItem, WorkTag } from '@mindlink-agent/protocol';
-import { AppIcon } from '../shared/app-icon.js';
+import { AppIcon } from '../../components/composites/app-icon.js';
 import { WorkNodeIcon, workIconChoices } from './work-node-icons.js';
-import { folderPath, isFolderDescendant, reorderedVisibleSiblingIds, visibleWorkTree, type WorkTreeNode } from './work-tree-model.js';
+import { folderPath, isFolderDescendant, reorderedVisibleSiblingIds, visibleWorkTree, type WorkTreeNode } from '../../components/widgets/work-tree/work-tree-model.js';
 import './work-tree.css';
 
 type NodeRef = { kind: 'folder' | 'conversation'; id: string };
